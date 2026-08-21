@@ -162,6 +162,40 @@ class Page {
     await sleep(180);
   }
 
+  /** 진짜 클릭. 합성 이벤트가 아니라 실제 마우스 입력을 보낸다. */
+  async clickReal(selector, { nth = 0 } = {}) {
+    await this.eval((sel, n) => {
+      document.querySelectorAll(sel)[n]?.scrollIntoView({ block: 'center', behavior: 'instant' });
+    }, selector, nth);
+    await sleep(120);
+    const b = await this.box(selector, nth);
+    if (!b) throw new Error(`요소 없음: ${selector}[${nth}]`);
+    for (const type of ['mousePressed', 'mouseReleased']) {
+      await this.send('Input.dispatchMouseEvent', {
+        type, x: b.x, y: b.y, button: 'left', clickCount: 1,
+      });
+    }
+    await sleep(180);
+    return b;
+  }
+
+  /** 진짜 타이핑. 포커스를 옮기고 문자를 실제로 넣는다. */
+  async typeReal(selector, value, { nth = 0, clear = true } = {}) {
+    await this.clickReal(selector, { nth });
+    if (clear) {
+      await this.send('Input.dispatchKeyEvent', { type: 'keyDown', modifiers: 4, key: 'a', code: 'KeyA', windowsVirtualKeyCode: 65 });
+      await this.send('Input.dispatchKeyEvent', { type: 'keyUp', modifiers: 4, key: 'a', code: 'KeyA', windowsVirtualKeyCode: 65 });
+    }
+    await this.send('Input.insertText', { text: value });
+    await sleep(200);
+  }
+
+  async pressKey(key, code, vk) {
+    await this.send('Input.dispatchKeyEvent', { type: 'keyDown', key, code, windowsVirtualKeyCode: vk });
+    await this.send('Input.dispatchKeyEvent', { type: 'keyUp', key, code, windowsVirtualKeyCode: vk });
+    await sleep(200);
+  }
+
   async text(selector, nth = 0) {
     return this.eval((sel, n) => {
       const el = document.querySelectorAll(sel)[n];

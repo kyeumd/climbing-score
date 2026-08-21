@@ -1,7 +1,6 @@
 /** 당일 대결 화면 (설계서 7.1절). 앱을 열면 여기가 뜬다. */
-import { h, panel, button, icon, animateNumber, onPressAndHold, eyebrow } from './components.js';
+import { h, panel, button, icon, onPressAndHold, eyebrow } from './components.js';
 import { hold } from './hold.js';
-import { ranking } from '../domain/match.js';
 import { activeGrades } from '../domain/gym.js';
 import { scoreFor } from '../domain/scoring.js';
 import { findSession, createSession, bumpCount, scoreOf, sendsOf } from '../domain/session.js';
@@ -13,7 +12,6 @@ export function viewMatch(ctx) {
 
   if (!gym) return emptyGym(ctx);
 
-  const rows = ranking({ sessions: state.sessions, gym, date, profiles: state.profiles });
   const grades = activeGrades(gym);
 
   return h('div', { class: 'view' },
@@ -22,10 +20,7 @@ export function viewMatch(ctx) {
     !gym.gradesVerified && gym.grades.length > 0 && verifyBanner(ctx, gym),
     grades.length === 0
       ? noGrades(ctx, gym)
-      : h('div', {},
-          scoreboard(ctx, rows, gym),
-          inputDeck(ctx, gym, grades),
-        ),
+      : inputGrid(ctx, gym, grades),
   );
 }
 
@@ -100,137 +95,94 @@ function emptyGym({ state, actions }) {
   );
 }
 
-/* ---------- 중단: 스코어보드 ---------- */
+/* ---------- 입력 격자: 난이도 x 참가자 ---------- */
 
-function scoreboard({ state, actions }, rows, gym) {
-  return h('section', { class: 'section' },
-    h('div', { class: 'section-head' },
-      h('div', {},
-        eyebrow('오늘의 대결'),
-        h('p', { class: 'hint', style: { marginTop: '0.35rem' } },
-          rows.length ? `${rows.length}명 참가 중` : '아직 아무도 기록하지 않았어요'),
-      ),
-      button('참가자 추가', { onClick: actions.openProfilePicker, small: true, trailing: 'plus' }),
-    ),
-    rows.length === 0
-      ? panel(h('p', { class: 'subtitle' }, '첫 완등을 기록하면 여기에 순위가 나타납니다.'))
-      : h('ul', { class: 'board' }, rows.map((r) => boardRow(r, state, actions))),
-  );
-}
-
-function boardRow(row, state, actions) {
-  const active = row.profile.id === state.ui.profileId;
-  const scoreEl = h('span', { class: 'num board__score', 'data-value': row.score },
-    row.score.toLocaleString('ko-KR'));
-
-  return h('li', {
-    class: `board__row${active ? ' is-active' : ''}${row.rank === 1 ? ' is-lead' : ''}`,
-    onclick: () => actions.setProfile(row.profile.id),
-  },
-    h('span', { class: 'board__rank num' }, row.rank === 1 ? icon('trophy', { size: 16 }) : row.rank),
-    h('div', { class: 'board__who' },
-      h('span', { class: 'board__name' }, row.profile.name),
-      h('span', { class: 'hint num' },
-        `LV${row.level} · ${row.sends}완등`,
-        row.gapFromLead > 0
-          ? h('span', { class: 'board__gap' }, `${row.gapFromLead.toLocaleString('ko-KR')}점 차`)
-          : ''),
-    ),
-    scoreEl,
-  );
-}
-
-/* ---------- 하단: 내 입력부 ---------- */
-
-function inputDeck({ state, actions }, gym, grades) {
-  const profile = state.profiles.find((p) => p.id === state.ui.profileId);
-  if (!profile) {
+/**
+ * 참가자를 전환하며 기록하면 사람 수만큼 탭이 늘어난다. 3명이 각자 5개를
+ * 깼으면 전환 6번 + 탭 15번이다. 격자로 두면 전환 없이 15번으로 끝난다.
+ *
+ * 세로는 난이도, 가로는 참가자. 각 칸을 탭하면 그 사람의 그 난이도가 +1.
+ */
+function inputGrid({ state, actions }, gym, grades) {
+  const people = state.profiles;
+  if (!people.length) {
     return h('section', { class: 'section' },
       panel(
+        eyebrow('참가자 없음'),
+        h('h2', { class: 'title', style: { margin: '0.4rem 0 0.35rem' } }, '누가 오늘 같이 하나요'),
         h('p', { class: 'subtitle', style: { marginBottom: '1rem' } },
-          '기록하려면 먼저 내 프로필을 골라 주세요.'),
-        button('프로필 고르기', { onClick: actions.openProfilePicker, variant: 'solid', trailing: 'arrow' }),
+          '참가자를 추가하면 여기에서 바로 완등을 기록할 수 있습니다.'),
+        button('참가자 추가', { onClick: actions.openProfilePicker, variant: 'solid', trailing: 'plus' }),
       ),
     );
   }
 
-  const level = profile.level ?? 0;
-  const session = findSession(state.sessions, {
-    profileId: profile.id, gymId: gym.id, date: state.ui.date,
-  }) ?? createSession({
-    profileId: profile.id, gymId: gym.id, date: state.ui.date,
-    level, scoreTable: gym.scoreTable,
-  });
+  const rows = people.map((profile) => {
+    const level = profile.level ?? 0;
+    const session = findSession(state.sessions, {
+      profileId: profile.id, gymId: gym.id, date: state.ui.date,
+    }) ?? createSession({
+      profileId: profile.id, gymId: gym.id, date: state.ui.date,
+      level, scoreTable: gym.scoreTable,
+    });
+    return { profile, level, session, score: scoreOf(session, gym), sends: sendsOf(session) };
+  }).sort((a, b) => b.score - a.score);
+
+  const lead = rows[0]?.score ?? 0;
 
   return h('section', { class: 'section' },
     h('div', { class: 'section-head' },
       h('div', {},
-        eyebrow(`${profile.name} 입력`),
-        h('p', { class: 'hint', style: { marginTop: '0.35rem' } },
-          '탭하면 +1, 길게 누르면 −1'),
+        eyebrow('오늘의 기록'),
+        h('p', { class: 'hint', style: { marginTop: '0.3rem' } }, '탭하면 +1, 길게 누르면 −1'),
       ),
-      button(`LV${level}`, { onClick: () => actions.openLevelPicker(profile.id), small: true }),
+      button('참가자', { onClick: actions.openProfilePicker, small: true, trailing: 'plus' }),
     ),
-    h('div', { class: 'grades' },
-      grades.map((grade) => gradeCard({ grade, session, gym, level, actions })),
+    h('div', { class: 'grid' },
+      // 머리글: 사람 이름과 현재 점수
+      h('div', { class: 'grid__head' },
+        h('span', { class: 'grid__corner hint' }, '난이도'),
+        rows.map((r, i) => h('button', {
+          class: `grid__person${i === 0 && rows.length > 1 ? ' is-lead' : ''}`,
+          type: 'button', onclick: () => actions.openLevelPicker(r.profile.id),
+          title: `${r.profile.name} 숙련도 바꾸기`,
+        },
+          h('span', { class: 'grid__name' }, r.profile.name),
+          h('span', { class: 'grid__score num' }, r.score.toLocaleString('ko-KR')),
+          h('span', { class: 'hint num' }, `LV${r.level}`),
+        )),
+      ),
+      // 본문: 난이도마다 사람별 칸
+      grades.map((grade) => h('div', { class: 'grid__row' },
+        h('span', { class: 'grid__grade' },
+          hold(grade, { size: 20 }),
+          h('span', { class: 'grid__label' }, grade.label),
+        ),
+        rows.map((r) => cell({ grade, ...r, gym, actions })),
+      )),
     ),
-    stickyTotal(session, gym, profile, state),
+    rows.length > 1 && h('p', { class: 'hint', style: { marginTop: 'var(--sp-3)' } },
+      lead > (rows[1]?.score ?? 0)
+        ? `${rows[0].profile.name}이 ${(lead - rows[1].score).toLocaleString('ko-KR')}점 앞서고 있어요.`
+        : '동점입니다.'),
   );
 }
 
-function gradeCard({ grade, session, gym, level, actions }) {
+function cell({ grade, profile, level, session, gym, actions }) {
   const count = session.counts?.[grade.id] ?? 0;
   const unit = scoreFor(gym.scoreTable, level, grade);
-  const isMyLevel = grade.order === level;
-
-  const card = h('button', {
-    class: `gcard${count ? ' has-count' : ''}${isMyLevel ? ' is-mylevel' : ''}`,
+  const el = h('button', {
+    class: `cell${count ? ' has-count' : ''}${grade.order === level ? ' is-mylevel' : ''}`,
     type: 'button',
-    'aria-label': `${grade.label} ${count}개`,
+    'aria-label': `${profile.name} ${grade.label} ${count}개, 한 개당 ${unit}점`,
   },
-    h('span', { class: 'holdcell' }, hold(grade, { size: 22 })),
-    h('span', { class: 'gcard__body' },
-      h('span', { class: 'gcard__label' }, grade.label),
-      h('span', { class: 'hint num' }, `${unit.toLocaleString('ko-KR')}점`),
-    ),
-    h('span', { class: 'gcard__count num' }, count || ''),
+    h('span', { class: 'cell__count num' }, count || ''),
+    h('span', { class: 'cell__unit hint num' }, count ? '' : `${unit.toLocaleString('ko-KR')}`),
   );
-
-  onPressAndHold(card, {
+  onPressAndHold(el, {
     onTap: () => actions.bump(session, grade.id, +1),
     onHold: () => actions.bump(session, grade.id, -1),
   });
-  return card;
+  return el;
 }
 
-/**
- * 하단 고정 요약.
- * 스코어보드와 같은 숫자를 반복하는 대신, 스크롤로 스코어보드가 사라진 뒤에도
- * 내 순위와 선두와의 차이를 계속 보여준다. 배경은 불투명하게 두어
- * 뒤 카드 글자가 비쳐 읽기 나빠지는 일이 없게 한다.
- */
-function stickyTotal(session, gym, profile, state) {
-  const score = scoreOf(session, gym);
-  const rows = ranking({ sessions: state.sessions, gym, date: state.ui.date, profiles: state.profiles });
-  const me = rows.find((r) => r.profile.id === profile.id);
-  const el = h('span', { class: 'num total__score', 'data-value': score },
-    score.toLocaleString('ko-KR'));
-  requestAnimationFrame(() => animateNumber(el, score));
-
-  return h('div', { class: 'total' },
-    h('div', { class: 'total__inner' },
-      h('span', { class: 'total__left' },
-        me && rows.length > 1
-          ? h('span', { class: 'total__rank num' }, `${me.rank}위`)
-          : null,
-        h('span', { class: 'hint num' }, `${sendsOf(session)}완등`),
-      ),
-      h('span', { class: 'total__right' },
-        me && me.gapFromLead > 0
-          ? h('span', { class: 'board__gap num' }, `${me.gapFromLead.toLocaleString('ko-KR')}점 차`)
-          : null,
-        el, h('span', { class: 'total__unit' }, '점'),
-      ),
-    ),
-  );
-}
