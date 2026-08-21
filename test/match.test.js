@@ -2,6 +2,9 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { ranking, headToHead } from '../src/domain/match.js';
 import { createSession, bumpCount, gymStats } from '../src/domain/session.js';
+import { DEFAULT_SCORE_TABLE } from '../src/domain/scoring.js';
+
+const T = { ...DEFAULT_SCORE_TABLE, baseScore: 100 };
 import { createGym, retireGrade, moveGrade, activeGrades, allGrades, guChips } from '../src/domain/gym.js';
 
 function fixture() {
@@ -23,23 +26,23 @@ function fixture() {
 
 test('당일 대결: 점수 내림차순으로 순위가 매겨진다', () => {
   const { gym, profiles, g } = fixture();
-  let a = createSession({ profileId: 'p1', gymId: gym.id, date: '2026-08-20', level: 0 });
-  let b = createSession({ profileId: 'p2', gymId: gym.id, date: '2026-08-20', level: 0 });
+  let a = createSession({ profileId: 'p1', gymId: gym.id, date: '2026-08-20', level: 0, scoreTable: T });
+  let b = createSession({ profileId: 'p2', gymId: gym.id, date: '2026-08-20', level: 0, scoreTable: T });
   a = bumpCount(a, g[0].id, 3);            // 100 × 3 = 300
-  b = bumpCount(b, g[2].id, 1);            // 225 × 1 = 225
+  b = bumpCount(b, g[2].id, 1);            // 230 × 1 = 230
 
   const rows = ranking({ sessions: [a, b], gym, date: '2026-08-20', profiles });
   assert.equal(rows.length, 2);
   assert.equal(rows[0].profile.name, '나');
   assert.equal(rows[0].score, 300);
   assert.equal(rows[0].rank, 1);
-  assert.equal(rows[1].gapFromLead, 75, '선두와의 점수 차');
+  assert.equal(rows[1].gapFromLead, 70, '선두와의 점수 차');
 });
 
 test('동점이면 같은 순위', () => {
   const { gym, profiles, g } = fixture();
-  const a = bumpCount(createSession({ profileId: 'p1', gymId: gym.id, date: 'D', level: 0 }), g[0].id, 1);
-  const b = bumpCount(createSession({ profileId: 'p2', gymId: gym.id, date: 'D', level: 0 }), g[0].id, 1);
+  const a = bumpCount(createSession({ profileId: 'p1', gymId: gym.id, date: 'D', level: 0, scoreTable: T }), g[0].id, 1);
+  const b = bumpCount(createSession({ profileId: 'p2', gymId: gym.id, date: 'D', level: 0, scoreTable: T }), g[0].id, 1);
   const rows = ranking({ sessions: [a, b], gym, date: 'D', profiles });
   assert.equal(rows[0].rank, 1);
   assert.equal(rows[1].rank, 1);
@@ -48,8 +51,8 @@ test('동점이면 같은 순위', () => {
 test('레벨이 다르면 같은 완등도 점수가 다르다', () => {
   const { gym, profiles, g } = fixture();
   // 고수(LV2)가 1단계를 깨면 25점, 초보(LV0)가 깨면 100점
-  const pro = bumpCount(createSession({ profileId: 'p1', gymId: gym.id, date: 'D', level: 2 }), g[0].id, 1);
-  const noob = bumpCount(createSession({ profileId: 'p2', gymId: gym.id, date: 'D', level: 0 }), g[0].id, 1);
+  const pro = bumpCount(createSession({ profileId: 'p1', gymId: gym.id, date: 'D', level: 2, scoreTable: T }), g[0].id, 1);
+  const noob = bumpCount(createSession({ profileId: 'p2', gymId: gym.id, date: 'D', level: 0, scoreTable: T }), g[0].id, 1);
   const rows = ranking({ sessions: [pro, noob], gym, date: 'D', profiles });
   assert.equal(rows[0].profile.name, '친구');
   assert.equal(rows[0].score, 100);
@@ -59,7 +62,7 @@ test('레벨이 다르면 같은 완등도 점수가 다르다', () => {
 test('다른 짐 세션은 대결에 끼지 않는다', () => {
   const { gym, profiles, g } = fixture();
   const other = createGym({ name: '다른짐', gu: '마포구', grades: [{ label: 'x' }] });
-  const mine = bumpCount(createSession({ profileId: 'p1', gymId: gym.id, date: 'D', level: 0 }), g[0].id, 1);
+  const mine = bumpCount(createSession({ profileId: 'p1', gymId: gym.id, date: 'D', level: 0, scoreTable: T }), g[0].id, 1);
   const theirs = createSession({ profileId: 'p2', gymId: other.id, date: 'D', level: 0 });
   const rows = ranking({ sessions: [mine, theirs], gym, date: 'D', profiles });
   assert.equal(rows.length, 1);
@@ -67,9 +70,9 @@ test('다른 짐 세션은 대결에 끼지 않는다', () => {
 
 test('대결 전적: 혼자 기록한 날은 세지 않는다', () => {
   const { gym, profiles, g } = fixture();
-  const solo = bumpCount(createSession({ profileId: 'p1', gymId: gym.id, date: 'D1', level: 0 }), g[0].id, 1);
-  const meD2 = bumpCount(createSession({ profileId: 'p1', gymId: gym.id, date: 'D2', level: 0 }), g[1].id, 1);
-  const youD2 = bumpCount(createSession({ profileId: 'p2', gymId: gym.id, date: 'D2', level: 0 }), g[0].id, 1);
+  const solo = bumpCount(createSession({ profileId: 'p1', gymId: gym.id, date: 'D1', level: 0, scoreTable: T }), g[0].id, 1);
+  const meD2 = bumpCount(createSession({ profileId: 'p1', gymId: gym.id, date: 'D2', level: 0, scoreTable: T }), g[1].id, 1);
+  const youD2 = bumpCount(createSession({ profileId: 'p2', gymId: gym.id, date: 'D2', level: 0, scoreTable: T }), g[0].id, 1);
 
   const h2h = headToHead({ sessions: [solo, meD2, youD2], gym, profileId: 'p1', profiles });
   assert.equal(h2h.length, 1);
@@ -81,7 +84,7 @@ test('대결 전적: 혼자 기록한 날은 세지 않는다', () => {
 
 test('카운트는 0 미만으로 내려가지 않는다', () => {
   const { gym, g } = fixture();
-  let s = createSession({ profileId: 'p1', gymId: gym.id, level: 0 });
+  let s = createSession({ profileId: 'p1', gymId: gym.id, level: 0, scoreTable: T });
   s = bumpCount(s, g[0].id, -1);
   assert.equal(s.counts[g[0].id], undefined);
   s = bumpCount(bumpCount(s, g[0].id, 2), g[0].id, -5);
@@ -90,14 +93,14 @@ test('카운트는 0 미만으로 내려가지 않는다', () => {
 
 test('등급을 retire해도 과거 기록은 살아 있다', () => {
   const { gym, g } = fixture();
-  const s = bumpCount(createSession({ profileId: 'p1', gymId: gym.id, date: 'D', level: 0 }), g[2].id, 2);
+  const s = bumpCount(createSession({ profileId: 'p1', gymId: gym.id, date: 'D', level: 0, scoreTable: T }), g[2].id, 2);   // 230 × 2
   const after = retireGrade(gym, g[2].id);
 
   assert.equal(activeGrades(after).length, 2, '신규 기록에서는 숨는다');
   assert.equal(allGrades(after).length, 3, '과거 조회에는 남는다');
 
   const stats = gymStats([s], after, 'p1');
-  assert.equal(stats.totalScore, 450, '점수가 그대로 계산된다');
+  assert.equal(stats.totalScore, 460, '점수가 그대로 계산된다');
   assert.equal(stats.topGrade.label, '3단계');
 });
 
@@ -158,8 +161,8 @@ test('레벨을 바꾸면 오늘 기록은 따라오고 지난 기록은 그대�
   const gym = createGym({ name: 'X', grades: [{ label: 'a' }, { label: 'b' }, { label: 'c' }] });
   const g = activeGrades(gym);
 
-  const today = bumpCount(createSession({ profileId: 'p1', gymId: gym.id, date: '2026-08-21', level: 3 }), g[0].id, 1);
-  const past = bumpCount(createSession({ profileId: 'p1', gymId: gym.id, date: '2026-08-01', level: 3 }), g[0].id, 1);
+  const today = bumpCount(createSession({ profileId: 'p1', gymId: gym.id, date: '2026-08-21', level: 3, scoreTable: T }), g[0].id, 1);
+  const past = bumpCount(createSession({ profileId: 'p1', gymId: gym.id, date: '2026-08-01', level: 3, scoreTable: T }), g[0].id, 1);
 
   // 레벨을 7로 올리면 오늘 세션만 levelAtTime이 따라간다
   const todayAfter = { ...today, levelAtTime: 7 };

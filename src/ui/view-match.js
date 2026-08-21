@@ -132,9 +132,16 @@ function inputGrid({ state, actions }, gym, grades) {
       level, scoreTable: gym.scoreTable,
     });
     return { profile, level, session, score: scoreOf(session, gym), sends: sendsOf(session) };
-  }).sort((a, b) => b.score - a.score);
+  });   // 열 순서는 참가자 추가 순서로 고정한다
 
-  const lead = rows[0]?.score ?? 0;
+  // 순위는 점수로 매기되 자리는 바꾸지 않는다. 동점은 같은 순위.
+  const ordered = [...rows].sort((a, b) => b.score - a.score);
+  const rankOf = new Map();
+  ordered.forEach((r, i) => {
+    const prev = ordered[i - 1];
+    rankOf.set(r.profile.id, prev && prev.score === r.score ? rankOf.get(prev.profile.id) : i + 1);
+  });
+  const lead = ordered[0]?.score ?? 0;
 
   return h('section', { class: 'section' },
     h('div', { class: 'section-head' },
@@ -148,15 +155,24 @@ function inputGrid({ state, actions }, gym, grades) {
       // 머리글: 사람 이름과 현재 점수
       h('div', { class: 'grid__head', style: { gridTemplateColumns: tpl(rows.length) } },
         h('span', { class: 'grid__corner hint' }, '난이도'),
-        rows.map((r, i) => h('button', {
-          class: `grid__person${i === 0 && rows.length > 1 ? ' is-lead' : ''}`,
-          type: 'button', onclick: () => actions.openLevelPicker(r.profile.id),
-          title: `${r.profile.name} 숙련도 바꾸기`,
-        },
-          h('span', { class: 'grid__name' }, r.profile.name),
-          h('span', { class: 'grid__score num' }, r.score.toLocaleString('ko-KR')),
-          h('span', { class: 'hint num' }, `LV${r.level}`),
-        )),
+        rows.map((r) => {
+          const rank = rankOf.get(r.profile.id);
+          const top = rows.length > 1 && rank === 1 && r.score > 0;
+          return h('button', {
+            class: `grid__person${top ? ' is-lead' : ''}`,
+            type: 'button', onclick: () => actions.openLevelPicker(r.profile.id),
+            title: `${r.profile.name} 숙련도 바꾸기`,
+          },
+            h('span', { class: 'grid__top' },
+              rows.length > 1 && r.score > 0
+                ? h('span', { class: `grid__rank num${top ? ' is-first' : ''}` }, `${rank}위`)
+                : null,
+              h('span', { class: 'grid__name' }, r.profile.name),
+            ),
+            h('span', { class: 'grid__score num' }, r.score.toLocaleString('ko-KR')),
+            h('span', { class: 'hint num' }, `LV${r.level}`),
+          );
+        }),
       ),
       // 본문: 난이도마다 사람별 칸
       grades.map((grade) => h('div', {
@@ -170,9 +186,9 @@ function inputGrid({ state, actions }, gym, grades) {
       )),
     ),
     rows.length > 1 && h('p', { class: 'hint', style: { marginTop: 'var(--sp-3)' } },
-      lead > (rows[1]?.score ?? 0)
-        ? `${rows[0].profile.name}이 ${(lead - rows[1].score).toLocaleString('ko-KR')}점 앞서고 있어요.`
-        : '동점입니다.'),
+      lead > 0 && lead > (ordered[1]?.score ?? 0)
+        ? `${ordered[0].profile.name}이 ${(lead - ordered[1].score).toLocaleString('ko-KR')}점 앞서고 있어요.`
+        : lead > 0 ? '동점입니다.' : '아직 기록이 없어요.'),
   );
 }
 

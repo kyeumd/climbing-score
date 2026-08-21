@@ -113,13 +113,18 @@ export function animateNumber(el, to, { duration = 420 } = {}) {
  * 일어나므로 요소가 중간에 교체되지 않는다. 길게 누르는 중임은 진동과
  * 클래스로 알린다.
  */
-export function onPressAndHold(el, { onTap, onHold, delay = 420 }) {
+export function onPressAndHold(el, { onTap, onHold, delay = 250 }) {
   let downAt = 0;
   let timer = null;
+  let repeat = null;
+  let fired = 0;   // 반복으로 실제 실행된 횟수
 
   const reset = () => {
     clearTimeout(timer);
+    clearInterval(repeat);
     timer = null;
+    repeat = null;
+    fired = 0;
     downAt = 0;
     el.classList.remove('is-pressing', 'is-held');
   };
@@ -132,15 +137,21 @@ export function onPressAndHold(el, { onTap, onHold, delay = 420 }) {
     timer = setTimeout(() => {
       el.classList.add('is-held');     // 여기서 감소를 실행하지 않는다
       navigator.vibrate?.(14);
+      // 누른 채로 두면 계속 줄어든다. 여러 개를 지울 때 손을 떼고 다시
+      // 누르기를 반복하지 않아도 된다.
+      repeat = setInterval(() => { fired += 1; onHold?.(); navigator.vibrate?.(8); }, 200);
     }, delay);
   });
 
   el.addEventListener('pointerup', (e) => {
     if (!downAt) return;
     const held = performance.now() - downAt >= delay;
+    const already = fired;
     reset();
     e.preventDefault();
-    (held ? onHold : onTap)?.(e);
+    // 반복이 한 번도 실행되지 않았다면(타이머가 돌기 전에 뗐다면) 여기서 한 번 줄인다
+    if (!held) onTap?.(e);
+    else if (already === 0) onHold?.(e);
   });
 
   el.addEventListener('pointercancel', reset);

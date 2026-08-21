@@ -785,9 +785,19 @@ ul { margin: 0; padding: 0; list-style: none; }
   border-radius: var(--r-core);
 }
 .grid__person.is-lead { border-color: var(--hairline); background: var(--core); }
+.grid__top { display: flex; align-items: center; gap: 0.2rem; max-width: 100%; min-width: 0; }
 .grid__name {
-  font-size: 0.9375rem; font-weight: 700; max-width: 100%;
+  font-size: 0.9375rem; font-weight: 700; min-width: 0;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+/* 순위는 배지로만 알린다. 열 자리는 바뀌지 않는다. */
+.grid__rank {
+  flex: 0 0 auto; padding: 0 0.2rem;
+  font-size: 0.6875rem; font-weight: 700; color: var(--ink-3);
+}
+.grid__rank.is-first {
+  background: var(--ink); color: var(--bg-elevated);
+  border-radius: var(--r-tight);
 }
 .grid__score { font-size: 1.0625rem; font-weight: 800; letter-spacing: -0.03em; }
 .grid__grade {

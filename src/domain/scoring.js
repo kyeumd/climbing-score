@@ -11,7 +11,9 @@
 
 export const DEFAULT_SCORE_TABLE = Object.freeze({
   mode: 'formula',
-  baseScore: 100,
+  // 기준을 100으로 두면 1.5배를 곱한 값이 338, 506, 1139 처럼 읽기 어려워진다.
+  // 10으로 낮추고 유효숫자 두 자리로 다듬으면 10, 15, 23, 34, 51 로 읽힌다.
+  baseScore: 10,
   upFactor: 1.5,
   downFactor: 0.5,
   overrides: {},
@@ -25,7 +27,7 @@ export const DEFAULT_SCORE_TABLE = Object.freeze({
  * 입력 단계에서 막고, 계산 단계에서도 한 번 더 가둔다.
  */
 export const LIMITS = Object.freeze({
-  baseScore: { min: 1, max: 100000 },
+  baseScore: { min: 1, max: 10000 },
   upFactor: { min: 1, max: 5 },
   downFactor: { min: 0.05, max: 1 },
 });
@@ -61,10 +63,21 @@ export function scoreFor(table, level, grade) {
   const factor = diff >= 0
     ? Math.pow(t.upFactor, diff)
     : Math.pow(t.downFactor, -diff);
-  // JS Math.round 기준(0.5는 올림). 언어에 따라 0.5를 짝수로 내리는 구현이 있어 명시.
-  // 레벨 차가 크면 반올림으로 0이 되는데, 완등을 0점으로 치면 기록한 보람이 사라진다.
-  // 최소 1점을 보장한다.
-  return Math.max(1, Math.round(t.baseScore * factor));
+  // 완등을 0점으로 치면 기록한 보람이 사라지므로 최소 1점을 보장한다.
+  return tidy(t.baseScore * factor);
+}
+
+/**
+ * 사람이 읽기 쉬운 숫자로 다듬는다.
+ * 337.5 -> 340, 1139.06 -> 1100 처럼 유효숫자 두 자리만 남긴다.
+ * 두 자리 이하는 그대로 두어 낮은 난이도의 차이가 사라지지 않게 한다.
+ */
+export function tidy(v) {
+  if (!Number.isFinite(v)) return 1;
+  const n = Math.abs(v);
+  if (n < 100) return Math.max(1, Math.round(v));
+  const mag = 10 ** (Math.floor(Math.log10(n)) - 1);
+  return Math.max(1, Math.round(v / mag) * mag);
 }
 
 /** 공식으로 계산한 값 — overrides를 무시한다. 표에서 "수정됨" 표시에 쓴다. */

@@ -7,52 +7,56 @@ import {
 const grades = ['1단계', '2단계', '3단계', '4단계', '5단계']
   .map((label, i) => ({ id: `g${i}`, label, order: i }));
 
+// 기준 점수는 짐마다 정하는 값이다. 표 검증은 100으로 고정해 읽기 쉽게 한다.
+const T = { ...DEFAULT_SCORE_TABLE, baseScore: 100 };
+
 test('대각선은 언제나 baseScore', () => {
   for (let lv = 0; lv < grades.length; lv++) {
-    assert.equal(scoreFor(DEFAULT_SCORE_TABLE, lv, grades[lv]), 100);
+    assert.equal(scoreFor(T, lv, grades[lv]), 100);
   }
 });
 
 test('설계서 5.1절 표와 일치한다', () => {
+  // 100 이상은 유효숫자 두 자리로 다듬는다 (338 -> 340, 506 -> 510)
   const expected = [
-    [100, 150, 225, 338, 506],
-    [50, 100, 150, 225, 338],
-    [25, 50, 100, 150, 225],
+    [100, 150, 230, 340, 510],
+    [50, 100, 150, 230, 340],
+    [25, 50, 100, 150, 230],
     [13, 25, 50, 100, 150],
     [6, 13, 25, 50, 100],
   ];
-  const actual = buildMatrix(DEFAULT_SCORE_TABLE, grades).map((r) => r.cells.map((c) => c.score));
+  const actual = buildMatrix(T, grades).map((r) => r.cells.map((c) => c.score));
   assert.deepEqual(actual, expected);
 });
 
 test('한 단계 어려우면 1.5배, 쉬우면 절반', () => {
-  const base = scoreFor(DEFAULT_SCORE_TABLE, 2, grades[2]);
-  assert.equal(scoreFor(DEFAULT_SCORE_TABLE, 2, grades[3]), Math.round(base * 1.5));
-  assert.equal(scoreFor(DEFAULT_SCORE_TABLE, 2, grades[1]), Math.round(base * 0.5));
+  const base = scoreFor(T, 2, grades[2]);
+  assert.equal(scoreFor(T, 2, grades[3]), 150);
+  assert.equal(scoreFor(T, 2, grades[1]), 50);
 });
 
 test('배율을 바꾸면 표 전체가 다시 계산된다', () => {
-  const table = { ...DEFAULT_SCORE_TABLE, upFactor: 2 };
+  const table = { ...T, upFactor: 2 };
   assert.equal(scoreFor(table, 0, grades[3]), 800);
 });
 
 test('수동 수정한 칸이 공식보다 우선한다', () => {
-  const table = { ...DEFAULT_SCORE_TABLE, overrides: { [overrideKey(0, 'g4')]: 999 } };
+  const table = { ...T, overrides: { [overrideKey(0, 'g4')]: 999 } };
   assert.equal(scoreFor(table, 0, grades[4]), 999);
-  assert.equal(scoreFor(table, 1, grades[4]), 338, '다른 칸은 영향받지 않는다');
+  assert.equal(scoreFor(table, 1, grades[4]), 340, '다른 칸은 영향받지 않는다');
   const cell = buildMatrix(table, grades)[0].cells[4];
   assert.equal(cell.overridden, true, '수정된 칸은 표시된다');
 });
 
 test('세션 점수는 기록 시점 레벨로 계산된다', () => {
-  const session = { levelAtTime: 1, counts: { g1: 2, g3: 1 } };
-  // LV1 기준: 2단계=100 ×2, 4단계=225 ×1
-  assert.equal(sessionScore(session, grades), 425);
+  const session = { levelAtTime: 1, scoreTable: T, counts: { g1: 2, g3: 1 } };
+  // LV1 기준: 2단계=100 ×2, 4단계=230 ×1
+  assert.equal(sessionScore(session, grades), 430);
   assert.equal(sessionSends(session), 3);
 });
 
 test('레벨을 올려도 과거 세션 점수는 변하지 않는다', () => {
-  const past = { levelAtTime: 0, counts: { g0: 3 } };
+  const past = { levelAtTime: 0, scoreTable: T, counts: { g0: 3 } };
   const before = sessionScore(past, grades);
   // 프로필 레벨을 2로 올려도 세션의 levelAtTime은 그대로다
   assert.equal(sessionScore(past, grades), before);
@@ -60,7 +64,7 @@ test('레벨을 올려도 과거 세션 점수는 변하지 않는다', () => {
 });
 
 test('사라진 등급을 참조하는 카운트는 무시한다', () => {
-  const session = { levelAtTime: 0, counts: { g0: 1, 'deleted-grade': 5 } };
+  const session = { levelAtTime: 0, scoreTable: T, counts: { g0: 1, 'deleted-grade': 5 } };
   assert.equal(sessionScore(session, grades), 100);
 });
 
@@ -72,8 +76,8 @@ test('빈 세션은 0점', () => {
 test('레벨 차가 커도 0점이 되지 않는다', () => {
   const wide = Array.from({ length: 10 }, (_, i) => ({ id: `w${i}`, label: `${i + 1}단계`, order: i }));
   // LV9가 1단계를 깨면 100 × 0.5^9 = 0.195 → 반올림 0. 완등을 0점으로 치면 안 된다.
-  assert.equal(scoreFor(DEFAULT_SCORE_TABLE, 9, wide[0]), 1);
-  assert.ok(buildMatrix(DEFAULT_SCORE_TABLE, wide).every((r) => r.cells.every((c) => c.score >= 1)));
+  assert.equal(scoreFor(T, 9, wide[0]), 1);
+  assert.ok(buildMatrix(T, wide).every((r) => r.cells.every((c) => c.score >= 1)));
 });
 
 test('배율이 범위를 벗어나면 유효 범위로 가둔다', async () => {
@@ -84,11 +88,11 @@ test('배율이 범위를 벗어나면 유효 범위로 가둔다', async () => 
   assert.equal(clampTable({ upFactor: 999 }).upFactor, LIMITS.upFactor.max);
   // 쉬운 문제가 어려운 문제보다 높은 점수가 되는 일은 없어야 한다
   assert.ok(clampTable({ downFactor: 3 }).downFactor <= 1);
-  assert.equal(clampTable({ baseScore: NaN }).baseScore, 100);
+  assert.equal(clampTable({ baseScore: NaN }).baseScore, DEFAULT_SCORE_TABLE.baseScore);
 });
 
 test('배율 0을 넣어도 표가 뭉개지지 않는다', async () => {
   const g = ['a','b','c','d'].map((x,i)=>({id:x,label:`${i+1}단계`,order:i}));
-  const row = buildMatrix({ ...DEFAULT_SCORE_TABLE, upFactor: 0 }, g)[0].cells.map(c=>c.score);
+  const row = buildMatrix({ ...T, upFactor: 0 }, g)[0].cells.map(c=>c.score);
   assert.deepEqual(row, [100, 100, 100, 100], '1로 가둬져 최소한 평평하게라도 유지된다');
 });
