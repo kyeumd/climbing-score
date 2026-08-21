@@ -15,10 +15,10 @@
   --core-line:     rgba(0, 0, 0, 0.05);
   --core-inset:    inset 0 1px 1px rgba(255, 255, 255, 0.9);
   --ink:           #16171A;
-  --ink-2:         #4A4E56;
-  --ink-3:         #63686F;   /* 5.2:1 — 이전 #8E939C는 2.88:1로 기준 미달이었다 */
+  --ink-2:         #2E3238;   /* 12.9:1 */
+  --ink-3:         #3A3E45;   /* 10.7:1 — 회색 보조 텍스트가 안 보인다는 지적을 반영 */
   --hairline:      rgba(0, 0, 0, 0.22);    /* 색 도트 둘레 — 8.2절 */
-  --track:         rgba(0, 0, 0, 0.13);    /* 막대 트랙. --shell은 대비가 1.1:1로 부족했다 */
+  --track:         rgba(0, 0, 0, 0.2);    /* 막대 트랙. --shell은 대비가 1.1:1로 부족했다 */
   --overlay:       rgba(247, 247, 248, 0.9);
   --scrim:         rgba(20, 20, 22, 0.45);   /* 모달 뒤 배경. 완전 불투명이면 컨텍스트가 사라진다 */
   --ambient:       0 1px 2px rgba(16, 17, 20, 0.04), 0 8px 24px rgba(16, 17, 20, 0.045);
@@ -59,7 +59,7 @@
   --hold-bolt: rgba(0, 0, 0, 0.32);
 
   --tap-min: 44px;   /* 한 손 조작 최소 타겟 */
-  --fs-min: 0.75rem; /* 12px. 이보다 작은 글자는 쓰지 않는다 */
+  --fs-min: 0.8125rem; /* 13px. 모바일 보조 텍스트 최소선 */
 }
 
 @media (prefers-color-scheme: dark) {
@@ -67,17 +67,17 @@
     --bg:            #050505;   /* Ethereal Glass: OLED 블랙 */
     --bg-elevated:   #0C0D0F;
     --shell:         rgba(255, 255, 255, 0.045);
-    --shell-line:    rgba(255, 255, 255, 0.13);
+    --shell-line:    rgba(255, 255, 255, 0.18);
     --core:          #121316;
     --core-line:     rgba(255, 255, 255, 0.07);
     --core-inset:    inset 0 1px 1px rgba(255, 255, 255, 0.06);
     --ink:           #F2F3F5;
-    --ink-2:         #B0B5BE;
-    --ink-3:         #949AA4;   /* 6.6:1 — 이전 #6E737C는 3.90:1로 기준 미달이었다 */
+    --ink-2:         #D5D9E0;   /* 13.1:1 */
+    --ink-3:         #C8CDD6;   /* 11.6:1 — 회색 보조 텍스트가 안 보인다는 지적을 반영 */
     --hairline:      rgba(255, 255, 255, 0.34);
     --hold-line:     rgba(255, 255, 255, 0.62);
     --hold-bolt:     rgba(0, 0, 0, 0.45);
-    --track:         rgba(255, 255, 255, 0.16);
+    --track:         rgba(255, 255, 255, 0.24);
     --overlay:       rgba(5, 5, 5, 0.9);
     --scrim:         rgba(0, 0, 0, 0.62);
     --ambient:       0 1px 2px rgba(0, 0, 0, 0.5), 0 8px 24px rgba(0, 0, 0, 0.45);

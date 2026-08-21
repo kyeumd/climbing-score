@@ -1,6 +1,6 @@
 /** 라우팅과 상태 조립. 저장 어댑터를 여기서 한 번만 주입한다. */
 import { createLocalStorageAdapter } from './storage/local-storage.js';
-import { loadSeedGyms } from './storage/seed.js';
+import { loadSeed, mergeSeed, SEED_VERSION } from './storage/seed.js';
 import { emptyState } from './storage/adapter.js';
 import { localDate, uid } from './domain/ids.js';
 import {
@@ -325,14 +325,15 @@ async function boot() {
   root = document.getElementById('app');
   let loaded = store.loadAll();
 
-  if (!loaded.meta?.seeded && loaded.gyms.length === 0) {
+  // 시드 버전이 오르면 목록을 갱신한다. 사용자 흔적은 mergeSeed가 지킨다.
+  if ((loaded.meta?.seedVersion ?? 0) < SEED_VERSION) {
     try {
-      const seeded = await loadSeedGyms();
-      store.replaceAll({ ...loaded, gyms: seeded, meta: { ...loaded.meta, seeded: true } });
+      const { gyms: fresh, version } = await loadSeed();
+      const gyms = loaded.gyms.length ? mergeSeed(loaded.gyms, fresh) : fresh;
+      store.replaceAll({ ...loaded, gyms, meta: { ...loaded.meta, seedVersion: version, seeded: true } });
       loaded = store.loadAll();
     } catch (err) {
-      console.warn('시드 적재 실패. 빈 상태로 시작합니다.', err);
-      store.replaceAll({ ...loaded, meta: { ...loaded.meta, seeded: true } });
+      console.warn('시드를 불러오지 못해 기존 목록을 유지합니다.', err);
     }
   }
 

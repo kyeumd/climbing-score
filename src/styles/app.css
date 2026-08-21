@@ -13,8 +13,8 @@ body {
   background: var(--bg);
   color: var(--ink);
   font-family: var(--font);
-  font-size: 15px;
-  line-height: 1.5;
+  font-size: 17px;
+  line-height: 1.55;
   letter-spacing: var(--tracking-tight);
   -webkit-font-smoothing: antialiased;
   overscroll-behavior-y: none;
@@ -67,11 +67,12 @@ ul { margin: 0; padding: 0; list-style: none; }
   font-size: var(--fs-min);
   font-weight: 700;
   letter-spacing: 0.04em;   /* 자간이 넓으면 다어절 라벨의 단어 경계가 흐려진다 */
-  color: var(--ink-2);
+  color: var(--ink);
 }
-.title    { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.03em; }
-.subtitle { font-size: 0.8125rem; color: var(--ink-2); }
+.title    { font-size: 1.4rem; font-weight: 700; letter-spacing: -0.03em; }
+.subtitle { font-size: 0.9375rem; color: var(--ink-2); }
 .hint     { font-size: var(--fs-min); color: var(--ink-3); line-height: 1.45; }
+.subtitle { color: var(--ink-2); }
 .section  { margin-top: var(--sp-7); }
 .section-head {
   display: flex; align-items: flex-end; justify-content: space-between;
@@ -89,14 +90,14 @@ ul { margin: 0; padding: 0; list-style: none; }
   background: var(--core);
   border: 1px solid var(--shell-line);
   border-radius: var(--r-pill);
-  font-size: 0.875rem; font-weight: 650;
+  font-size: 0.9375rem; font-weight: 650;
   transition: transform var(--dur-tap) var(--ease-spring),
               background var(--dur-tap) var(--ease-spring);
 }
 .btn:active { transform: scale(0.98); }
 .btn--ghost { background: transparent; }
 .btn--solid { background: var(--ink); color: var(--bg-elevated); border-color: transparent; }
-.btn--sm    { min-height: 34px; padding: 0.3rem 0.7rem; font-size: 0.8125rem; }
+.btn--sm    { min-height: 36px; padding: 0.35rem 0.75rem; font-size: 0.875rem; }
 
 /* 트레일링 아이콘은 맨몸으로 두지 않고 자기 원 안에 넣는다 */
 .btn__icon {
@@ -194,13 +195,13 @@ ul { margin: 0; padding: 0; list-style: none; }
   margin-left: auto; padding-left: 0.35rem; flex: 0 0 auto;
 }
 .matchbar__name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.matchbar__name { font-weight: 700; font-size: 0.9375rem; }
+.matchbar__name { font-weight: 700; font-size: 1.0625rem; }
 .star { color: var(--ink); display: inline-flex; }
 .matchbar__datewrap { display: flex; flex: 0 0 auto; }
 .matchbar__date {
   min-height: var(--tap-min); padding: 0 0.7rem;
   background: var(--shell); border: 1px solid var(--shell-line);
-  border-radius: var(--r-shell); font-size: 0.8125rem;
+  border-radius: var(--r-shell); font-size: 0.9375rem;
   font-variant-numeric: tabular-nums;
 }
 
@@ -221,7 +222,7 @@ ul { margin: 0; padding: 0; list-style: none; }
 .board { display: flex; flex-direction: column; gap: var(--sp-2); }
 .board__row {
   display: flex; align-items: center; gap: var(--sp-3);
-  min-height: 54px; padding: 0.5rem var(--sp-4);
+  min-height: 60px; padding: 0.55rem var(--sp-4);
   background: var(--core); border: 1px solid var(--core-line);
   border-radius: var(--r-core); box-shadow: var(--ambient);
   cursor: pointer;
@@ -244,16 +245,16 @@ ul { margin: 0; padding: 0; list-style: none; }
 .board__row.is-lead .board__rank { background: var(--ink); color: var(--bg-elevated); }
 .board__who { display: flex; flex-direction: column; gap: 0.1rem; min-width: 0; flex: 1; }
 .board__name {
-  font-weight: 700; font-size: 0.9375rem;
+  font-weight: 700; font-size: 1.0625rem;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-.board__score { font-size: 1.375rem; font-weight: 800; letter-spacing: -0.03em; }
+.board__score { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.03em; }
 
 /* ============================================================
    난이도 카드
    ============================================================ */
 .grades {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
   gap: var(--sp-2);
 }
 /* 좁은 화면에서 3열은 점수가 들어갈 폭이 안 나온다 */
@@ -262,7 +263,7 @@ ul { margin: 0; padding: 0; list-style: none; }
 }
 .gcard {
   display: flex; align-items: center; gap: var(--sp-2);
-  min-height: 56px; padding: 0.5rem 0.6rem;
+  min-height: 62px; padding: 0.6rem 0.7rem;
   background: var(--core); border: 1px solid var(--core-line);
   border-radius: var(--r-core); box-shadow: var(--core-inset);
   text-align: left;
@@ -279,12 +280,12 @@ ul { margin: 0; padding: 0; list-style: none; }
 }
 .gcard__body .hint { white-space: nowrap; }
 .gcard__label {
-  font-weight: 600; font-size: 0.8125rem;
+  font-weight: 650; font-size: 0.9375rem;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .gcard__count {
   align-self: center; min-width: 1.2ch; text-align: right;
-  font-size: 1.25rem; font-weight: 800; letter-spacing: -0.04em;
+  font-size: 1.4rem; font-weight: 800; letter-spacing: -0.04em;
 }
 
 /* ============================================================
@@ -316,8 +317,8 @@ ul { margin: 0; padding: 0; list-style: none; }
   background: var(--ink); color: var(--bg-elevated);
   font-size: 0.75rem; font-weight: 700;
 }
-.total__score { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.035em; }
-.total__unit { font-size: 0.8125rem; color: var(--ink-3); margin-left: 0.2rem; }
+.total__score { font-size: 1.625rem; font-weight: 800; letter-spacing: -0.035em; }
+.total__unit { font-size: 0.9375rem; color: var(--ink-3); margin-left: 0.2rem; }
 
 /* ============================================================
    탭 바
@@ -380,8 +381,8 @@ ul { margin: 0; padding: 0; list-style: none; }
   transform: rotate(45deg);
 }
 .toggle {
-  display: flex; align-items: center; gap: 0.4rem; flex: 0 0 auto;
-  font-size: 0.8125rem; color: var(--ink-2); white-space: nowrap;
+  display: flex; align-items: center; gap: 0.45rem; flex: 0 0 auto;
+  font-size: 0.9375rem; color: var(--ink-2); white-space: nowrap;
 }
 
 
@@ -398,21 +399,20 @@ ul { margin: 0; padding: 0; list-style: none; }
 .gymrow__pick {
   flex: 1; min-width: 0;
   display: flex; align-items: center; gap: var(--sp-3);
-  height: 56px; padding: 0.5rem; background: none; border: 0; text-align: left;
+  height: 64px; padding: 0.5rem; background: none; border: 0; text-align: left;
 }
 .gymrow__dots { display: flex; gap: 2px; flex: 0 0 auto; }
 .gymrow__text { display: flex; flex-direction: column; gap: 0.05rem; min-width: 0; flex: 1; }
 .gymrow__name {
-  font-weight: 600; font-size: 0.875rem;
+  font-weight: 650; font-size: 1rem;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .gymrow__text .hint { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .gymrow__star { background: none; border: 0; padding: 0.5rem; color: var(--ink-3); }
 .gymrow__star.is-on { color: var(--ink); }
 .gymlist__empty {
-  /* 결과가 0건이면 모달 높이가 줄어 검색창이 화면 아래로 도망갔다 */
-  min-height: 38dvh; display: grid; place-items: center;
-  padding: var(--sp-5) var(--sp-4); text-align: center;
+  display: grid; place-items: center;
+  padding: var(--sp-7) var(--sp-4); text-align: center;
 }
 .gymlist__foot {
   flex: 0 0 auto; flex-wrap: wrap;
@@ -474,7 +474,7 @@ ul { margin: 0; padding: 0; list-style: none; }
 }
 .profilerow.is-current .profilerow__name { font-weight: 800; }
 .profilerow__text { display: flex; flex-direction: column; }
-.profilerow__name { font-weight: 600; font-size: 0.9375rem; }
+.profilerow__name { font-weight: 650; font-size: 1.0625rem; }
 .avatar {
   display: grid; place-items: center; width: 34px; height: 34px; flex: 0 0 auto;
   border-radius: var(--r-tight); background: var(--shell); font-weight: 700; font-size: 0.875rem;
@@ -484,7 +484,7 @@ ul { margin: 0; padding: 0; list-style: none; }
   min-height: var(--tap-min);
   padding: 0.5rem 0; border-bottom: 1px solid var(--shell-line);
 }
-.levelrow__name { flex: 1; font-size: 0.875rem; }
+.levelrow__name { flex: 1; font-size: 0.9375rem; }
 
 /* ============================================================
    점수표
@@ -495,7 +495,7 @@ ul { margin: 0; padding: 0; list-style: none; }
 .fieldrow .dial input[type='date'] { min-width: 8.5rem; }
 .dial { display: flex; flex-direction: column; gap: 0.3rem; flex: 1 1 8rem; min-width: 0; }
 .dials .dial .field { width: 100%; }
-.dial__label { font-size: 0.8125rem; font-weight: 600; }
+.dial__label { font-size: 0.9375rem; font-weight: 600; }
 .matrixwrap {
   overflow-x: auto; margin: 0 calc(var(--sp-5) * -1); padding: 0 var(--sp-5);
   /* 오른쪽이 뚝 잘리면 레이아웃이 깨진 것처럼 보인다. 흐려지며 이어지게 한다. */
@@ -504,7 +504,7 @@ ul { margin: 0; padding: 0; list-style: none; }
   scroll-snap-type: x proximity;
 }
 .matrix td, .matrix th { scroll-snap-align: end; }
-.matrix { border-collapse: separate; border-spacing: 3px; font-size: 0.8125rem; }
+.matrix { border-collapse: separate; border-spacing: 3px; font-size: 0.9375rem; }
 .matrix th { font-weight: 700; color: var(--ink-2); font-size: var(--fs-min); padding: 0.35rem 0.2rem; }
 .matrix thead .dot { width: 14px; height: 14px; }
 .matrix__lv { text-align: right; padding-right: 0.4rem !important; }
@@ -536,10 +536,8 @@ ul { margin: 0; padding: 0; list-style: none; }
 .sparkfoot { display: flex; justify-content: space-between; margin-top: 0.3rem; }
 
 .gradebars { display: flex; flex-direction: column; gap: 0.55rem; margin-top: var(--sp-3); }
-.gradebar { display: flex; align-items: center; gap: var(--sp-2); font-size: 0.8125rem; }
-.gradebar.is-zero .hold,
-.gradebar.is-zero .gradebar__track { opacity: 0.4; }
-.gradebar.is-zero .gradebar__label { color: var(--ink-3); }
+.gradebar { display: flex; align-items: center; gap: var(--sp-2); font-size: 0.9375rem; }
+.gradebar.is-zero .gradebar__track { opacity: 0.55; }
 .gradebar__label { width: 3.5rem; flex: 0 0 auto; color: var(--ink-2); }
 .gradebar__track {
   flex: 1; height: 7px; border-radius: 3.5px; overflow: hidden;
@@ -564,6 +562,12 @@ ul { margin: 0; padding: 0; list-style: none; }
   opacity: 0; transition: opacity var(--dur-view) var(--ease-out);
 }
 .modal.is-open { opacity: 1; }
+/* 목록이 있는 모달은 높이를 고정한다.
+   내용에 맞춰 높이가 변하면 검색어를 한 글자 칠 때마다 모달이 오르내리고,
+   손가락 아래에서 입력창이 도망간다. */
+.modal__sheet:has(.pickerbody),
+.modal__sheet:has(.editlist) { height: 84dvh; }
+
 .modal__sheet {
   width: 100%; max-width: 560px; max-height: 92dvh;
   display: flex; flex-direction: column;
@@ -596,7 +600,7 @@ ul { margin: 0; padding: 0; list-style: none; }
   display: flex; align-items: center; gap: var(--sp-2);
   padding: 0.2rem 0; border-bottom: 1px solid var(--shell-line);
 }
-.editrow__label { flex: 1; font-size: 0.875rem; }
+.editrow__label { flex: 1; font-size: 0.9375rem; }
 .editrow .field { width: 4.5rem; }
 .field--xs { width: 4rem; min-width: 0; min-height: 36px; text-align: center; padding: 0.3rem 0.5rem; }
 .editfoot {
@@ -631,7 +635,8 @@ ul { margin: 0; padding: 0; list-style: none; }
 
 /* 유일한 스크롤 컨테이너(.modal__body) 안에서 검색·필터를 함께 고정한다.
    따로 걸면 서로 다른 높이에서 붙고, 반투명 칩 뒤로 목록이 비친다. */
-.pickerbody { display: flex; flex-direction: column; }
+.pickerbody { display: flex; flex-direction: column; min-height: 0; flex: 1 1 auto; }
+.pickerbody .gymlist { flex: 1 1 auto; }
 .pickerhead {
   position: sticky; top: 0; z-index: 3;
   display: flex; flex-direction: column; gap: var(--sp-3);

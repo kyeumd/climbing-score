@@ -6,9 +6,6 @@
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#F7F7F8" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#050505" media="(prefers-color-scheme: dark)">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<link rel="manifest" href="./manifest.webmanifest">
-<link rel="icon" href="./icon.svg" type="image/svg+xml">
 <title>클라이밍 점수</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,11 +15,5 @@
 <body>
 <main id="app" class="app"></main>
 <script type="module" src="./src/app.js"></script>
-<script>
-  // 암장은 지하가 많다. 껍데기를 캐시해 두면 신호 없이도 앱이 뜬다.
-  if ('serviceWorker' in navigator && location.protocol !== 'file:') {
-    addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
-  }
-</script>
 </body>
 </html>
