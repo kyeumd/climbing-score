@@ -771,20 +771,11 @@ ul { margin: 0; padding: 0; list-style: none; }
    ============================================================ */
 .grid { display: flex; flex-direction: column; gap: 4px; }
 .grid__head, .grid__row {
+  /* 열 개수는 인라인 style 로 직접 준다.
+     repeat(var(--cols)) 는 커스텀 속성이 정수로 해석되지 않아 무효가 되고,
+     :has(> :nth-child(n)) 는 구형 사파리에서 지원되지 않는다. */
   display: grid; gap: 4px; align-items: stretch;
-  /* 첫 칸은 난이도 이름, 나머지는 참가자 수만큼 균등 분할.
-     참가자 수를 CSS 변수로 넘기려 했으나 repeat(var(...))는 정수로 해석되지
-     않아 선언 전체가 무효가 된다. 자식 개수로 직접 정한다. */
-  grid-template-columns: minmax(76px, 1fr) 1fr;
 }
-.grid__head:has(> :nth-child(3)),
-.grid__row:has(> :nth-child(3))  { grid-template-columns: minmax(76px, 1fr) repeat(2, 1fr); }
-.grid__head:has(> :nth-child(4)),
-.grid__row:has(> :nth-child(4))  { grid-template-columns: minmax(72px, .9fr) repeat(3, 1fr); }
-.grid__head:has(> :nth-child(5)),
-.grid__row:has(> :nth-child(5))  { grid-template-columns: minmax(64px, .8fr) repeat(4, 1fr); }
-.grid__head:has(> :nth-child(6)),
-.grid__row:has(> :nth-child(6))  { grid-template-columns: minmax(56px, .7fr) repeat(5, 1fr); }
 .grid__head { position: sticky; top: 0; z-index: 2; background: var(--bg); padding-bottom: 2px; }
 .grid__corner { display: flex; align-items: flex-end; padding-bottom: 0.4rem; }
 .grid__person {

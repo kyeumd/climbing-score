@@ -97,6 +97,12 @@ function emptyGym({ state, actions }) {
 
 /* ---------- 입력 격자: 난이도 x 참가자 ---------- */
 
+/** 첫 칸은 난이도 이름, 나머지는 참가자 수만큼 균등 분할 */
+function tpl(n) {
+  const first = n >= 4 ? 60 : n === 3 ? 72 : 84;
+  return `minmax(${first}px, ${n >= 4 ? 0.8 : 1}fr) repeat(${n}, minmax(0, 1fr))`;
+}
+
 /**
  * 참가자를 전환하며 기록하면 사람 수만큼 탭이 늘어난다. 3명이 각자 5개를
  * 깼으면 전환 6번 + 탭 15번이다. 격자로 두면 전환 없이 15번으로 끝난다.
@@ -140,7 +146,7 @@ function inputGrid({ state, actions }, gym, grades) {
     ),
     h('div', { class: 'grid' },
       // 머리글: 사람 이름과 현재 점수
-      h('div', { class: 'grid__head' },
+      h('div', { class: 'grid__head', style: { gridTemplateColumns: tpl(rows.length) } },
         h('span', { class: 'grid__corner hint' }, '난이도'),
         rows.map((r, i) => h('button', {
           class: `grid__person${i === 0 && rows.length > 1 ? ' is-lead' : ''}`,
@@ -153,7 +159,9 @@ function inputGrid({ state, actions }, gym, grades) {
         )),
       ),
       // 본문: 난이도마다 사람별 칸
-      grades.map((grade) => h('div', { class: 'grid__row' },
+      grades.map((grade) => h('div', {
+        class: 'grid__row', style: { gridTemplateColumns: tpl(rows.length) },
+      },
         h('span', { class: 'grid__grade' },
           hold(grade, { size: 20 }),
           h('span', { class: 'grid__label' }, grade.label),
