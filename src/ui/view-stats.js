@@ -1,0 +1,186 @@
+/** 통계 — 짐별로만 본다. 짐 간 합산은 하지 않는다 (설계서 5.4절). */
+import { h, panel, button, eyebrow } from './components.js';
+import { gymStats } from '../domain/session.js';
+import { headToHead } from '../domain/match.js';
+import { sortGyms } from '../domain/gym.js';
+import { openSessionEditor } from './session-editor.js';
+import { hold } from './hold.js';
+
+export function viewStats(ctx) {
+  const { state, actions } = ctx;
+  const profile = state.profiles.find((p) => p.id === state.ui.profileId);
+  const gym = state.gyms.find((g) => g.id === state.ui.gymId);
+
+  if (!profile || !gym) {
+    return h('div', { class: 'view' },
+      // 탭으로 들어온 화면이라 '뒤로'는 갈 곳이 없다
+      h('div', { class: 'viewhead' }, h('h1', { class: 'title' }, '기록')),
+      panel(
+        eyebrow('아직 기록 없음'),
+        h('h2', { class: 'title', style: { margin: '0.5rem 0 0.35rem' } }, '무엇을 깼는지 남겨 볼까요'),
+        h('p', { class: 'subtitle', style: { marginBottom: '1rem' } },
+          !gym ? '클라이밍장을 고르고 완등을 기록하면 여기에 점수 추이가 쌓입니다.'
+               : '프로필을 만들고 완등을 기록하면 여기에 점수 추이가 쌓입니다.'),
+        h('div', { class: 'btnrow' },
+          !gym && button('클라이밍장 고르기', {
+            onClick: actions.openGymPicker, variant: 'solid', trailing: 'arrow',
+          }),
+          !profile && button('프로필 만들기', {
+            onClick: actions.openProfilePicker, variant: gym ? 'solid' : '', trailing: 'arrow',
+          }),
+        ),
+      ),
+    );
+  }
+
+  const stats = gymStats(state.sessions, gym, profile.id);
+  const h2h = headToHead({ sessions: state.sessions, gym, profileId: profile.id, profiles: state.profiles });
+  const gyms = sortGyms(state.gyms.filter((g) => !g.archived));
+
+  return h('div', { class: 'view' },
+    h('div', { class: 'viewhead' },
+      button('뒤로', { onClick: actions.goHome, variant: 'ghost', small: true }),
+      h('h1', { class: 'title' }, '기록'),
+    ),
+
+    h('div', { class: 'chips' },
+      gyms.map((g) => h('button', {
+        class: 'chip', type: 'button', 'aria-pressed': String(g.id === gym.id),
+        onclick: () => actions.setGym(g.id),
+      }, g.name)),
+    ),
+
+    h('div', { class: 'bento' },
+      stat('누적 점수', stats.totalScore.toLocaleString('ko-KR'), '점', 'is-wide'),
+      stat('세션', stats.sessionCount, '회'),
+      stat('완등', stats.totalSends, '개'),
+      stat('최고 단계', stats.topGrade?.label ?? '없음', '', 'is-tall', stats.topGrade),
+    ),
+
+    stats.trend.length > 1 && h('div', { class: 'section' },
+      panel(
+        eyebrow('세션별 점수'),
+        sparkline(stats.trend),
+      ),
+    ),
+
+    h('div', { class: 'section' },
+      panel(
+        eyebrow('단계별 완등'),
+        h('ul', { class: 'gradebars' },
+          stats.gradeTotals.map(({ grade, count }) => {
+            const max = Math.max(1, ...stats.gradeTotals.map((t) => t.count));
+            return h('li', { class: `gradebar${count === 0 ? ' is-zero' : ''}` },
+              hold(grade, { size: 20, bolt: false }),
+              h('span', { class: 'gradebar__label' }, grade.label),
+              h('span', { class: 'gradebar__track' },
+                h('span', {
+                  class: 'gradebar__fill',
+                  style: { transform: `scaleX(${count / max})`, background: grade.color },
+                }),
+              ),
+              h('span', { class: 'num gradebar__n' }, count),
+            );
+          }),
+        ),
+      ),
+    ),
+
+    h2h.length > 0 && h('div', { class: 'section' },
+      panel(
+        eyebrow(`${profile.name}의 대결 전적`),
+        h('ul', { class: 'h2hlist' },
+          h2h.map((r) => h('li', { class: 'h2hrow' },
+            h('span', {}, `vs ${r.profile.name}`),
+            h('span', { class: 'num' }, `${r.win}승 ${r.lose}패${r.draw ? ` ${r.draw}무` : ''}`),
+          )),
+        ),
+      ),
+    ),
+
+    stats.sessions.length > 0 && h('div', { class: 'section' },
+      panel(
+        eyebrow('최근 세션'),
+        h('p', { class: 'hint', style: { margin: '0.35rem 0 0.5rem' } }, '탭하면 수정할 수 있어요.'),
+        h('ul', { class: 'sessionlist' },
+          [...stats.sessions].reverse().slice(0, 12).map((session) => {
+            const score = stats.trend.find((t) => t.date === session.date)?.score ?? 0;
+            return h('li', {
+              class: 'sessionrow is-tappable',
+              onclick: () => openSessionEditor(session, gym, ctx),
+            },
+              h('span', { class: 'num hint' }, session.date.slice(5).replace('-', '월 ') + '일'),
+              h('span', { class: 'num' }, `${score.toLocaleString('ko-KR')}점`),
+            );
+          }),
+        ),
+      ),
+    ),
+  );
+}
+
+function stat(label, value, unit, extra = '', grade) {
+  return h('div', { class: `bento__cell shell ${extra}` },
+    h('div', { class: 'core' },
+      h('span', { class: 'hint' }, label),
+      h('span', { class: 'bento__value num' },
+        grade && hold(grade, { size: 24 }),
+        value,
+        unit && h('span', { class: 'bento__unit' }, unit),
+      ),
+    ),
+  );
+}
+
+/** 인라인 SVG 스파크라인. 차트 라이브러리 없음. */
+function sparkline(trend) {
+  const W = 320, H = 72, P = 6;
+  const scores = trend.map((t) => t.score);
+  // 0에 고정하면 세션 간 차이가 눌려 평평해 보인다. 데이터 범위로 스케일하고
+  // 실제 최소·최대값을 아래에 함께 적어 과장을 상쇄한다.
+  const max = Math.max(...scores, 1);
+  const min = Math.min(...scores);
+  const span = Math.max(1, max - min);
+  const pts = trend.map((t, i) => {
+    const x = P + (i / Math.max(1, trend.length - 1)) * (W - P * 2);
+    const y = H - P - ((t.score - min) / span) * (H - P * 2);
+    return [x, y];
+  });
+  const d = pts.map(([x, y], i) => `${i ? 'L' : 'M'}${x.toFixed(1)},${y.toFixed(1)}`).join(' ');
+
+  const ns = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(ns, 'svg');
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.setAttribute('class', 'spark');
+  svg.setAttribute('preserveAspectRatio', 'none');
+
+  const line = document.createElementNS(ns, 'path');
+  line.setAttribute('d', d);
+  line.setAttribute('fill', 'none');
+  line.setAttribute('stroke', 'currentColor');
+  line.setAttribute('stroke-width', '1.6');
+  line.setAttribute('stroke-linecap', 'round');
+  line.setAttribute('stroke-linejoin', 'round');
+  svg.append(line);
+
+  // 마지막 점만 찍으면 앞 세션들이 어디서 꺾이는지 눈으로 찾아야 한다
+  pts.forEach(([x, y], i) => {
+    const dot = document.createElementNS(ns, 'circle');
+    dot.setAttribute('cx', x); dot.setAttribute('cy', y);
+    dot.setAttribute('r', i === pts.length - 1 ? '3' : '2');
+    dot.setAttribute('fill', 'currentColor');
+    if (i !== pts.length - 1) dot.setAttribute('opacity', '0.55');
+    svg.append(dot);
+  });
+
+  // 값 라벨을 x축 양끝에 두면 "첫 세션 -> 마지막 세션"으로 읽힌다.
+  // 실제로는 최저·최고값이므로 그렇게 밝혀 적는다.
+  return h('div', { class: 'sparkwrap' }, svg,
+    h('div', { class: 'sparkfoot hint num' },
+      h('span', {}, trend[0]?.date?.slice(5).replace('-', '.') ?? ''),
+      h('span', { class: 'sparkfoot__range' },
+        `최저 ${min.toLocaleString('ko-KR')} · 최고 ${max.toLocaleString('ko-KR')}`),
+      h('span', {}, trend[trend.length - 1]?.date?.slice(5).replace('-', '.') ?? ''),
+    ),
+  );
+}

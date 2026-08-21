@@ -1,0 +1,5039 @@
+[
+ {
+  "name": "더클라임 강남점",
+  "gu": "강남구",
+  "grades": [
+   {
+    "label": "흰색",
+    "color": "#F5F5F5",
+    "order": 0
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 1
+   },
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 2
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 3
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 4
+   },
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 5
+   },
+   {
+    "label": "핑크",
+    "color": "#FF6FA5",
+    "order": 6
+   },
+   {
+    "label": "보라",
+    "color": "#7B4BC4",
+    "order": 7
+   },
+   {
+    "label": "회색",
+    "color": "#8A8F98",
+    "order": 8
+   },
+   {
+    "label": "갈색",
+    "color": "#7A5230",
+    "order": 9
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 10
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "더클라임 신사점",
+  "gu": "강남구",
+  "grades": [
+   {
+    "label": "흰색",
+    "color": "#F5F5F5",
+    "order": 0
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 1
+   },
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 2
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 3
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 4
+   },
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 5
+   },
+   {
+    "label": "핑크",
+    "color": "#FF6FA5",
+    "order": 6
+   },
+   {
+    "label": "보라",
+    "color": "#7B4BC4",
+    "order": 7
+   },
+   {
+    "label": "회색",
+    "color": "#8A8F98",
+    "order": 8
+   },
+   {
+    "label": "갈색",
+    "color": "#7A5230",
+    "order": 9
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 10
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "더클라임 양재점",
+  "gu": "강남구",
+  "grades": [
+   {
+    "label": "흰색",
+    "color": "#F5F5F5",
+    "order": 0
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 1
+   },
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 2
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 3
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 4
+   },
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 5
+   },
+   {
+    "label": "핑크",
+    "color": "#FF6FA5",
+    "order": 6
+   },
+   {
+    "label": "보라",
+    "color": "#7B4BC4",
+    "order": 7
+   },
+   {
+    "label": "회색",
+    "color": "#8A8F98",
+    "order": 8
+   },
+   {
+    "label": "갈색",
+    "color": "#7A5230",
+    "order": 9
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 10
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "락트리 클라이밍 강남",
+  "gu": "강남구",
+  "grades": [
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 0
+   },
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 1
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 2
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 3
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 4
+   },
+   {
+    "label": "남색",
+    "color": "#2A3D8F",
+    "order": 5
+   },
+   {
+    "label": "보라",
+    "color": "#7B4BC4",
+    "order": 6
+   },
+   {
+    "label": "흰색",
+    "color": "#F5F5F5",
+    "order": 7
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 8
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "무중력 클라이밍",
+  "gu": "강남구",
+  "grades": [
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 0
+   },
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 1
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 2
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 3
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 4
+   },
+   {
+    "label": "남색",
+    "color": "#2A3D8F",
+    "order": 5
+   },
+   {
+    "label": "보라",
+    "color": "#7B4BC4",
+    "order": 6
+   },
+   {
+    "label": "흰색",
+    "color": "#F5F5F5",
+    "order": 7
+   },
+   {
+    "label": "핑크",
+    "color": "#FF6FA5",
+    "order": 8
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "볼더하이웨이 클라이밍짐",
+  "gu": "강남구",
+  "grades": [
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 0
+   },
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 1
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 2
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 3
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 4
+   },
+   {
+    "label": "남색",
+    "color": "#2A3D8F",
+    "order": 5
+   },
+   {
+    "label": "보라",
+    "color": "#7B4BC4",
+    "order": 6
+   },
+   {
+    "label": "흰색",
+    "color": "#F5F5F5",
+    "order": 7
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 8
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "비블럭 강남점",
+  "gu": "강남구",
+  "grades": [
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 0
+   },
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 1
+   },
+   {
+    "label": "핑크",
+    "color": "#FF6FA5",
+    "order": 2
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 3
+   },
+   {
+    "label": "회색",
+    "color": "#8A8F98",
+    "order": 4
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 5
+   },
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 6
+   },
+   {
+    "label": "남색",
+    "color": "#2A3D8F",
+    "order": 7
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 8
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "온플릭 클라이밍 삼성점",
+  "gu": "강남구",
+  "grades": [
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 0
+   },
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 1
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 2
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 3
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 4
+   },
+   {
+    "label": "남색",
+    "color": "#2A3D8F",
+    "order": 5
+   },
+   {
+    "label": "보라",
+    "color": "#7B4BC4",
+    "order": 6
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 7
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "클라이밍파크 강남",
+  "gu": "강남구",
+  "grades": [
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 0
+   },
+   {
+    "label": "핑크",
+    "color": "#FF6FA5",
+    "order": 1
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 2
+   },
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 3
+   },
+   {
+    "label": "보라",
+    "color": "#7B4BC4",
+    "order": 4
+   },
+   {
+    "label": "갈색",
+    "color": "#7A5230",
+    "order": 5
+   },
+   {
+    "label": "회색",
+    "color": "#8A8F98",
+    "order": 6
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 7
+   },
+   {
+    "label": "흰색",
+    "color": "#F5F5F5",
+    "order": 8
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "클라이밍파크 신논현",
+  "gu": "강남구",
+  "grades": [
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 0
+   },
+   {
+    "label": "핑크",
+    "color": "#FF6FA5",
+    "order": 1
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 2
+   },
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 3
+   },
+   {
+    "label": "보라",
+    "color": "#7B4BC4",
+    "order": 4
+   },
+   {
+    "label": "갈색",
+    "color": "#7A5230",
+    "order": 5
+   },
+   {
+    "label": "회색",
+    "color": "#8A8F98",
+    "order": 6
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 7
+   },
+   {
+    "label": "흰색",
+    "color": "#F5F5F5",
+    "order": 8
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "클라이밍파크 한티",
+  "gu": "강남구",
+  "grades": [
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 0
+   },
+   {
+    "label": "핑크",
+    "color": "#FF6FA5",
+    "order": 1
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 2
+   },
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 3
+   },
+   {
+    "label": "보라",
+    "color": "#7B4BC4",
+    "order": 4
+   },
+   {
+    "label": "갈색",
+    "color": "#7A5230",
+    "order": 5
+   },
+   {
+    "label": "회색",
+    "color": "#8A8F98",
+    "order": 6
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 7
+   },
+   {
+    "label": "흰색",
+    "color": "#F5F5F5",
+    "order": 8
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "클라임이모션",
+  "gu": "강남구",
+  "grades": [
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 0
+   },
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 1
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 2
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 3
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 4
+   },
+   {
+    "label": "보라",
+    "color": "#7B4BC4",
+    "order": 5
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "타잔101 클라이밍 압구정점",
+  "gu": "강남구",
+  "grades": [
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 0
+   },
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 1
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 2
+   },
+   {
+    "label": "연두",
+    "color": "#A8D24A",
+    "order": 3
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 4
+   },
+   {
+    "label": "남색",
+    "color": "#2A3D8F",
+    "order": 5
+   },
+   {
+    "label": "보라",
+    "color": "#7B4BC4",
+    "order": 6
+   },
+   {
+    "label": "갈색",
+    "color": "#7A5230",
+    "order": 7
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "강동클라이밍짐",
+  "gu": "강동구",
+  "grades": [],
+  "gradesSource": null,
+  "kinds": [
+   "지구력"
+  ]
+ },
+ {
+  "name": "알레 클라이밍 강동",
+  "gu": "강동구",
+  "grades": [
+   {
+    "label": "흰색",
+    "color": "#F5F5F5",
+    "order": 0
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 1
+   },
+   {
+    "label": "연두",
+    "color": "#A8D24A",
+    "order": 2
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 3
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 4
+   },
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 5
+   },
+   {
+    "label": "회색",
+    "color": "#8A8F98",
+    "order": 6
+   },
+   {
+    "label": "갈색",
+    "color": "#7A5230",
+    "order": 7
+   },
+   {
+    "label": "핑크",
+    "color": "#FF6FA5",
+    "order": 8
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 9
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "온플릭 클라이밍 천호점",
+  "gu": "강동구",
+  "grades": [
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 0
+   },
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 1
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 2
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 3
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 4
+   },
+   {
+    "label": "남색",
+    "color": "#2A3D8F",
+    "order": 5
+   },
+   {
+    "label": "보라",
+    "color": "#7B4BC4",
+    "order": 6
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 7
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "V10클라이밍 천호본점",
+  "gu": "강동구",
+  "grades": [
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 0
+   },
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 1
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 2
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 3
+   },
+   {
+    "label": "핑크",
+    "color": "#FF6FA5",
+    "order": 4
+   },
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 5
+   },
+   {
+    "label": "남색",
+    "color": "#2A3D8F",
+    "order": 6
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "락랜드",
+  "gu": "강북구",
+  "grades": [
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 0
+   },
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 1
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 2
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 3
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 4
+   },
+   {
+    "label": "남색",
+    "color": "#2A3D8F",
+    "order": 5
+   },
+   {
+    "label": "보라",
+    "color": "#7B4BC4",
+    "order": 6
+   },
+   {
+    "label": "회색",
+    "color": "#8A8F98",
+    "order": 7
+   },
+   {
+    "label": "갈색",
+    "color": "#7A5230",
+    "order": 8
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 9
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "북한산클라이밍센터",
+  "gu": "강북구",
+  "grades": [],
+  "gradesSource": null,
+  "kinds": [
+   "리드",
+   "지구력"
+  ]
+ },
+ {
+  "name": "강서클라이밍센터",
+  "gu": "강서구",
+  "grades": [
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 0
+   },
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 1
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 2
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 3
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 4
+   },
+   {
+    "label": "남색",
+    "color": "#2A3D8F",
+    "order": 5
+   },
+   {
+    "label": "보라",
+    "color": "#7B4BC4",
+    "order": 6
+   },
+   {
+    "label": "회색",
+    "color": "#8A8F98",
+    "order": 7
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 8
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "더클라임 마곡점",
+  "gu": "강서구",
+  "grades": [
+   {
+    "label": "흰색",
+    "color": "#F5F5F5",
+    "order": 0
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 1
+   },
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 2
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 3
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 4
+   },
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 5
+   },
+   {
+    "label": "핑크",
+    "color": "#FF6FA5",
+    "order": 6
+   },
+   {
+    "label": "보라",
+    "color": "#7B4BC4",
+    "order": 7
+   },
+   {
+    "label": "회색",
+    "color": "#8A8F98",
+    "order": 8
+   },
+   {
+    "label": "갈색",
+    "color": "#7A5230",
+    "order": 9
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 10
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "더플라스틱 클라이밍 염창점",
+  "gu": "강서구",
+  "grades": [
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 0
+   },
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 1
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 2
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 3
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 4
+   },
+   {
+    "label": "남색",
+    "color": "#2A3D8F",
+    "order": 5
+   },
+   {
+    "label": "보라",
+    "color": "#7B4BC4",
+    "order": 6
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 7
+   },
+   {
+    "label": "회색",
+    "color": "#8A8F98",
+    "order": 8
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "어거스트 클라이밍",
+  "gu": "강서구",
+  "grades": [
+   {
+    "label": "흰색",
+    "color": "#F5F5F5",
+    "order": 0
+   },
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 1
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 2
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 3
+   },
+   {
+    "label": "하늘",
+    "color": "#4FB6E8",
+    "order": 4
+   },
+   {
+    "label": "남색",
+    "color": "#2A3D8F",
+    "order": 5
+   },
+   {
+    "label": "갈색",
+    "color": "#7A5230",
+    "order": 6
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 7
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "KBS스포츠월드 88클라이밍센터",
+  "gu": "강서구",
+  "grades": [
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 0
+   },
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 1
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 2
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 3
+   },
+   {
+    "label": "하늘",
+    "color": "#4FB6E8",
+    "order": 4
+   },
+   {
+    "label": "남색",
+    "color": "#2A3D8F",
+    "order": 5
+   },
+   {
+    "label": "핑크",
+    "color": "#FF6FA5",
+    "order": 6
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "더클라임 사당점",
+  "gu": "관악구",
+  "grades": [
+   {
+    "label": "흰색",
+    "color": "#F5F5F5",
+    "order": 0
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 1
+   },
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 2
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 3
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 4
+   },
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 5
+   },
+   {
+    "label": "핑크",
+    "color": "#FF6FA5",
+    "order": 6
+   },
+   {
+    "label": "보라",
+    "color": "#7B4BC4",
+    "order": 7
+   },
+   {
+    "label": "회색",
+    "color": "#8A8F98",
+    "order": 8
+   },
+   {
+    "label": "갈색",
+    "color": "#7A5230",
+    "order": 9
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 10
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "더클라임 서울대점",
+  "gu": "관악구",
+  "grades": [
+   {
+    "label": "흰색",
+    "color": "#F5F5F5",
+    "order": 0
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 1
+   },
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 2
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 3
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 4
+   },
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 5
+   },
+   {
+    "label": "핑크",
+    "color": "#FF6FA5",
+    "order": 6
+   },
+   {
+    "label": "보라",
+    "color": "#7B4BC4",
+    "order": 7
+   },
+   {
+    "label": "회색",
+    "color": "#8A8F98",
+    "order": 8
+   },
+   {
+    "label": "갈색",
+    "color": "#7A5230",
+    "order": 9
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 10
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "더클라임 신림점",
+  "gu": "관악구",
+  "grades": [
+   {
+    "label": "흰색",
+    "color": "#F5F5F5",
+    "order": 0
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 1
+   },
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 2
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 3
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 4
+   },
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 5
+   },
+   {
+    "label": "핑크",
+    "color": "#FF6FA5",
+    "order": 6
+   },
+   {
+    "label": "보라",
+    "color": "#7B4BC4",
+    "order": 7
+   },
+   {
+    "label": "회색",
+    "color": "#8A8F98",
+    "order": 8
+   },
+   {
+    "label": "갈색",
+    "color": "#7A5230",
+    "order": 9
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 10
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "스톤즈클라이밍",
+  "gu": "관악구",
+  "grades": [
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 0
+   },
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 1
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 2
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 3
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 4
+   },
+   {
+    "label": "남색",
+    "color": "#2A3D8F",
+    "order": 5
+   },
+   {
+    "label": "보라",
+    "color": "#7B4BC4",
+    "order": 6
+   },
+   {
+    "label": "흰색",
+    "color": "#F5F5F5",
+    "order": 7
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 8
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "인클라이밍센터",
+  "gu": "관악구",
+  "grades": [],
+  "gradesSource": null,
+  "kinds": [
+   "지구력"
+  ]
+ },
+ {
+  "name": "정지현클라이밍짐",
+  "gu": "관악구",
+  "grades": [
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 0
+   },
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 1
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 2
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 3
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 4
+   },
+   {
+    "label": "남색",
+    "color": "#2A3D8F",
+    "order": 5
+   },
+   {
+    "label": "보라",
+    "color": "#7B4BC4",
+    "order": 6
+   },
+   {
+    "label": "갈색",
+    "color": "#7A5230",
+    "order": 7
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "레드포인트클라이밍",
+  "gu": "광진구",
+  "grades": [],
+  "gradesSource": null,
+  "kinds": [
+   "지구력"
+  ]
+ },
+ {
+  "name": "버티고 클라이밍",
+  "gu": "광진구",
+  "grades": [
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 0
+   },
+   {
+    "label": "연두",
+    "color": "#A8D24A",
+    "order": 1
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 2
+   },
+   {
+    "label": "하늘",
+    "color": "#4FB6E8",
+    "order": 3
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 4
+   },
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 5
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "조규복클라이밍센터 강변점",
+  "gu": "광진구",
+  "grades": [
+   {
+    "label": "흰색",
+    "color": "#F5F5F5",
+    "order": 0
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 1
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 2
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 3
+   },
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 4
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 5
+   },
+   {
+    "label": "회색",
+    "color": "#8A8F98",
+    "order": 6
+   },
+   {
+    "label": "갈색",
+    "color": "#7A5230",
+    "order": 7
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "서울숲클라이밍 구로점",
+  "gu": "구로구",
+  "grades": [
+   {
+    "label": "핑크",
+    "color": "#FF6FA5",
+    "order": 0
+   },
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 1
+   },
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 2
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 3
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 4
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 5
+   },
+   {
+    "label": "남색",
+    "color": "#2A3D8F",
+    "order": 6
+   },
+   {
+    "label": "보라",
+    "color": "#7B4BC4",
+    "order": 7
+   },
+   {
+    "label": "갈색",
+    "color": "#7A5230",
+    "order": 8
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 9
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "스튜디오 볼더",
+  "gu": "구로구",
+  "grades": [
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 0
+   },
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 1
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 2
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 3
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 4
+   },
+   {
+    "label": "남색",
+    "color": "#2A3D8F",
+    "order": 5
+   },
+   {
+    "label": "보라",
+    "color": "#7B4BC4",
+    "order": 6
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 7
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "썬 클라이밍 짐",
+  "gu": "구로구",
+  "grades": [],
+  "gradesSource": null,
+  "kinds": [
+   "지구력"
+  ]
+ },
+ {
+  "name": "에이스 클라이밍",
+  "gu": "구로구",
+  "grades": [
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 0
+   },
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 1
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 2
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 3
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 4
+   },
+   {
+    "label": "남색",
+    "color": "#2A3D8F",
+    "order": 5
+   },
+   {
+    "label": "보라",
+    "color": "#7B4BC4",
+    "order": 6
+   },
+   {
+    "label": "회색",
+    "color": "#8A8F98",
+    "order": 7
+   },
+   {
+    "label": "핑크",
+    "color": "#FF6FA5",
+    "order": 8
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "클라임잇 구로점",
+  "gu": "구로구",
+  "grades": [
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 0
+   },
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 1
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 2
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 3
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 4
+   },
+   {
+    "label": "남색",
+    "color": "#2A3D8F",
+    "order": 5
+   },
+   {
+    "label": "보라",
+    "color": "#7B4BC4",
+    "order": 6
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 7
+   },
+   {
+    "label": "흰색",
+    "color": "#F5F5F5",
+    "order": 8
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "피커스 클라이밍 구로",
+  "gu": "구로구",
+  "grades": [
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 0
+   },
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 1
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 2
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 3
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 4
+   },
+   {
+    "label": "남색",
+    "color": "#2A3D8F",
+    "order": 5
+   },
+   {
+    "label": "보라",
+    "color": "#7B4BC4",
+    "order": 6
+   },
+   {
+    "label": "회색",
+    "color": "#8A8F98",
+    "order": 7
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 8
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "어거스트 클라이밍 가산",
+  "gu": "금천구",
+  "grades": [
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 0
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 1
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 2
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 3
+   },
+   {
+    "label": "남색",
+    "color": "#2A3D8F",
+    "order": 4
+   },
+   {
+    "label": "보라",
+    "color": "#7B4BC4",
+    "order": 5
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 6
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "드림캐처 클라이밍",
+  "gu": "노원구",
+  "grades": [
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 0
+   },
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 1
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 2
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 3
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 4
+   },
+   {
+    "label": "남색",
+    "color": "#2A3D8F",
+    "order": 5
+   },
+   {
+    "label": "보라",
+    "color": "#7B4BC4",
+    "order": 6
+   },
+   {
+    "label": "회색",
+    "color": "#8A8F98",
+    "order": 7
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 8
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "몽키즈클라이밍 중계점",
+  "gu": "노원구",
+  "grades": [
+   {
+    "label": "흰색",
+    "color": "#F5F5F5",
+    "order": 0
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 1
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 2
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 3
+   },
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 4
+   },
+   {
+    "label": "회색",
+    "color": "#8A8F98",
+    "order": 5
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 6
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "볼더 클라이밍 짐",
+  "gu": "노원구",
+  "grades": [
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 0
+   },
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 1
+   },
+   {
+    "label": "연두",
+    "color": "#A8D24A",
+    "order": 2
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 3
+   },
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 4
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 5
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "비숍 클라이밍",
+  "gu": "노원구",
+  "grades": [
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 0
+   },
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 1
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 2
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 3
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 4
+   },
+   {
+    "label": "남색",
+    "color": "#2A3D8F",
+    "order": 5
+   },
+   {
+    "label": "보라",
+    "color": "#7B4BC4",
+    "order": 6
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "태릉스파이더스 클라이밍센터",
+  "gu": "노원구",
+  "grades": [
+   {
+    "label": "회색",
+    "color": "#8A8F98",
+    "order": 0
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 1
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 2
+   },
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 3
+   },
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 4
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "도봉파워클라이밍센터",
+  "gu": "도봉구",
+  "grades": [],
+  "gradesSource": null,
+  "kinds": [
+   "지구력"
+  ]
+ },
+ {
+  "name": "몽키즈클라이밍 답십리점",
+  "gu": "동대문구",
+  "grades": [
+   {
+    "label": "흰색",
+    "color": "#F5F5F5",
+    "order": 0
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 1
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 2
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 3
+   },
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 4
+   },
+   {
+    "label": "회색",
+    "color": "#8A8F98",
+    "order": 5
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 6
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "산타클라이밍",
+  "gu": "동대문구",
+  "grades": [
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 0
+   },
+   {
+    "label": "흰색",
+    "color": "#F5F5F5",
+    "order": 1
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 2
+   },
+   {
+    "label": "핑크",
+    "color": "#FF6FA5",
+    "order": 3
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 4
+   },
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 5
+   },
+   {
+    "label": "갈색",
+    "color": "#7A5230",
+    "order": 6
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "웨어하우스 볼더링",
+  "gu": "동대문구",
+  "grades": [
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 0
+   },
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 1
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 2
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 3
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 4
+   },
+   {
+    "label": "남색",
+    "color": "#2A3D8F",
+    "order": 5
+   },
+   {
+    "label": "보라",
+    "color": "#7B4BC4",
+    "order": 6
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 7
+   },
+   {
+    "label": "핑크",
+    "color": "#FF6FA5",
+    "order": 8
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "클라임 어스 장한평점",
+  "gu": "동대문구",
+  "grades": [
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 0
+   },
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 1
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 2
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 3
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 4
+   },
+   {
+    "label": "남색",
+    "color": "#2A3D8F",
+    "order": 5
+   },
+   {
+    "label": "보라",
+    "color": "#7B4BC4",
+    "order": 6
+   },
+   {
+    "label": "흰색",
+    "color": "#F5F5F5",
+    "order": 7
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 8
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "V10클라이밍 장한평점",
+  "gu": "동대문구",
+  "grades": [
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 0
+   },
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 1
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 2
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 3
+   },
+   {
+    "label": "핑크",
+    "color": "#FF6FA5",
+    "order": 4
+   },
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 5
+   },
+   {
+    "label": "남색",
+    "color": "#2A3D8F",
+    "order": 6
+   },
+   {
+    "label": "흰색",
+    "color": "#F5F5F5",
+    "order": 7
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "더클라임 이수점",
+  "gu": "동작구",
+  "grades": [
+   {
+    "label": "흰색",
+    "color": "#F5F5F5",
+    "order": 0
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 1
+   },
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 2
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 3
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 4
+   },
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 5
+   },
+   {
+    "label": "핑크",
+    "color": "#FF6FA5",
+    "order": 6
+   },
+   {
+    "label": "보라",
+    "color": "#7B4BC4",
+    "order": 7
+   },
+   {
+    "label": "회색",
+    "color": "#8A8F98",
+    "order": 8
+   },
+   {
+    "label": "갈색",
+    "color": "#7A5230",
+    "order": 9
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 10
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "볼더생활",
+  "gu": "동작구",
+  "grades": [
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 0
+   },
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 1
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 2
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 3
+   },
+   {
+    "label": "하늘",
+    "color": "#4FB6E8",
+    "order": 4
+   },
+   {
+    "label": "남색",
+    "color": "#2A3D8F",
+    "order": 5
+   },
+   {
+    "label": "갈색",
+    "color": "#7A5230",
+    "order": 6
+   },
+   {
+    "label": "보라",
+    "color": "#7B4BC4",
+    "order": 7
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 8
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "더클라임 연남점",
+  "gu": "마포구",
+  "grades": [
+   {
+    "label": "흰색",
+    "color": "#F5F5F5",
+    "order": 0
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 1
+   },
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 2
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 3
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 4
+   },
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 5
+   },
+   {
+    "label": "핑크",
+    "color": "#FF6FA5",
+    "order": 6
+   },
+   {
+    "label": "보라",
+    "color": "#7B4BC4",
+    "order": 7
+   },
+   {
+    "label": "회색",
+    "color": "#8A8F98",
+    "order": 8
+   },
+   {
+    "label": "갈색",
+    "color": "#7A5230",
+    "order": 9
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 10
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "더클라임 B 홍대점",
+  "gu": "마포구",
+  "grades": [
+   {
+    "label": "1",
+    "color": "#e8e8ec",
+    "order": 0
+   },
+   {
+    "label": "2",
+    "color": "#d0d0d4",
+    "order": 1
+   },
+   {
+    "label": "3",
+    "color": "#b8b8bc",
+    "order": 2
+   },
+   {
+    "label": "4",
+    "color": "#a0a0a4",
+    "order": 3
+   },
+   {
+    "label": "5",
+    "color": "#88888c",
+    "order": 4
+   },
+   {
+    "label": "6",
+    "color": "#707074",
+    "order": 5
+   },
+   {
+    "label": "7",
+    "color": "#58585c",
+    "order": 6
+   },
+   {
+    "label": "8",
+    "color": "#404044",
+    "order": 7
+   },
+   {
+    "label": "9",
+    "color": "#28282c",
+    "order": 8
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "볼더그라운드",
+  "gu": "마포구",
+  "grades": [
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 0
+   },
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 1
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 2
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 3
+   },
+   {
+    "label": "하늘",
+    "color": "#4FB6E8",
+    "order": 4
+   },
+   {
+    "label": "남색",
+    "color": "#2A3D8F",
+    "order": 5
+   },
+   {
+    "label": "보라",
+    "color": "#7B4BC4",
+    "order": 6
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 7
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "볼더프렌즈 클라이밍",
+  "gu": "마포구",
+  "grades": [
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 0
+   },
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 1
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 2
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 3
+   },
+   {
+    "label": "하늘",
+    "color": "#4FB6E8",
+    "order": 4
+   },
+   {
+    "label": "남색",
+    "color": "#2A3D8F",
+    "order": 5
+   },
+   {
+    "label": "보라",
+    "color": "#7B4BC4",
+    "order": 6
+   },
+   {
+    "label": "회색",
+    "color": "#8A8F98",
+    "order": 7
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 8
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "서울시산악문화체험센터",
+  "gu": "마포구",
+  "grades": [
+   {
+    "label": "흰색",
+    "color": "#F5F5F5",
+    "order": 0
+   },
+   {
+    "label": "핑크",
+    "color": "#FF6FA5",
+    "order": 1
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 2
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 3
+   },
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 4
+   },
+   {
+    "label": "회색",
+    "color": "#8A8F98",
+    "order": 5
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "코알라클라이밍",
+  "gu": "마포구",
+  "grades": [
+   {
+    "label": "핑크",
+    "color": "#FF6FA5",
+    "order": 0
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 1
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 2
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 3
+   },
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 4
+   },
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 5
+   },
+   {
+    "label": "보라",
+    "color": "#7B4BC4",
+    "order": 6
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 7
+   },
+   {
+    "label": "흰색",
+    "color": "#F5F5F5",
+    "order": 8
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "홍대클라이밍센터",
+  "gu": "마포구",
+  "grades": [
+   {
+    "label": "흰색",
+    "color": "#F5F5F5",
+    "order": 0
+   },
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 1
+   },
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 2
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 3
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 4
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 5
+   },
+   {
+    "label": "보라",
+    "color": "#7B4BC4",
+    "order": 6
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 7
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "Summit 클라이밍센터",
+  "gu": "마포구",
+  "grades": [],
+  "gradesSource": null,
+  "kinds": [
+   "지구력"
+  ]
+ },
+ {
+  "name": "몽키즈클라이밍 북가좌점",
+  "gu": "서대문구",
+  "grades": [
+   {
+    "label": "흰색",
+    "color": "#F5F5F5",
+    "order": 0
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 1
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 2
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 3
+   },
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 4
+   },
+   {
+    "label": "회색",
+    "color": "#8A8F98",
+    "order": 5
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 6
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "신촌 담장",
+  "gu": "서대문구",
+  "grades": [
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 0
+   },
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 1
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 2
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 3
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 4
+   },
+   {
+    "label": "남색",
+    "color": "#2A3D8F",
+    "order": 5
+   },
+   {
+    "label": "보라",
+    "color": "#7B4BC4",
+    "order": 6
+   },
+   {
+    "label": "흰색",
+    "color": "#F5F5F5",
+    "order": 7
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 8
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "피커스 클라이밍 신촌",
+  "gu": "서대문구",
+  "grades": [
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 0
+   },
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 1
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 2
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 3
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 4
+   },
+   {
+    "label": "남색",
+    "color": "#2A3D8F",
+    "order": 5
+   },
+   {
+    "label": "보라",
+    "color": "#7B4BC4",
+    "order": 6
+   },
+   {
+    "label": "회색",
+    "color": "#8A8F98",
+    "order": 7
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 8
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "게이트원 클라이밍",
+  "gu": "서초구",
+  "grades": [
+   {
+    "label": "흰색",
+    "color": "#F5F5F5",
+    "order": 0
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 1
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 2
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 3
+   },
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 4
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 5
+   },
+   {
+    "label": "갈색",
+    "color": "#7A5230",
+    "order": 6
+   },
+   {
+    "label": "핑크",
+    "color": "#FF6FA5",
+    "order": 7
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "더클라이밍짐",
+  "gu": "서초구",
+  "grades": [
+   {
+    "label": "V0",
+    "color": "#e8e8ec",
+    "order": 0
+   },
+   {
+    "label": "V1",
+    "color": "#cdcdd1",
+    "order": 1
+   },
+   {
+    "label": "V2",
+    "color": "#b1b1b5",
+    "order": 2
+   },
+   {
+    "label": "V3",
+    "color": "#96969a",
+    "order": 3
+   },
+   {
+    "label": "V4",
+    "color": "#7a7a7e",
+    "order": 4
+   },
+   {
+    "label": "V5",
+    "color": "#5f5f63",
+    "order": 5
+   },
+   {
+    "label": "V6",
+    "color": "#434347",
+    "order": 6
+   },
+   {
+    "label": "V7",
+    "color": "#28282c",
+    "order": 7
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "더클라임 논현점",
+  "gu": "서초구",
+  "grades": [
+   {
+    "label": "흰색",
+    "color": "#F5F5F5",
+    "order": 0
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 1
+   },
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 2
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 3
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 4
+   },
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 5
+   },
+   {
+    "label": "핑크",
+    "color": "#FF6FA5",
+    "order": 6
+   },
+   {
+    "label": "보라",
+    "color": "#7B4BC4",
+    "order": 7
+   },
+   {
+    "label": "회색",
+    "color": "#8A8F98",
+    "order": 8
+   },
+   {
+    "label": "갈색",
+    "color": "#7A5230",
+    "order": 9
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 10
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "손상원 클라이밍짐 강남점",
+  "gu": "서초구",
+  "grades": [
+   {
+    "label": "흰색",
+    "color": "#F5F5F5",
+    "order": 0
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 1
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 2
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 3
+   },
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 4
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 5
+   },
+   {
+    "label": "회색",
+    "color": "#8A8F98",
+    "order": 6
+   },
+   {
+    "label": "갈색",
+    "color": "#7A5230",
+    "order": 7
+   },
+   {
+    "label": "핑크",
+    "color": "#FF6FA5",
+    "order": 8
+   },
+   {
+    "label": "보라",
+    "color": "#7B4BC4",
+    "order": 9
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "원베일리 인바이트",
+  "gu": "서초구",
+  "grades": [
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 0
+   },
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 1
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 2
+   },
+   {
+    "label": "핑크",
+    "color": "#FF6FA5",
+    "order": 3
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 4
+   },
+   {
+    "label": "갈색",
+    "color": "#7A5230",
+    "order": 5
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "더클라임 성수점",
+  "gu": "성동구",
+  "grades": [
+   {
+    "label": "하양",
+    "color": "#F5F5F5",
+    "order": 0
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 1
+   },
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 2
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 3
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 4
+   },
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 5
+   },
+   {
+    "label": "핑크",
+    "color": "#FF6FA5",
+    "order": 6
+   },
+   {
+    "label": "보라",
+    "color": "#7B4BC4",
+    "order": 7
+   },
+   {
+    "label": "회색",
+    "color": "#8A8F98",
+    "order": 8
+   },
+   {
+    "label": "갈색",
+    "color": "#7A5230",
+    "order": 9
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 10
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "서울숲클라이밍 뚝섬점",
+  "gu": "성동구",
+  "grades": [
+   {
+    "label": "핑크",
+    "color": "#FF6FA5",
+    "order": 0
+   },
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 1
+   },
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 2
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 3
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 4
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 5
+   },
+   {
+    "label": "남색",
+    "color": "#2A3D8F",
+    "order": 6
+   },
+   {
+    "label": "보라",
+    "color": "#7B4BC4",
+    "order": 7
+   },
+   {
+    "label": "갈색",
+    "color": "#7A5230",
+    "order": 8
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 9
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "손정준 스포츠 클라이밍 연구소",
+  "gu": "성동구",
+  "grades": [
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 0
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "클라이밍파크 성수",
+  "gu": "성동구",
+  "grades": [
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 0
+   },
+   {
+    "label": "핑크",
+    "color": "#FF6FA5",
+    "order": 1
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 2
+   },
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 3
+   },
+   {
+    "label": "보라",
+    "color": "#7B4BC4",
+    "order": 4
+   },
+   {
+    "label": "갈색",
+    "color": "#7A5230",
+    "order": 5
+   },
+   {
+    "label": "회색",
+    "color": "#8A8F98",
+    "order": 6
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 7
+   },
+   {
+    "label": "흰색",
+    "color": "#F5F5F5",
+    "order": 8
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "훅클라이밍 성수점",
+  "gu": "성동구",
+  "grades": [
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 0
+   },
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 1
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 2
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 3
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 4
+   },
+   {
+    "label": "남색",
+    "color": "#2A3D8F",
+    "order": 5
+   },
+   {
+    "label": "보라",
+    "color": "#7B4BC4",
+    "order": 6
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 7
+   },
+   {
+    "label": "별",
+    "color": "#D4AF37",
+    "order": 8
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "훅클라이밍 왕십리점",
+  "gu": "성동구",
+  "grades": [
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 0
+   },
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 1
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 2
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 3
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 4
+   },
+   {
+    "label": "남색",
+    "color": "#2A3D8F",
+    "order": 5
+   },
+   {
+    "label": "보라",
+    "color": "#7B4BC4",
+    "order": 6
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 7
+   },
+   {
+    "label": "별",
+    "color": "#D4AF37",
+    "order": 8
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "경동클라이밍센터",
+  "gu": "성북구",
+  "grades": [
+   {
+    "label": "회색",
+    "color": "#8A8F98",
+    "order": 0
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 1
+   },
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 2
+   },
+   {
+    "label": "핑크",
+    "color": "#FF6FA5",
+    "order": 3
+   },
+   {
+    "label": "하늘",
+    "color": "#4FB6E8",
+    "order": 4
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 5
+   },
+   {
+    "label": "남색",
+    "color": "#2A3D8F",
+    "order": 6
+   },
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 7
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "닷클라이밍짐",
+  "gu": "송파구",
+  "grades": [
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 0
+   },
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 1
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 2
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 3
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 4
+   },
+   {
+    "label": "남색",
+    "color": "#2A3D8F",
+    "order": 5
+   },
+   {
+    "label": "갈색",
+    "color": "#7A5230",
+    "order": 6
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 7
+   },
+   {
+    "label": "흰색",
+    "color": "#F5F5F5",
+    "order": 8
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "락스타 클라이밍",
+  "gu": "송파구",
+  "grades": [
+   {
+    "label": "흰색",
+    "color": "#F5F5F5",
+    "order": 0
+   },
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 1
+   },
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 2
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 3
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 4
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 5
+   },
+   {
+    "label": "보라",
+    "color": "#7B4BC4",
+    "order": 6
+   },
+   {
+    "label": "갈색",
+    "color": "#7A5230",
+    "order": 7
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 8
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "루트클라이밍",
+  "gu": "송파구",
+  "grades": [
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 0
+   },
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 1
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 2
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 3
+   },
+   {
+    "label": "하늘",
+    "color": "#4FB6E8",
+    "order": 4
+   },
+   {
+    "label": "남색",
+    "color": "#2A3D8F",
+    "order": 5
+   },
+   {
+    "label": "갈색",
+    "color": "#7A5230",
+    "order": 6
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 7
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "브릭스클라이밍짐",
+  "gu": "송파구",
+  "grades": [
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 0
+   },
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 1
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 2
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 3
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 4
+   },
+   {
+    "label": "남색",
+    "color": "#2A3D8F",
+    "order": 5
+   },
+   {
+    "label": "갈색",
+    "color": "#7A5230",
+    "order": 6
+   },
+   {
+    "label": "흰색",
+    "color": "#F5F5F5",
+    "order": 7
+   },
+   {
+    "label": "회색",
+    "color": "#8A8F98",
+    "order": 8
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "서울숲클라이밍 잠실점",
+  "gu": "송파구",
+  "grades": [
+   {
+    "label": "핑크",
+    "color": "#FF6FA5",
+    "order": 0
+   },
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 1
+   },
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 2
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 3
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 4
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 5
+   },
+   {
+    "label": "남색",
+    "color": "#2A3D8F",
+    "order": 6
+   },
+   {
+    "label": "보라",
+    "color": "#7B4BC4",
+    "order": 7
+   },
+   {
+    "label": "갈색",
+    "color": "#7A5230",
+    "order": 8
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 9
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "손상원 클라이밍짐 잠실점",
+  "gu": "송파구",
+  "grades": [
+   {
+    "label": "흰색",
+    "color": "#F5F5F5",
+    "order": 0
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 1
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 2
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 3
+   },
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 4
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 5
+   },
+   {
+    "label": "회색",
+    "color": "#8A8F98",
+    "order": 6
+   },
+   {
+    "label": "갈색",
+    "color": "#7A5230",
+    "order": 7
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "에어즈락 클라이밍 위례점",
+  "gu": "송파구",
+  "grades": [
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 0
+   },
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 1
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 2
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 3
+   },
+   {
+    "label": "하늘",
+    "color": "#4FB6E8",
+    "order": 4
+   },
+   {
+    "label": "남색",
+    "color": "#2A3D8F",
+    "order": 5
+   },
+   {
+    "label": "보라",
+    "color": "#7B4BC4",
+    "order": 6
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 7
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "클라임투더문",
+  "gu": "송파구",
+  "grades": [
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 0
+   },
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 1
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 2
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 3
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 4
+   },
+   {
+    "label": "보라",
+    "color": "#7B4BC4",
+    "order": 5
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 6
+   },
+   {
+    "label": "회색",
+    "color": "#8A8F98",
+    "order": 7
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "목동클라이밍센터",
+  "gu": "양천구",
+  "grades": [],
+  "gradesSource": null,
+  "kinds": [
+   "지구력"
+  ]
+ },
+ {
+  "name": "서울볼더스 목동점",
+  "gu": "양천구",
+  "grades": [
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 0
+   },
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 1
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 2
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 3
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 4
+   },
+   {
+    "label": "남색",
+    "color": "#2A3D8F",
+    "order": 5
+   },
+   {
+    "label": "보라",
+    "color": "#7B4BC4",
+    "order": 6
+   },
+   {
+    "label": "흰색",
+    "color": "#F5F5F5",
+    "order": 7
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 8
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "더클라임 문래점",
+  "gu": "영등포구",
+  "grades": [
+   {
+    "label": "흰색",
+    "color": "#F5F5F5",
+    "order": 0
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 1
+   },
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 2
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 3
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 4
+   },
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 5
+   },
+   {
+    "label": "핑크",
+    "color": "#FF6FA5",
+    "order": 6
+   },
+   {
+    "label": "보라",
+    "color": "#7B4BC4",
+    "order": 7
+   },
+   {
+    "label": "회색",
+    "color": "#8A8F98",
+    "order": 8
+   },
+   {
+    "label": "갈색",
+    "color": "#7A5230",
+    "order": 9
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 10
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "더플라스틱 클라이밍 문래점",
+  "gu": "영등포구",
+  "grades": [
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 0
+   },
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 1
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 2
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 3
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 4
+   },
+   {
+    "label": "남색",
+    "color": "#2A3D8F",
+    "order": 5
+   },
+   {
+    "label": "보라",
+    "color": "#7B4BC4",
+    "order": 6
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 7
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "몽키즈클라이밍 홈플러스 영등포점",
+  "gu": "영등포구",
+  "grades": [
+   {
+    "label": "흰색",
+    "color": "#F5F5F5",
+    "order": 0
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 1
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 2
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 3
+   },
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 4
+   },
+   {
+    "label": "회색",
+    "color": "#8A8F98",
+    "order": 5
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 6
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "서울볼더스 클라이밍 컴퍼니",
+  "gu": "영등포구",
+  "grades": [
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 0
+   },
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 1
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 2
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 3
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 4
+   },
+   {
+    "label": "남색",
+    "color": "#2A3D8F",
+    "order": 5
+   },
+   {
+    "label": "보라",
+    "color": "#7B4BC4",
+    "order": 6
+   },
+   {
+    "label": "흰색",
+    "color": "#F5F5F5",
+    "order": 7
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 8
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "서울숲클라이밍 영등포점",
+  "gu": "영등포구",
+  "grades": [
+   {
+    "label": "핑크",
+    "color": "#FF6FA5",
+    "order": 0
+   },
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 1
+   },
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 2
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 3
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 4
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 5
+   },
+   {
+    "label": "남색",
+    "color": "#2A3D8F",
+    "order": 6
+   },
+   {
+    "label": "보라",
+    "color": "#7B4BC4",
+    "order": 7
+   },
+   {
+    "label": "갈색",
+    "color": "#7A5230",
+    "order": 8
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 9
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "서종국클라이밍",
+  "gu": "영등포구",
+  "grades": [],
+  "gradesSource": null,
+  "kinds": [
+   "지구력"
+  ]
+ },
+ {
+  "name": "알레클라이밍",
+  "gu": "영등포구",
+  "grades": [
+   {
+    "label": "흰색",
+    "color": "#F5F5F5",
+    "order": 0
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 1
+   },
+   {
+    "label": "연두",
+    "color": "#A8D24A",
+    "order": 2
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 3
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 4
+   },
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 5
+   },
+   {
+    "label": "회색",
+    "color": "#8A8F98",
+    "order": 6
+   },
+   {
+    "label": "갈색",
+    "color": "#7A5230",
+    "order": 7
+   },
+   {
+    "label": "핑크",
+    "color": "#FF6FA5",
+    "order": 8
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "클라임웍스",
+  "gu": "영등포구",
+  "grades": [
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 0
+   },
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 1
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 2
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 3
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 4
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 5
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "YDP오름실내암벽장",
+  "gu": "영등포구",
+  "grades": [
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 0
+   },
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 1
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 2
+   },
+   {
+    "label": "연두",
+    "color": "#A8D24A",
+    "order": 3
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 4
+   },
+   {
+    "label": "남색",
+    "color": "#2A3D8F",
+    "order": 5
+   },
+   {
+    "label": "보라",
+    "color": "#7B4BC4",
+    "order": 6
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 7
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "볼더룸",
+  "gu": "용산구",
+  "grades": [],
+  "gradesSource": null,
+  "kinds": [
+   "문보드",
+   "지구력",
+   "킬터보드"
+  ]
+ },
+ {
+  "name": "오프더월클라이밍",
+  "gu": "용산구",
+  "grades": [
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 0
+   },
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 1
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 2
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 3
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 4
+   },
+   {
+    "label": "남색",
+    "color": "#2A3D8F",
+    "order": 5
+   },
+   {
+    "label": "보라",
+    "color": "#7B4BC4",
+    "order": 6
+   },
+   {
+    "label": "회색",
+    "color": "#8A8F98",
+    "order": 7
+   },
+   {
+    "label": "갈색",
+    "color": "#7A5230",
+    "order": 8
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 9
+   },
+   {
+    "label": "흰색",
+    "color": "#F5F5F5",
+    "order": 10
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "치즈 클라이밍",
+  "gu": "용산구",
+  "grades": [
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 0
+   },
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 1
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 2
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 3
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 4
+   },
+   {
+    "label": "남색",
+    "color": "#2A3D8F",
+    "order": 5
+   },
+   {
+    "label": "보라",
+    "color": "#7B4BC4",
+    "order": 6
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 7
+   },
+   {
+    "label": "치즈",
+    "color": "#F0C060",
+    "order": 8
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "써니사이드 클라이밍",
+  "gu": "은평구",
+  "grades": [],
+  "gradesSource": null,
+  "kinds": [
+   "지구력"
+  ]
+ },
+ {
+  "name": "행클라임",
+  "gu": "은평구",
+  "grades": [
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 0
+   },
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 1
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 2
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 3
+   },
+   {
+    "label": "하늘",
+    "color": "#4FB6E8",
+    "order": 4
+   },
+   {
+    "label": "남색",
+    "color": "#2A3D8F",
+    "order": 5
+   },
+   {
+    "label": "보라",
+    "color": "#7B4BC4",
+    "order": 6
+   },
+   {
+    "label": "회색",
+    "color": "#8A8F98",
+    "order": 7
+   },
+   {
+    "label": "흰색",
+    "color": "#F5F5F5",
+    "order": 8
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "서울숲클라이밍 종로점",
+  "gu": "종로구",
+  "grades": [
+   {
+    "label": "핑크",
+    "color": "#FF6FA5",
+    "order": 0
+   },
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 1
+   },
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 2
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 3
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 4
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 5
+   },
+   {
+    "label": "남색",
+    "color": "#2A3D8F",
+    "order": 6
+   },
+   {
+    "label": "보라",
+    "color": "#7B4BC4",
+    "order": 7
+   },
+   {
+    "label": "갈색",
+    "color": "#7A5230",
+    "order": 8
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 9
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "알레 클라이밍 혜화",
+  "gu": "종로구",
+  "grades": [
+   {
+    "label": "흰색",
+    "color": "#F5F5F5",
+    "order": 0
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 1
+   },
+   {
+    "label": "연두",
+    "color": "#A8D24A",
+    "order": 2
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 3
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 4
+   },
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 5
+   },
+   {
+    "label": "회색",
+    "color": "#8A8F98",
+    "order": 6
+   },
+   {
+    "label": "갈색",
+    "color": "#7A5230",
+    "order": 7
+   },
+   {
+    "label": "핑크",
+    "color": "#FF6FA5",
+    "order": 8
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "클라이밍파크 종로",
+  "gu": "종로구",
+  "grades": [
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 0
+   },
+   {
+    "label": "핑크",
+    "color": "#FF6FA5",
+    "order": 1
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 2
+   },
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 3
+   },
+   {
+    "label": "보라",
+    "color": "#7B4BC4",
+    "order": 4
+   },
+   {
+    "label": "갈색",
+    "color": "#7A5230",
+    "order": 5
+   },
+   {
+    "label": "회색",
+    "color": "#8A8F98",
+    "order": 6
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 7
+   },
+   {
+    "label": "흰색",
+    "color": "#F5F5F5",
+    "order": 8
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "피커스 클라이밍",
+  "gu": "종로구",
+  "grades": [
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 0
+   },
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 1
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 2
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 3
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 4
+   },
+   {
+    "label": "남색",
+    "color": "#2A3D8F",
+    "order": 5
+   },
+   {
+    "label": "보라",
+    "color": "#7B4BC4",
+    "order": 6
+   },
+   {
+    "label": "회색",
+    "color": "#8A8F98",
+    "order": 7
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 8
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "권영세 클라이밍센터",
+  "gu": "중구",
+  "grades": [],
+  "gradesSource": null,
+  "kinds": [
+   "지구력"
+  ]
+ },
+ {
+  "name": "손상원 클라이밍짐 을지로",
+  "gu": "중구",
+  "grades": [
+   {
+    "label": "흰색",
+    "color": "#F5F5F5",
+    "order": 0
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 1
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 2
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 3
+   },
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 4
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 5
+   },
+   {
+    "label": "회색",
+    "color": "#8A8F98",
+    "order": 6
+   },
+   {
+    "label": "갈색",
+    "color": "#7A5230",
+    "order": 7
+   },
+   {
+    "label": "핑크",
+    "color": "#FF6FA5",
+    "order": 8
+   },
+   {
+    "label": "보라",
+    "color": "#7B4BC4",
+    "order": 9
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "을지로 담장",
+  "gu": "중구",
+  "grades": [
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 0
+   },
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 1
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 2
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 3
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 4
+   },
+   {
+    "label": "남색",
+    "color": "#2A3D8F",
+    "order": 5
+   },
+   {
+    "label": "보라",
+    "color": "#7B4BC4",
+    "order": 6
+   },
+   {
+    "label": "흰색",
+    "color": "#F5F5F5",
+    "order": 7
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 8
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "플래시볼더스",
+  "gu": "중구",
+  "grades": [
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 0
+   },
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 1
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 2
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 3
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 4
+   },
+   {
+    "label": "남색",
+    "color": "#2A3D8F",
+    "order": 5
+   },
+   {
+    "label": "보라",
+    "color": "#7B4BC4",
+    "order": 6
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 7
+   },
+   {
+    "label": "회색",
+    "color": "#8A8F98",
+    "order": 8
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "몽키즈클라이밍 신내점",
+  "gu": "중랑구",
+  "grades": [
+   {
+    "label": "흰색",
+    "color": "#F5F5F5",
+    "order": 0
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 1
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 2
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 3
+   },
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 4
+   },
+   {
+    "label": "회색",
+    "color": "#8A8F98",
+    "order": 5
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 6
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ },
+ {
+  "name": "크래커 클라이밍",
+  "gu": "중랑구",
+  "grades": [
+   {
+    "label": "빨강",
+    "color": "#E23B34",
+    "order": 0
+   },
+   {
+    "label": "주황",
+    "color": "#F07C1E",
+    "order": 1
+   },
+   {
+    "label": "노랑",
+    "color": "#F2C41D",
+    "order": 2
+   },
+   {
+    "label": "초록",
+    "color": "#3FA45B",
+    "order": 3
+   },
+   {
+    "label": "파랑",
+    "color": "#2F7DD1",
+    "order": 4
+   },
+   {
+    "label": "남색",
+    "color": "#2A3D8F",
+    "order": 5
+   },
+   {
+    "label": "보라",
+    "color": "#7B4BC4",
+    "order": 6
+   },
+   {
+    "label": "회색",
+    "color": "#8A8F98",
+    "order": 7
+   },
+   {
+    "label": "검정",
+    "color": "#1C1C1E",
+    "order": 8
+   }
+  ],
+  "gradesSource": "스피릿(spiri7) 등급 DB"
+ }
+]

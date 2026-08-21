@@ -1,0 +1,21 @@
+{
+  "name": "climbing-score",
+  "private": true,
+  "type": "module",
+  "description": "클라이밍 완등 기록·점수 앱. 빌드 없는 정적 사이트 — 런타임 의존성 0.",
+  "scripts": {
+    "test": "node --test test/scoring.test.js test/match.test.js",
+    "serve": "python3 tools/dev-server.py 8080",
+    "scrape": "node tools/scrape-gyms.mjs && node tools/build-seed.mjs",
+    "review": "node tools/review.mjs",
+    "review:light": "node tools/review.mjs --light",
+    "review:small": "node tools/review.mjs --small",
+    "flow": "node tools/flow.mjs",
+    "audit:ui": "node tools/ui-audit.mjs",
+    "audit:visual": "node tools/visual-audit.mjs",
+    "audit:modal": "node tools/modal-audit.mjs"
+  },
+  "devDependencies": {
+    "axe-core": "^4.13.0"
+  }
+}

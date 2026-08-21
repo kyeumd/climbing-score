@@ -1,0 +1,80 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>클라이밍 점수 (데모)</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../src/styles/app.css" id="sheet"></head>
+<body><main id="app" class="app"></main>
+<script type="module">
+/* ?theme=light — headless Chrome이 prefers-color-scheme을 못 바꿔서,
+   다크 미디어쿼리 블록만 걷어내 :root 기본값(=라이트 팔레트)을 노출시킨다. */
+if (new URLSearchParams(location.search).get('theme') === 'light') {
+  const base = await (await fetch('../src/styles/app.css')).text();
+  const tok = await (await fetch('../src/styles/tokens.css')).text();
+  const strip = (css) => {
+    let out = '', i = 0;
+    while (i < css.length) {
+      const at = css.indexOf('@media (prefers-color-scheme: dark)', i);
+      if (at < 0) { out += css.slice(i); break; }
+      out += css.slice(i, at);
+      let depth = 0, j = css.indexOf('{', at);
+      for (let k = j; k < css.length; k++) {
+        if (css[k] === '{') depth++;
+        else if (css[k] === '}' && --depth === 0) { j = k; break; }
+      }
+      i = j + 1;
+    }
+    return out;
+  };
+  document.getElementById('sheet').remove();
+  const st = document.createElement('style');
+  st.textContent = strip(tok) + strip(base.replace(/@import[^;]+;/g, ''));
+  document.head.append(st);
+}
+
+/* 스크린샷용 시나리오 데이터. 앱 코드는 건드리지 않는다. */
+const seed = await (await fetch('../data/gyms.seed.json')).json();
+const { createGym } = await import('../src/domain/gym.js');
+const gyms = seed.map((r) => createGym({
+  name: r.name, gu: r.gu, isCustom: false, gradesSource: r.gradesSource ?? null, kinds: r.kinds ?? null,
+  grades: (r.grades ?? []).map((g) => ({ label: g.label, color: g.color, order: g.order })),
+}));
+// 피커스 종로를 주력 짐으로 (색 체계가 들어 있는 곳)
+const want = new URLSearchParams(location.search).get('gym');
+const gym = (want ? gyms.find((g) => g.name.includes(want) && g.grades.length) : null)
+  || gyms.find((g) => g.name.includes('피커스') && g.name.includes('종로'))
+  || gyms.find((g) => g.grades.length);
+gym.favorite = true;
+const gr = gym.grades.slice().sort((a,b)=>a.order-b.order);
+
+const profiles = [
+  { id:'p1', name:'동균', level:3, primaryGymId: gym.id, createdAt:'2026-01-01' },
+  { id:'p2', name:'지수', level:2, primaryGymId: gym.id, createdAt:'2026-01-01' },
+  { id:'p3', name:'현우', level:5, primaryGymId: gym.id, createdAt:'2026-01-01' },
+];
+const D = new URLSearchParams(location.search).get('date') || new Date().toISOString().slice(0,10);
+const mk = (id, pid, date, level, counts) => ({ id, profileId:pid, gymId:gym.id, date, levelAtTime:level, scoreTable:gym.scoreTable, counts, memo:'' });
+const sessions = [
+  mk('s1','p1',D,3,{ [gr[3].id]:4, [gr[4].id]:2, [gr[5].id]:1 }),
+  mk('s2','p2',D,2,{ [gr[2].id]:6, [gr[3].id]:2 }),
+  mk('s3','p3',D,5,{ [gr[5].id]:3, [gr[6].id]:2 }),
+  mk('s4','p1','2026-08-13',3,{ [gr[2].id]:5, [gr[3].id]:2 }),
+  mk('s5','p1','2026-08-08',2,{ [gr[2].id]:4, [gr[3].id]:1 }),
+  mk('s6','p1','2026-08-02',2,{ [gr[1].id]:6, [gr[2].id]:2 }),
+  mk('s7','p2','2026-08-13',2,{ [gr[2].id]:3 }),
+];
+localStorage.setItem('climbing-score/v1', JSON.stringify({
+  profiles, gyms, sessions, meta:{ version:1, seeded:true },
+}));
+await import('../src/app.js');
+
+// ?route=stats|profile|gym|scoreTable|picker 로 화면 전환
+const route = new URLSearchParams(location.search).get('route');
+if (route) setTimeout(() => {
+  const tabs = document.querySelectorAll('.tab');
+  ({ stats:()=>tabs[1].click(), profile:()=>tabs[2].click(), gym:()=>tabs[3].click(),
+     picker:()=>document.querySelector('.matchbar__gym')?.click(),
+     scoreTable:()=>{ tabs[3].click(); setTimeout(()=>[...document.querySelectorAll('.btn')].find(b=>b.textContent.includes('점수표 열기'))?.click(), 250); },
+  }[route] ?? (()=>{}))();
+}, 600);
+</script></body></html>

@@ -1,0 +1,10 @@
+node_modules/
+.DS_Store
+.obsidian/
+
+# 검토 산출물 — 필요할 때 다시 만든다
+tools/shots/
+tools/flows/
+tools/cache/
+dogfood-output/screenshots/
+dogfood-output/videos/

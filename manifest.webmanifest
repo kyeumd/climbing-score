@@ -1,0 +1,15 @@
+{
+  "name": "클라이밍 점수",
+  "short_name": "클라이밍",
+  "description": "완등한 색깔로 점수를 매기고 친구들과 겨루는 기록장",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#050505",
+  "theme_color": "#050505",
+  "lang": "ko",
+  "icons": [
+    { "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

@@ -1,0 +1,90 @@
+/* ============================================================
+   디자인 토큰
+   - soft-skill(high-end-visual-design) 규칙을 바닐라 CSS로 옮긴 것
+   - 색 예산 규칙: UI 크롬은 완전한 무채색. 채도는 난이도 색에만 배정한다.
+   - 라이트/다크 2셋. 시스템 설정을 따른다.
+   ============================================================ */
+
+:root {
+  /* ---- 무채색 스케일 (라이트) ---------------------------- */
+  --bg:            #F7F7F8;
+  --bg-elevated:   #FFFFFF;
+  --shell:         rgba(0, 0, 0, 0.035);   /* Double-Bezel 외곽 셸 */
+  --shell-line:    rgba(0, 0, 0, 0.07);
+  --core:          #FFFFFF;                /* Double-Bezel 내부 코어 */
+  --core-line:     rgba(0, 0, 0, 0.05);
+  --core-inset:    inset 0 1px 1px rgba(255, 255, 255, 0.9);
+  --ink:           #16171A;
+  --ink-2:         #4A4E56;
+  --ink-3:         #63686F;   /* 5.2:1 — 이전 #8E939C는 2.88:1로 기준 미달이었다 */
+  --hairline:      rgba(0, 0, 0, 0.22);    /* 색 도트 둘레 — 8.2절 */
+  --track:         rgba(0, 0, 0, 0.13);    /* 막대 트랙. --shell은 대비가 1.1:1로 부족했다 */
+  --overlay:       rgba(247, 247, 248, 0.9);
+  --scrim:         rgba(20, 20, 22, 0.45);   /* 모달 뒤 배경. 완전 불투명이면 컨텍스트가 사라진다 */
+  --ambient:       0 1px 2px rgba(16, 17, 20, 0.04), 0 8px 24px rgba(16, 17, 20, 0.045);
+  --ambient-lift:  0 2px 4px rgba(16, 17, 20, 0.05), 0 16px 40px rgba(16, 17, 20, 0.08);
+
+  /* ---- 타이포 ------------------------------------------- */
+  /* 금지 폰트(Inter/Roboto/Arial/Open Sans/Helvetica)를 피한 스택 */
+  --font: 'Plus Jakarta Sans', 'Pretendard', 'Apple SD Gothic Neo',
+          system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --tracking-tight: -0.022em;
+  --tracking-eyebrow: 0.2em;
+
+  /* ---- 공간 (매크로 화이트스페이스) ---------------------- */
+  --sp-1: 0.25rem;  --sp-2: 0.5rem;   --sp-3: 0.75rem;
+  --sp-4: 1rem;     --sp-5: 1.5rem;   --sp-6: 2rem;
+  --sp-7: 3rem;     --sp-8: 4rem;
+
+  /* ---- 반경 -------------------------------------------------
+     클라이밍 벽은 합판 패널을 볼트로 고정한 각진 구조물이다.
+     둥근 pill은 그 성격과 어긋나고 어디서나 보는 기본값으로 읽힌다.
+     모서리는 살짝만 깎는다. */
+  --r-shell: 0.75rem;
+  --r-pad:   0.25rem;
+  --r-core:  calc(var(--r-shell) - var(--r-pad));
+  --r-pill:  0.5rem;    /* 완전한 원형 대신 각진 태그 */
+  --r-tight: 0.25rem;
+
+  /* ---- 모션 --------------------------------------------- */
+  /* 기본 ease / linear 금지. 물리적 질량감을 흉내내는 커브만 쓴다. */
+  --ease-spring: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-tap:  140ms;
+  --dur-move: 340ms;
+  --dur-view: 200ms;
+
+  /* 홀드 실루엣 */
+  --hold-line: rgba(0, 0, 0, 0.42);
+  --hold-bolt: rgba(0, 0, 0, 0.32);
+
+  --tap-min: 44px;   /* 한 손 조작 최소 타겟 */
+  --fs-min: 0.75rem; /* 12px. 이보다 작은 글자는 쓰지 않는다 */
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:            #050505;   /* Ethereal Glass: OLED 블랙 */
+    --bg-elevated:   #0C0D0F;
+    --shell:         rgba(255, 255, 255, 0.045);
+    --shell-line:    rgba(255, 255, 255, 0.13);
+    --core:          #121316;
+    --core-line:     rgba(255, 255, 255, 0.07);
+    --core-inset:    inset 0 1px 1px rgba(255, 255, 255, 0.06);
+    --ink:           #F2F3F5;
+    --ink-2:         #B0B5BE;
+    --ink-3:         #949AA4;   /* 6.6:1 — 이전 #6E737C는 3.90:1로 기준 미달이었다 */
+    --hairline:      rgba(255, 255, 255, 0.34);
+    --hold-line:     rgba(255, 255, 255, 0.62);
+    --hold-bolt:     rgba(0, 0, 0, 0.45);
+    --track:         rgba(255, 255, 255, 0.16);
+    --overlay:       rgba(5, 5, 5, 0.9);
+    --scrim:         rgba(0, 0, 0, 0.62);
+    --ambient:       0 1px 2px rgba(0, 0, 0, 0.5), 0 8px 24px rgba(0, 0, 0, 0.45);
+    --ambient-lift:  0 2px 6px rgba(0, 0, 0, 0.55), 0 20px 48px rgba(0, 0, 0, 0.6);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --dur-tap: 0ms; --dur-move: 0ms; --dur-view: 0ms; }
+}
