@@ -201,6 +201,8 @@ const SCREENS = [
   { name: '색 등급 없는 짐', code: null, opts: { gym: '강동클라이밍짐', record: false } },
   { name: '즐겨찾기 목록', code: `tap(q('.matchbar__gym')); await wait(700);
       tap(q('.gymrow__star', 2)); await wait(400)` },
+  { name: '은퇴 등급', code: `tap(q('.tab', 3)); await wait(600);
+      tap(q('.graderow', 1).querySelectorAll('.iconbtn')[2])` },
 ];
 
 const report = [];

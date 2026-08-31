@@ -311,12 +311,22 @@ ul { margin: 0; padding: 0; list-style: none; }
   padding: 0.4rem 0; border-bottom: 1px solid var(--shell-line);
 }
 /*
- * 은퇴한 등급. 여기서도 홀드는 흐리게 하지 않는다. 45% 로 깔면 노랑이 올리브가 되어
- * 바로 아래 갈색과 헷갈린다. 이 앱에서 색은 곧 데이터다.
- * 흐린 글자와 되살리기(+) 아이콘만으로 '지금 안 쓰는 색' 은 충분히 읽힌다.
+ * 은퇴한 등급.
+ *
+ * 홀드는 흐리게 하지 않는다. 45% 로 깔면 노랑이 올리브가 되어 바로 아래 갈색과
+ * 헷갈린다. 이 앱에서 색은 곧 데이터다.
+ *
+ * 그렇다고 글자만 --ink-3 으로 바꾸면 신호가 없는 것과 같다. --ink-2 와 대비가
+ * 12.9:1 대 10.7:1 이라 눈으로는 구분되지 않는다(라이트 테마에서 확인).
+ * 취소선을 긋는다. 폭을 더 먹지 않고, 색을 새로 들이지도 않고, 뜻이 분명하다.
  */
 .graderow.is-retired .graderow__order,
 .graderow.is-retired .graderow__label { color: var(--ink-3); }
+.graderow.is-retired .graderow__label {
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
+  text-decoration-color: var(--ink-3);
+}
 .graderow__order {
   width: 1.5rem; flex: 0 0 auto; text-align: right;
   color: var(--ink-3); font-size: 0.75rem;
@@ -643,14 +653,19 @@ ul { margin: 0; padding: 0; list-style: none; }
 }
 @media (max-width: 400px) {
   /*
-   * 좁은 화면에서는 홀드를 줄여 5개 + 나머지 개수가 폭 안에 다 들어오게 한다.
-   * 예전에는 4번째부터 CSS 로 숨겼는데, '+N' 은 자바스크립트가 (전체 − 5) 로
-   * 세므로 9단계 짐이 좁은 화면에서 3개만 보이면서 '+4' 라고 적혀 있었다.
-   * 실제로 감춰진 건 6개다. 개수를 줄이려면 숫자도 같이 줄여야 하는데
-   * 그건 화면 폭을 자바스크립트가 알아야 한다는 뜻이라, 크기만 줄인다.
+   * 좁은 화면에서는 홀드 띠를 이름 아래로 내린다.
+   *
+   * 한 줄에 같이 두면 띠가 94px 을 먹어 이름 자리가 120px 밖에 안 남는다.
+   * 실제로 360px 에서 다섯 줄이 전부 '강서클라이밍…' 으로 잘렸다.
+   * 짐은 이름으로 고르는 것이지 색 미리보기로 고르는 게 아니다.
+   *
+   * 줄이 나뉘면 이름 시작점을 맞추려고 띠 폭을 고정할 이유도 없어진다.
+   * 색 등급이 없는 곳의 점선 자리 표시도 같은 이유로 뺀다.
    */
-  .gymrow__dots { width: 94px; gap: 1px; }
-  .gymrow__dots .hold { width: 12px; height: 12px; }
+  .gymrow__pick { flex-wrap: wrap; height: auto; row-gap: 0.3rem; padding: 0.6rem 0.5rem; }
+  .gymrow__text { order: -1; flex-basis: 100%; }
+  .gymrow__dots { width: auto; gap: 2px; }
+  .gymrow__nocolor { display: none; }
 }
 .gradebar .hold { flex: 0 0 auto; }
 .bento__value .hold { flex: 0 0 auto; }
