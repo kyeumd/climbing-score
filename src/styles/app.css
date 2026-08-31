@@ -177,13 +177,59 @@ ul { margin: 0; padding: 0; list-style: none; }
 .matchbar__name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .matchbar__name { font-weight: 700; font-size: 1.0625rem; }
 .star { color: var(--ink); display: inline-flex; }
-.matchbar__datewrap { display: flex; flex: 0 0 auto; }
 .matchbar__date {
-  min-height: var(--tap-min); padding: 0 0.7rem;
+  display: flex; align-items: center; gap: 0.4rem; flex: 0 0 auto;
+  min-height: var(--tap-min); padding: 0 0.75rem;
   background: var(--shell); border: 1px solid var(--shell-line);
-  border-radius: var(--r-shell); font-size: 0.9375rem;
+  border-radius: var(--r-shell); color: var(--ink);
+  font-size: 0.9375rem; font-weight: 600; white-space: nowrap;
   font-variant-numeric: tabular-nums;
+  transition: background var(--dur-tap) var(--ease-spring),
+              transform var(--dur-tap) var(--ease-spring);
 }
+.matchbar__date:active { transform: scale(0.97); }
+.matchbar__date svg { color: var(--ink-3); flex: 0 0 auto; }
+
+/* ============================================================
+   날짜 고르기 — vanilla-calendar-pro 에 앱 색을 입힌다.
+   딸려 오는 CSS 는 구조만 있고 색이 없어서, 테마 파일을 쓰지 않고
+   여기서 토큰으로 직접 칠한다. 라이트/다크가 저절로 따라온다.
+   ============================================================ */
+.datepick { display: flex; justify-content: center; }
+[data-vc=calendar] { padding: 0; width: 100%; color: var(--ink); }
+[data-vc=month], [data-vc=year] { color: var(--ink); }
+[data-vc-week-day] { color: var(--ink-3); font-weight: 600; }
+[data-vc-arrow] { color: var(--ink-2); }
+[data-vc-arrow]:before {
+  /* 라이브러리는 배경 이미지로 화살표를 그린다. currentColor 를 쓰는 도형으로 갈아 끼운다 */
+  content: ''; border-left: 2px solid currentColor; border-bottom: 2px solid currentColor;
+  width: 9px; height: 9px; left: 50%; top: 50%;
+  transform: translate(-50%, -50%) rotate(45deg); background: none;
+}
+[data-vc-arrow=next]:before { transform: translate(-50%, -50%) rotate(-135deg); }
+/* 라이브러리는 border 만 지우고 background 는 두지 않는다. 그러면 브라우저 기본
+   버튼 회색(ButtonFace)이 그대로 나와 모든 날짜가 회색 칩처럼 보인다. */
+[data-vc=calendar] button { background: transparent; }
+[data-vc-date-btn] {
+  color: var(--ink-2); font-size: 0.9375rem; min-height: 2.5rem;
+  border-radius: var(--r-tight);
+}
+[data-vc-date-btn]:hover { background: var(--shell); }
+[data-vc-date][data-vc-date-today] [data-vc-date-btn] {
+  color: var(--ink); box-shadow: inset 0 0 0 1px var(--hairline);
+}
+[data-vc-date][data-vc-date-selected] [data-vc-date-btn] {
+  background: var(--ink); color: var(--bg-elevated); font-weight: 700;
+}
+[data-vc-date][data-vc-date-disabled] [data-vc-date-btn] { opacity: 0.28; }
+[data-vc-months-month], [data-vc-years-year] {
+  color: var(--ink-2); border-radius: var(--r-tight);
+}
+[data-vc-months-month][data-vc-months-month-selected],
+[data-vc-years-year][data-vc-years-year-selected] {
+  background: var(--ink); color: var(--bg-elevated);
+}
+.datepick__foot { display: flex; justify-content: flex-end; margin-top: var(--sp-3); }
 
 .banner {
   display: flex; flex-wrap: wrap; gap: var(--sp-2);

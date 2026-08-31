@@ -4,6 +4,7 @@ import { hold } from './hold.js';
 import { activeGrades } from '../domain/gym.js';
 import { scoreFor } from '../domain/scoring.js';
 import { josa, levelLabel } from '../domain/text.js';
+import { prettyDate } from './date-picker.js';
 import { findSession, createSession, bumpCount, scoreOf, sendsOf } from '../domain/session.js';
 
 export function viewMatch(ctx) {
@@ -34,14 +35,18 @@ function headerBar({ actions, state }, gym) {
       h('span', { class: 'matchbar__name' }, gym.name),
       icon('back', { size: 15 }),
     ),
-    // date 입력에 aria-label을 걸면 연/월/일 세그먼트마다 겹쳐 읽힌다.
-    // 보이지 않는 <label>로 감싸면 한 번만 읽힌다.
-    h('label', { class: 'matchbar__datewrap' },
-      h('span', { class: 'sr-only' }, '기록할 날짜'),
-      h('input', {
-        class: 'matchbar__date', type: 'date', value: state.ui.date,
-        onchange: (e) => actions.setDate(e.target.value),
-      }),
+    /*
+     * <input type="date"> 를 버튼으로 바꿨다. 네이티브 달력은 iOS·안드로이드·
+     * 데스크톱이 저마다 다르게 뜨고 그중 어느 것도 이 앱처럼 생기지 않았다.
+     * 게다가 '2026. 08. 31.' 은 오늘인지 아닌지 한눈에 안 보인다.
+     */
+    h('button', {
+      class: 'matchbar__date', type: 'button',
+      'aria-label': `기록할 날짜: ${state.ui.date}. 눌러서 바꾸기`,
+      onclick: () => actions.openDatePicker(),
+    },
+      icon('calendar', { size: 15 }),
+      h('span', {}, prettyDate(state.ui.date)),
     ),
   );
 }

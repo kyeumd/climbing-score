@@ -124,7 +124,8 @@ for (const g of sp) {
   if (!isTarget(g.name)) continue;
   const grades = (g.grades ?? []).map((x, i, arr) =>
     ({ label: x.label, color: hexOf(x.label, i, arr.length), order: i }));
-  if (addGym(g.name, guOf(g.address), grades, '스피릿(spiri7) 등급 DB', g.exercises)) n1++;
+  // 수집기가 정한 자치구를 먼저 쓴다. 주소가 "뚝섬" 처럼 속칭이면 guOf 로는 못 뽑는다.
+  if (addGym(g.name, g.gu ?? guOf(g.address), grades, '스피릿(spiri7) 등급 DB', g.exercises)) n1++;
 }
 console.log(`스피릿: ${n1}곳`);
 
@@ -182,7 +183,14 @@ for (const e of osm) {
 console.log(`OSM 보강: +${n3}곳`);
 
 rows.sort((a, b) => a.gu.localeCompare(b.gu, 'ko') || a.name.localeCompare(b.name, 'ko'));
-writeFileSync('data/gyms.seed.json', JSON.stringify(rows, null, 1));
+/*
+ * 버전을 함께 쓴다. 예전에는 배열만 썼는데, 로더가 배열을 version 1 로 읽는다.
+ * 저장된 seedVersion(4)보다 낮으니 목록을 늘려도 갱신이 걸리지 않는다.
+ * src/storage/seed.js 의 SEED_VERSION 과 같아야 한다 (test/seed.test.js 가 지킨다).
+ */
+const SEED_VERSION = 5;
+writeFileSync('data/gyms.seed.json',
+  JSON.stringify({ version: SEED_VERSION, gyms: rows }, null, 1));
 
 const withG = rows.filter((r) => r.grades.length);
 const gus = new Set(rows.map((r) => r.gu));

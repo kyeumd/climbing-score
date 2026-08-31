@@ -11,7 +11,7 @@
  */
 import { createGym } from '../domain/gym.js';
 
-export const SEED_VERSION = 4;
+export const SEED_VERSION = 5;
 
 export async function loadSeed(url = './data/gyms.seed.json') {
   // 시드를 갱신해도 브라우저가 옛 파일을 캐시하고 있으면 반영되지 않는다.

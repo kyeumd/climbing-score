@@ -16,6 +16,7 @@ import { viewProfile } from './ui/view-profile.js';
 import { viewGym } from './ui/view-gym.js';
 import { viewScoreTable } from './ui/view-score-table.js';
 import { openGymPicker } from './ui/gym-picker.js';
+import { openDatePicker } from './ui/date-picker.js';
 
 // 서버로 옮길 때 여기 한 줄만 바꾼다.
 const store = createLocalStorageAdapter();
@@ -63,6 +64,7 @@ const actions = {
 
   setGym(id) { state.ui.gymId = id; render(); },
   setDate(d) { state.ui.date = d || localDate(); render(); },
+  openDatePicker() { openDatePicker(ctx); },
   setProfile(id) {
     state.ui.profileId = id;
     const p = state.profiles.find((x) => x.id === id);
