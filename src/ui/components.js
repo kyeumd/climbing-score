@@ -28,6 +28,7 @@ export function clear(el) {
 const PATHS = {
   plus: 'M12 5v14M5 12h14',
   minus: 'M5 12h14',
+  close: 'M6 6l12 12M18 6 6 18',
   arrow: 'M7 17 17 7M9 7h8v8',
   star: 'M12 3.6l2.6 5.27 5.82.85-4.21 4.1.99 5.79L12 16.88l-5.2 2.73.99-5.79-4.21-4.1 5.82-.85z',
   check: 'M4 12.5 9 17.5 20 6.5',
@@ -62,13 +63,6 @@ export function button(label, { onClick, variant = '', trailing, small = false, 
   const kids = [label];
   if (trailing) kids.push(h('span', { class: 'btn__icon' }, icon(trailing, { size: 14 })));
   return h('button', { class: cls, type: 'button', onclick: onClick, ...rest }, ...kids);
-}
-
-export function dot(color, { large = false } = {}) {
-  return h('span', {
-    class: large ? 'dot dot--lg' : 'dot',
-    style: { background: color || 'transparent' },
-  });
 }
 
 /** 셸 + 코어 두 겹. 모든 주요 카드가 이걸 쓴다. */

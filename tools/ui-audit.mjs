@@ -5,10 +5,10 @@
  * 다크/라이트 × 전 화면을 돈다.
  */
 import { launch, sleep } from './cdp.mjs';
+import { open, scene } from './seed.mjs';
 import { readFileSync } from 'node:fs';
 
 const AXE = readFileSync('node_modules/axe-core/axe.min.js', 'utf8');
-const BASE = 'http://localhost:8099';
 const S = '/private/tmp/claude-501/-Users-leedk1130-climbing/174922e0-db02-4ae0-bb81-229ee7636811/scratchpad';
 
 /* ---------- 브라우저 안에서 도는 기하 검사기 ---------- */
@@ -91,11 +91,16 @@ const GEOMETRY_PROBE = function () {
       const fs = parseFloat(s.fontSize);
       if (fs < 12) out.tiny.push({ el: desc(el), fontSize: +fs.toFixed(1) });
       const lh = s.lineHeight === 'normal' ? fs * 1.2 : parseFloat(s.lineHeight);
-      if (lh / fs < 1.3 && el.scrollHeight > fs * 1.6) {
-        out.tightLeading.push({ el: desc(el), ratio: +(lh / fs).toFixed(2) });
+      // scrollHeight 로 '여러 줄'을 짐작하면 글자 한 자짜리 큰 버튼도 걸린다.
+      // 실제로 몇 줄에 걸쳐 그려졌는지 Range 로 센다. 줄간격은 두 줄부터 문제다.
+      if (lh / fs < 1.3) {
+        const range = document.createRange();
+        range.selectNodeContents(el);
+        const lines = new Set([...range.getClientRects()].map((r) => Math.round(r.top))).size;
+        if (lines > 1) out.tightLeading.push({ el: desc(el), ratio: +(lh / fs).toFixed(2), lines });
       }
     }
-    const interactive = el.matches('button, a, input, select, [role=button], .chip, .swatch, .iconbtn, .gcard, .board__row, .gymrow__pick, .sessionrow');
+    const interactive = el.matches('button, a, input, select, [role=button], .chip, .swatch, .iconbtn, .grid__row button, .gymrow__pick, .sessionrow');
     if (interactive) {
       // <label> 안의 input은 라벨 전체가 클릭 영역이다
       const wrapLabel = el.closest('label');
@@ -162,26 +167,52 @@ const GEOMETRY_PROBE = function () {
   return out;
 };
 
-/* ---------- 화면 정의 ---------- */
+/* ---------- 화면 정의 ----------
+ * 예전에는 tools/demo.html 의 ?route= 로 화면을 갈아 끼웠다. 데모는 실제 앱과
+ * 마크업이 달라서, 감사기는 데모에만 있는 h1 누락을 12건 보고하면서 정작
+ * 사용자가 보는 화면은 한 번도 검사하지 않았다. 이제 실제 앱을 눌러서 이동한다.
+ */
 const SCREENS = [
-  { name: '대결(데이터 있음)', url: `${BASE}/tools/demo.html` },
-  { name: '기록/통계',        url: `${BASE}/tools/demo.html?route=stats` },
-  { name: '짐 설정',          url: `${BASE}/tools/demo.html?route=gym` },
-  { name: '점수표',           url: `${BASE}/tools/demo.html?route=scoreTable` },
-  { name: '프로필',           url: `${BASE}/tools/demo.html?route=profile` },
-  { name: '짐 선택기',        url: `${BASE}/tools/demo.html?route=picker` },
-  { name: '첫 실행(빈 상태)', url: `${BASE}/index.html`, clear: true },
+  { name: '대결(데이터 있음)', code: null },
+  // 1명 시드로는 순위 배지·좁아진 열·접힌 칸이 한 번도 화면에 오르지 않는다
+  { name: '대결(여러 명)', code: `
+    for (const name of ['지수', '박하늘']) {
+      tap(await until(() => byText('.btn', '참가자 추가'), '참가자 버튼'));
+      const i = await until(() => q('.modal .field'), '이름 입력칸');
+      i.value = name; i.dispatchEvent(new Event('input', { bubbles: true }));
+      tap(await until(() => byText('.modal .btn', '추가'), '추가 버튼'));
+      await wait(350);
+    }
+    tap(q('.grid__row', 6).querySelectorAll('.cell')[2]); await wait(200);
+  ` },
+  { name: '기록/통계',        code: `tap(q('.tab', 1))` },
+  { name: '짐 설정',          code: `tap(q('.tab', 3))` },
+  { name: '점수표',           code: `tap(q('.tab', 3)); await wait(500); tap(byText('.btn', '점수표'))` },
+  { name: '프로필',           code: `tap(q('.tab', 2))` },
+  { name: '짐 선택기',        code: `tap(q('.matchbar__gym'))` },
+  { name: '세션 편집',        code: `tap(q('.tab', 1)); await wait(600); q('.sessionrow').click()` },
+  { name: '첫 실행(빈 상태)', code: null, seed: false },
+  /*
+   * 기본 시드로는 절대 안 나오는 상태들. 몇 라운드 동안 감사에 한 번도 오르지 않았다.
+   * (시각 검사기에는 넣지 않는다. 뷰포트 3종 x 테마 2종이라 한 화면이 6번 도는데,
+   *  이미 5분 30초가 걸린다. axe·기하 검사만으로 이 세 화면은 충분히 걸린다.)
+   */
+  { name: '색 순서 확인 배너', code: null, opts: { confirm: false } },
+  { name: '색 등급 없는 짐', code: null, opts: { gym: '강동클라이밍짐', record: false } },
+  { name: '즐겨찾기 목록', code: `tap(q('.matchbar__gym')); await wait(700);
+      tap(q('.gymrow__star', 2)); await wait(400)` },
 ];
 
 const report = [];
 for (const dark of [true, false]) {
   const theme = dark ? 'dark' : 'light';
-  const page = await (await launch({ width: 414, height: 896, dark })).connect();
   for (const sc of SCREENS) {
-    const url = dark ? sc.url : sc.url + (sc.url.includes('?') ? '&' : '?') + 'theme=light';
-    await page.goto(url, { wait: 300 });
-    if (sc.clear) { await page.eval(() => localStorage.clear()); await page.goto(url, { wait: 1200 }); }
-    await sleep(1100);
+    // 화면마다 브라우저를 새로 띄운다. 한 브라우저를 돌려쓰면 앞 화면이 남긴
+    // 상태(열린 모달, 스크롤, 저장된 기록)가 다음 검사에 섞인다.
+    const page = await (await launch({ width: 414, height: 896, dark })).connect();
+    try {
+    await open(page, { seed: sc.seed !== false, sleep, ...(sc.opts ?? {}) });
+    await scene(page, sc.code, { sleep });
 
     // 스크롤 위치별로 검사한다. 최상단만 보면 고정 바가 마지막 콘텐츠를 먹는 걸 놓친다.
     const geo = { overlap: [], barBleed: [], clipped: [], overflow: [], tiny: [], smallTap: [], tightLeading: [], covered: [] };
@@ -198,11 +229,11 @@ for (const dark of [true, false]) {
     geo.covered = await page.eval(() => {
       // 모달이 떠 있으면 뒤 화면은 보이지 않으므로 가림 판정 대상이 아니다
       if (document.querySelector('.modal')) return [];
-      const bars = [...document.querySelectorAll('.total__inner, .tabbar__inner')]
+      const bars = [...document.querySelectorAll('.tabbar__inner, .editfoot, .grid__head')]
         .map((b) => b.getBoundingClientRect());
       if (!bars.length) return [];
       const hit = [];
-      for (const el of document.querySelectorAll('.gcard, .board__row, .graderow, .sessionrow, .bento__cell, .btn, .swatch')) {
+      for (const el of document.querySelectorAll('.grid__row button, .graderow, .sessionrow, .bento__cell, .btn, .swatch')) {
         const r = el.getBoundingClientRect();
         if (r.bottom <= 0 || r.top >= innerHeight) continue;
         for (const b of bars) {
@@ -233,8 +264,11 @@ for (const dark of [true, false]) {
       }));
     });
     report.push({ theme, screen: sc.name, geo, axe });
+    } catch (e) {
+      console.log(`  ${theme}·${sc.name} 준비 실패: ${String(e.message).slice(0, 70)}`);
+    }
+    await page.close();
   }
-  await page.close();
 }
 
 /* ---------- 출력 ---------- */

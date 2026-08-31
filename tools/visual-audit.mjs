@@ -11,16 +11,48 @@
  * 검사 축: 뷰포트 4종 x 테마 2종 x 화면/모달 x 스크롤 컨테이너별 3단계
  */
 import { launch, sleep } from './cdp.mjs';
-
-const BASE = 'http://localhost:8099/tools/demo.html';
+import { open as openApp, scene } from './seed.mjs';
 
 const PROBE = function () {
-  const out = { hidden: [], clippedText: [], offscreen: [], tinyTap: [] };
+  const out = { hidden: [], clippedText: [], offscreen: [], tinyTap: [], underBar: 0 };
+
+  /*
+   * 고정 바(탭바, 스티키 헤더, 모달 바닥)가 스크롤 중인 내용을 덮는 건 설계다.
+   * 그걸 전부 '가려짐' 으로 올리면 164건이 쏟아져 진짜 문제가 묻힌다.
+   * 여기서는 세고 넘기고, 끝까지 스크롤해도 안 드러나는 경우는 ui-audit 의
+   * covered 검사가 따로 잡는다.
+   */
+  /*
+   * getComputedStyle 은 요소마다 새로 부르면 비싸다. 점수표는 16x11 표라
+   * 조상까지 훑는 검사가 겹쳐 한 번 도는 데 60초를 넘겼고, 도구는 그걸
+   * '검사 실패'로 적었다. 한 번 돈 결과는 기억해 둔다.
+   */
+  const styles = new Map();
+  const cssOf = (el) => {
+    let v = styles.get(el);
+    if (!v) { v = getComputedStyle(el); styles.set(el, v); }
+    return v;
+  };
+
+  const bars = new Map();
+  const isBar = (el) => {
+    let v = bars.get(el);
+    if (v !== undefined) return v;
+    v = false;
+    for (let n = el; n && n !== document.documentElement; n = n.parentElement) {
+      const cached = bars.get(n);
+      if (cached !== undefined) { v = cached; break; }
+      const p = cssOf(n).position;
+      if (p === 'fixed' || p === 'sticky') { v = true; break; }
+    }
+    bars.set(el, v);
+    return v;
+  };
 
   const meaningful = (el) => {
     const t = [...el.childNodes].filter(n => n.nodeType === 3).map(n => n.textContent.trim()).join('');
     if (!t) return null;
-    const cs = getComputedStyle(el);
+    const cs = cssOf(el);
     if (cs.display === 'none' || cs.visibility === 'hidden' || +cs.opacity < 0.1) return null;
     if (cs.clipPath?.includes('inset(50%)') || el.classList.contains('sr-only')) return null;
     const r = el.getBoundingClientRect();
@@ -48,7 +80,7 @@ const PROBE = function () {
     // 그 안에 있는데도 안 보이면 무언가가 덮은 것이고, 그게 진짜 문제다.
     let clippedOut = false;
     for (let n = el.parentElement; n && n !== document.body; n = n.parentElement) {
-      const ncs = getComputedStyle(n);
+      const ncs = cssOf(n);
       if (!/(auto|scroll|hidden)/.test(ncs.overflowY + ncs.overflowX)) continue;
       const nr = n.getBoundingClientRect();
       const iw = Math.min(r.right, nr.right) - Math.max(r.left, nr.left);
@@ -72,11 +104,8 @@ const PROBE = function () {
     if (sampled === 0) continue;
 
     const ratio = mine / sampled;
-    if (ratio === 0) {
-      // 한 점도 자기 자신이 아니다 = 완전히 가려졌다
-      const bt = blocker ? (blocker.textContent || '').trim().slice(0, 22) : '?';
-      out.hidden.push({ el: desc(el, text), by: blocker ? desc(blocker, bt) : '알 수 없음', pct: 100 });
-    } else if (ratio < 0.5) {
+    if (ratio < 0.5) {
+      if (blocker && isBar(blocker)) { out.underBar++; continue; }
       const bt = blocker ? (blocker.textContent || '').trim().slice(0, 22) : '?';
       out.hidden.push({ el: desc(el, text), by: blocker ? desc(blocker, bt) : '알 수 없음',
                         pct: Math.round((1 - ratio) * 100) });
@@ -116,34 +145,30 @@ const SCROLLERS = function () {
   return out;
 };
 
+/* 데모가 아니라 실제 앱을 눌러서 이동한다 (seed.mjs 주석 참고) */
 const OPENERS = {
   '대결 화면': null,
-  '짐 선택기': () => document.querySelector('.matchbar__gym').click(),
-  '참가자 선택': () => [...document.querySelectorAll('.btn')].find(b => b.textContent.includes('참가자 추가')).click(),
-  '숙련도 설정': async () => { document.querySelectorAll('.tab')[2].click();
-      await new Promise(r => setTimeout(r, 400)); document.querySelector('.profilerow .iconbtn').click(); },
-  '세션 편집': async () => { document.querySelectorAll('.tab')[1].click();
-      await new Promise(r => setTimeout(r, 500)); document.querySelector('.sessionrow').click(); },
-  '색 고르기': async () => { document.querySelectorAll('.tab')[3].click();
-      await new Promise(r => setTimeout(r, 500)); document.querySelector('.graderow__dot').click(); },
-  '점수표': async () => { document.querySelectorAll('.tab')[3].click();
-      await new Promise(r => setTimeout(r, 500));
-      [...document.querySelectorAll('.btn')].find(b => b.textContent.includes('점수표')).click(); },
+  '짐 선택기': `tap(q('.matchbar__gym'))`,
+  '참가자 선택': `tap(byText('.btn', '참가자 추가'))`,
+  '숙련도 설정': `tap(q('.tab', 2)); await wait(500); tap(q('.profilerow .iconbtn'))`,
+  '세션 편집': `tap(q('.tab', 1)); await wait(600); q('.sessionrow').click()`,
+  '색 고르기': `tap(q('.tab', 3)); await wait(600); tap(q('.graderow__dot'))`,
+  '점수표': `tap(q('.tab', 3)); await wait(500); tap(byText('.btn', '점수표'))`,
 };
 
 const VIEWPORTS = [[414, 896, '폰'], [360, 640, '작은폰'], [1280, 720, '데스크톱']];
 const findings = new Map();
+let underBar = 0;
 const add = (k, v) => { if (!findings.has(k)) findings.set(k, new Set()); findings.get(k).add(v); };
 
 for (const [w, h, vpName] of VIEWPORTS) {
   for (const dark of [true, false]) {
     const theme = dark ? '다크' : '라이트';
-    for (const [scene, open] of Object.entries(OPENERS)) {
+    for (const [sceneName, code] of Object.entries(OPENERS)) {
       const page = await (await launch({ width: w, height: h, dark })).connect();
       try {
-        await page.goto(dark ? BASE : BASE + '?theme=light', { wait: 2100 });
-        if (open) { await page.eval(new Function(`return (${open.toString()})()`)); }
-        if (open) await sleep(650);
+        await openApp(page, { sleep });
+        await scene(page, code, { sleep, wait: 650 });
 
         const scrollers = await page.eval(SCROLLERS);
         // 스크롤 컨테이너마다 위/중간/아래를 각각 본다
@@ -161,14 +186,15 @@ for (const [w, h, vpName] of VIEWPORTS) {
               await sleep(220);
             }
             const g = await page.eval(PROBE);
-            const where = `${vpName}·${theme}·${scene}${sc !== '__none__' ? `·${sc}@${frac * 100}%` : ''}`;
+            const where = `${vpName}·${theme}·${sceneName}${sc !== '__none__' ? `·${sc}@${frac * 100}%` : ''}`;
+            underBar += g.underBar || 0;
             for (const x of g.hidden) add(`가려짐 (${x.pct}%)`, `${where} · ${x.el} ← ${x.by}`);
             for (const x of g.clippedText) add('글자 잘림', `${where} · ${x.el} ${x.w}→${x.need}px`);
             for (const x of g.offscreen) add('모달이 화면 밖', `${where} · ${x.by}px`);
           }
         }
       } catch (e) {
-        add('검사 실패', `${vpName}·${theme}·${scene} · ${String(e.message).slice(0, 70)}`);
+        add('검사 실패', `${vpName}·${theme}·${sceneName} · ${String(e.message).slice(0, 70)}`);
       }
       await page.close();
     }
@@ -176,6 +202,9 @@ for (const [w, h, vpName] of VIEWPORTS) {
 }
 
 console.log('\n######### 시각 검사 (elementFromPoint 기반) #########\n');
+// 넘긴 건수를 적어 둔다. 조용히 걸러 내면 '문제 없음' 으로 읽힌다.
+console.log(`고정 바에 덮여 넘긴 것 ${underBar}건 (스크롤하면 드러나므로 정상).`);
+console.log('끝까지 스크롤해도 안 드러나는 경우는 ui-audit 의 covered 검사가 잡는다.\n');
 if (!findings.size) console.log('발견 없음');
 for (const [k, set] of [...findings].sort((a, b) => b[1].size - a[1].size)) {
   console.log(`### ${k} — ${set.size}건`);

@@ -70,17 +70,29 @@ const seoul = detail.filter((g) => SEOUL.test(g.address)
   && (GYMISH.test(g.name) || g.exercises.length) && !NOT_GYM.test(g.name));
 console.log(`3단계: 서울 후보 ${seoul.length}곳 난이도 조회`);
 
+/*
+ * 색 체계를 등록하지 않은 짐에는 API 가 표준 V등급 20개를 그대로 돌려준다.
+ * (Vb, V0-, V0, V0+, V1 ... V16) 확인해 보니 서로 다른 두 짐이 글자 하나까지
+ * 같은 목록을 내놨다. 그 짐의 벽 세팅이 아니라 기본값이라는 뜻이다.
+ * 이걸 그대로 받으면 색 등급을 안 쓰는 12곳에 없는 데이터가 생긴다.
+ */
+const V_ONLY = /^V(b|\d+[-+]?)$/i;
+const isDefaultVScale = (labels) =>
+  labels.length >= 15 && labels.every((l) => V_ONLY.test(String(l).trim()));
+
 let d2 = 0;
+let vSkipped = 0;
 const graded = await cached('spiri7-seoul-grades', async () => pool(seoul, 5, async (g) => {
   const res = await fetch(`https://api.spiri7.com/api/v1/companies/gyms/${g.id}/skill?exerciseId=1`);
   if (++d2 % 50 === 0) console.log(`   ${d2}/${seoul.length}`);
   if (!res.ok) return { ...g, grades: [] };
   const j = await res.json();
-  const grades = (j.grades ?? []).slice()
-    .sort((a, b) => a.match_level - b.match_level)
-    .map((x, i) => ({ label: x.name, order: i, matchLevel: x.match_level }));
+  const raw = (j.grades ?? []).slice().sort((a, b) => a.match_level - b.match_level);
+  if (isDefaultVScale(raw.map((x) => x.name))) { vSkipped++; return { ...g, grades: [] }; }
+  const grades = raw.map((x, i) => ({ label: x.name, order: i, matchLevel: x.match_level }));
   return { ...g, grades };
 }));
+if (vSkipped) console.log(`   기본 V등급만 있어 건너뜀: ${vSkipped}곳`);
 
 const withG = graded.filter((g) => g?.grades?.length);
 console.log(`\n서울 ${graded.length}곳 / 난이도 ${withG.length}곳 (${Math.round(withG.length / graded.length * 100)}%)`);

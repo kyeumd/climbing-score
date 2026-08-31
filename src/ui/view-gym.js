@@ -15,14 +15,14 @@ export function viewGym(ctx, gymId) {
   const gym = state.gyms.find((g) => g.id === gymId);
   if (!gym) {
     return h('div', { class: 'view' },
-      h('div', { class: 'viewhead' }, h('h1', { class: 'title' }, '짐 설정')),
+      h('div', { class: 'viewhead' }, h('h1', { class: 'title' }, '클라이밍장')),
       panel(
         eyebrow('선택 필요'),
-        h('h2', { class: 'title', style: { margin: '0.5rem 0 0.35rem' } }, '어느 곳을 설정할까요'),
+        h('h2', { class: 'title', style: { margin: '0.5rem 0 0.35rem' } }, '어느 곳을 설정할까요?'),
         h('p', { class: 'subtitle', style: { margin: '0 0 1.25rem' } },
-          '클라이밍장을 고르면 그곳의 난이도 색을 등록할 수 있습니다.'),
+          '클라이밍장을 고르면 그곳의 난이도 색을 등록할 수 있어요.'),
         button('클라이밍장 고르기', {
-          onClick: actions.openGymPicker, variant: 'solid', trailing: 'arrow',
+          onClick: actions.openGymPicker, variant: 'solid', trailing: 'next',
         }),
       ),
     );
@@ -32,7 +32,7 @@ export function viewGym(ctx, gymId) {
 
   return h('div', { class: 'view' },
     h('div', { class: 'viewhead' },
-      button('뒤로', { onClick: actions.goHome, variant: 'ghost', small: true }),
+      // 탭으로 들어오는 화면이라 '뒤로'는 갈 곳이 없다. 탭바가 늘 아래에 있다.
       h('h1', { class: 'title' }, gym.name),
     ),
 
@@ -41,7 +41,7 @@ export function viewGym(ctx, gymId) {
         h('div', {},
           eyebrow('난이도 색'),
           h('p', { class: 'hint', style: { marginTop: '0.35rem' } },
-            '벽에 붙은 안내판 순서대로 넣어 주세요. 위가 가장 쉬운 단계입니다.'),
+            '위에서부터 쉬운 순서로 맞춰 주세요. 벽에 붙은 안내판과 같게요.'),
         ),
         h('label', { class: 'toggle' },
           h('input', {
@@ -53,11 +53,11 @@ export function viewGym(ctx, gymId) {
       ),
 
       gym.gradesSource && !gym.gradesVerified && h('p', { class: 'hint warn' },
-        '클라이밍 기록 앱 자료를 참고한 초기값이라 실제와 다를 수 있습니다.'),
+        '클라이밍 기록 앱 자료를 참고한 초기값이라 실제와 다를 수 있어요.'),
 
       grades.length === 0
         ? h('p', { class: 'subtitle', style: { padding: '1rem 0' } },
-            '등록된 난이도가 없습니다. 아래에서 색을 추가하세요.')
+            '등록된 난이도가 없어요. 아래에서 색을 추가하세요.')
         : h('ul', { class: 'gradelist' },
             grades.map((g, i) => gradeRow(g, i, grades.length, gym, actions))),
 
@@ -65,7 +65,10 @@ export function viewGym(ctx, gymId) {
         h('p', { class: 'hint', style: { marginBottom: '0.5rem' } }, '색 추가'),
         h('div', { class: 'swatches' },
           PALETTE.map(([label, color], i) => h('button', {
-            class: 'swatch', type: 'button', title: label,
+            // 이미 목록에 있는 색이면 그렇게 표시한다. 14개 중 11개가 이미
+            // 쓰는 색인데 전부 똑같이 눌러 달라는 모습이었다.
+            class: `swatch${gym.grades.some((x) => x.label === label) ? ' is-used' : ''}`,
+            type: 'button', title: label,
             'aria-label': `${label} 추가`,
             onclick: () => actions.addGrade(gym.id, { label, color }),
           },
@@ -79,7 +82,7 @@ export function viewGym(ctx, gymId) {
       panel(
         eyebrow('점수표'),
         h('p', { class: 'subtitle', style: { margin: '0.5rem 0 1rem' } },
-          '내 레벨과 문제 난이도의 차이로 점수가 정해집니다.'),
+          '내 레벨과 문제 난이도의 차이로 점수가 정해져요.'),
         button('점수표 열기', {
           onClick: () => actions.openScoreTable(gym.id), trailing: 'next',
         }),
@@ -88,7 +91,7 @@ export function viewGym(ctx, gymId) {
 
     h('div', { class: 'section' },
       panel(
-        eyebrow('짐 정보'),
+        eyebrow('클라이밍장 정보'),
         h('div', { class: 'fieldrow', style: { marginTop: '0.75rem' } },
           // 값이 채워져 있으면 placeholder가 사라져 무슨 칸인지 알 수 없다
           h('label', { class: 'dial' },
@@ -129,9 +132,10 @@ function gradeRow(grade, i, total, gym, actions) {
       iconBtn('위로', 'back', () => actions.moveGrade(gym.id, grade.id, -1), i === 0, 'rotate(90deg)'),
       iconBtn('아래로', 'back', () => actions.moveGrade(gym.id, grade.id, +1), i === total - 1, 'rotate(-90deg)'),
       h('button', {
-        class: 'iconbtn iconbtn--danger', type: 'button',
-        'aria-label': grade.retired ? `${grade.label} 되살리기` : `${grade.label} 목록에서 빼기`,
-        title: grade.retired ? '되살리기' : '더 이상 안 씀',
+        // 되돌릴 수 있는 동작이라 위험 표시를 하지 않는다. 지우기(X)와도 글리프가 다르다.
+        class: 'iconbtn', type: 'button',
+        title: grade.retired ? '다시 쓰기' : '이제 안 쓰는 색',
+        'aria-label': grade.retired ? `${grade.label} 다시 쓰기` : `${grade.label} 이제 안 씀`,
         onclick: () => actions.toggleRetire(gym.id, grade.id, !grade.retired),
       }, icon(grade.retired ? 'plus' : 'minus', { size: 15 })),
     ),
@@ -147,12 +151,17 @@ function iconBtn(title, name, onClick, disabled, transform) {
 }
 
 function pickColor(grade, gym, actions) {
+  // 이름을 직접 고쳐 둔 등급이면 색만 바꾼다. 팔레트 이름을 그대로 쓰던
+  // 등급이라야 새 색 이름을 따라간다. 안 그러면 '화이트'가 색만 바꿔도 '파랑'이 된다.
+  const named = PALETTE.some(([l]) => l === grade.label);
   const sheet = modal('색 고르기',
     h('div', { class: 'swatches swatches--lg' },
       PALETTE.map(([label, color]) => h('button', {
-        class: 'swatch swatch--lg', type: 'button', title: label,
+        class: `swatch swatch--lg${color === grade.color ? ' is-on' : ''}`,
+        type: 'button', title: label,
+        'aria-pressed': String(color === grade.color),
         onclick: () => {
-          actions.updateGrade(gym.id, grade.id, { color, label });
+          actions.updateGrade(gym.id, grade.id, named ? { color, label } : { color });
           sheet.close();
         },
       },

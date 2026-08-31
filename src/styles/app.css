@@ -153,31 +153,11 @@ ul { margin: 0; padding: 0; list-style: none; }
 }
 .chip:active { transform: scale(0.96); }
 .chip[aria-pressed='true'] { background: var(--ink); color: var(--bg-elevated); }
-.chip[aria-pressed='true'] .chip__count { color: inherit; }
-.chip__count { opacity: 1; margin-left: 0.3rem; font-weight: 500; color: var(--ink-3); }
-
 /* ============================================================
    난이도 색 도트 — 채도가 허용되는 유일한 자리
    어두운 색은 다크에서, 밝은 색은 라이트에서 묻히므로
    테마 대비색 hairline 링을 항상 두른다 (설계서 8.2절)
    ============================================================ */
-.dot {
-  display: inline-block;      /* 없으면 inline span이라 크기가 무시된다 */
-  flex: 0 0 auto;
-  vertical-align: middle;
-  width: 18px; height: 18px;
-  border-radius: 50%;
-  box-shadow: 0 0 0 1px var(--hairline);
-}
-.dot--lg { width: 26px; height: 26px; }
-.bar {
-  display: block;
-  flex: 0 0 auto;
-  width: 4px; align-self: stretch;
-  border-radius: 2px;
-  box-shadow: 0 0 0 1px var(--hairline);
-}
-
 /* ============================================================
    상단 바 · 배너
    ============================================================ */
@@ -215,110 +195,6 @@ ul { margin: 0; padding: 0; list-style: none; }
 .banner strong { font-size: 0.875rem; }
 .banner__actions { display: flex; gap: var(--sp-2); }
 .warn { color: var(--ink-2); margin-bottom: var(--sp-3); }
-
-/* ============================================================
-   스코어보드
-   ============================================================ */
-.board { display: flex; flex-direction: column; gap: var(--sp-2); }
-.board__row {
-  display: flex; align-items: center; gap: var(--sp-3);
-  min-height: 60px; padding: 0.55rem var(--sp-4);
-  background: var(--core); border: 1px solid var(--core-line);
-  border-radius: var(--r-core); box-shadow: var(--ambient);
-  cursor: pointer;
-  transition: transform var(--dur-move) var(--ease-spring),
-              box-shadow var(--dur-move) var(--ease-spring);
-}
-.board__row:active { transform: scale(0.99); }
-.board__row.is-lead {
-  box-shadow: var(--ambient-lift);
-  border-color: var(--hairline);
-  background: var(--bg-elevated);
-}
-.board__row.is-active { border-color: var(--hairline); }
-.board__rank {
-  display: grid; place-items: center;
-  width: 30px; height: 30px; flex: 0 0 auto; box-sizing: border-box;
-  border-radius: var(--r-tight); background: var(--shell);
-  font-size: 0.8125rem; font-weight: 700; color: var(--ink-2);
-}
-.board__row.is-lead .board__rank { background: var(--ink); color: var(--bg-elevated); }
-.board__who { display: flex; flex-direction: column; gap: 0.1rem; min-width: 0; flex: 1; }
-.board__name {
-  font-weight: 700; font-size: 1.0625rem;
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-}
-.board__score { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.03em; }
-
-/* ============================================================
-   난이도 카드
-   ============================================================ */
-.grades {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
-  gap: var(--sp-2);
-}
-/* 좁은 화면에서 3열은 점수가 들어갈 폭이 안 나온다 */
-@media (max-width: 400px) {
-  .grades { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
-.gcard {
-  display: flex; align-items: center; gap: var(--sp-2);
-  min-height: 62px; padding: 0.6rem 0.7rem;
-  background: var(--core); border: 1px solid var(--core-line);
-  border-radius: var(--r-core); box-shadow: var(--core-inset);
-  text-align: left;
-  transition: transform var(--dur-tap) var(--ease-spring),
-              box-shadow var(--dur-tap) var(--ease-spring);
-  -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
-}
-.gcard:active { transform: scale(0.98); }
-.gcard.has-count { box-shadow: var(--ambient); }
-.gcard.is-mylevel { border-color: var(--hairline); }
-.gcard__body {
-  display: flex; flex-direction: column; justify-content: center;
-  gap: 0.1rem; flex: 1; min-width: 0;
-}
-.gcard__body .hint { white-space: nowrap; }
-.gcard__label {
-  font-weight: 650; font-size: 0.9375rem;
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-}
-.gcard__count {
-  align-self: center; min-width: 1.2ch; text-align: right;
-  font-size: 1.4rem; font-weight: 800; letter-spacing: -0.04em;
-}
-
-/* ============================================================
-   하단 고정 총점 — blur는 고정 요소에만
-   ============================================================ */
-.total {
-  position: fixed; left: 0; right: 0;
-  bottom: calc(env(safe-area-inset-bottom) + 62px);
-  padding: 0 var(--sp-4); pointer-events: none; z-index: 20;
-}
-/* 바 위쪽에서 콘텐츠가 뚝 잘리지 않고 흐려지며 사라지게 한다 */
-.total::before {
-  content: ''; position: absolute; left: 0; right: 0; bottom: 100%;
-  height: 52px; pointer-events: none;
-  background: linear-gradient(to top, var(--bg) 30%, transparent);
-}
-.total__inner {
-  max-width: 720px; margin: 0 auto;
-  display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3);
-  padding: 0.65rem 1rem;
-  /* 반투명이면 뒤 카드 글자가 비쳐 총점이 읽기 나빠진다. 불투명하게 둔다. */
-  background: var(--bg-elevated);
-  border: 1px solid var(--shell-line); border-radius: var(--r-shell);
-  box-shadow: var(--ambient-lift);
-}
-.total__left, .total__right { display: flex; align-items: center; gap: 0.5rem; }
-.total__rank {
-  padding: 0.15rem 0.45rem; border-radius: var(--r-tight);
-  background: var(--ink); color: var(--bg-elevated);
-  font-size: 0.75rem; font-weight: 700;
-}
-.total__score { font-size: 1.625rem; font-weight: 800; letter-spacing: -0.035em; }
-.total__unit { font-size: 0.9375rem; color: var(--ink-3); margin-left: 0.2rem; }
 
 /* ============================================================
    탭 바
@@ -403,6 +279,14 @@ ul { margin: 0; padding: 0; list-style: none; }
 }
 .gymrow__dots { display: flex; gap: 2px; flex: 0 0 auto; }
 .gymrow__text { display: flex; flex-direction: column; gap: 0.05rem; min-width: 0; flex: 1; }
+.gymrow__top { display: flex; align-items: center; gap: 0.35rem; min-width: 0; }
+/* 지금 고른 곳. 색은 홀드 몫이라 글자 배지로 알린다 */
+.gymrow__now {
+  flex: 0 0 auto; padding: 0.05rem 0.3rem;
+  background: var(--ink); color: var(--bg-elevated);
+  border-radius: var(--r-tight);
+  font-size: 0.75rem; font-weight: 700;
+}
 .gymrow__name {
   font-weight: 650; font-size: 1rem;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
@@ -426,7 +310,13 @@ ul { margin: 0; padding: 0; list-style: none; }
   display: flex; align-items: center; gap: var(--sp-2);
   padding: 0.4rem 0; border-bottom: 1px solid var(--shell-line);
 }
-.graderow.is-retired { opacity: 0.4; }
+/*
+ * 은퇴한 등급. 여기서도 홀드는 흐리게 하지 않는다. 45% 로 깔면 노랑이 올리브가 되어
+ * 바로 아래 갈색과 헷갈린다. 이 앱에서 색은 곧 데이터다.
+ * 흐린 글자와 되살리기(+) 아이콘만으로 '지금 안 쓰는 색' 은 충분히 읽힌다.
+ */
+.graderow.is-retired .graderow__order,
+.graderow.is-retired .graderow__label { color: var(--ink-3); }
 .graderow__order {
   width: 1.5rem; flex: 0 0 auto; text-align: right;
   color: var(--ink-3); font-size: 0.75rem;
@@ -449,9 +339,21 @@ ul { margin: 0; padding: 0; list-style: none; }
   transition: background var(--dur-tap) var(--ease-spring);
 }
 .iconbtn:hover:not(:disabled) { background: var(--shell); color: var(--ink); }
-.iconbtn--danger { color: var(--ink-2); }
-.iconbtn--danger:hover { background: var(--shell); color: var(--ink); }
+/* iconbtn--danger 는 .iconbtn 과 완전히 같은 규칙이었다. 이름만 위험하고
+   화면에는 아무 차이가 없었다. 색을 새로 들이는 대신(색은 홀드 몫이다)
+   글리프로 구분한다. 지우기는 X, 목록에서 빼기는 −. */
 .iconbtn:disabled { opacity: 0.25; cursor: default; }
+/*
+ * 누를 수 없는 버튼은 그렇게 보여야 한다. 멀쩡해 보이는데 반응이 없으면 고장으로 읽힌다.
+ * 다만 opacity 로 흐리게 하면 글자와 배경이 같이 묽어져 '추가' 가 안 읽힌다.
+ * 색을 갈아 끼운다 (0인 단계·이미 쓴 색에서 배운 것과 같은 이유).
+ */
+.btn:disabled {
+  background: var(--shell); color: var(--ink-3);
+  border-color: var(--shell-line); box-shadow: none; cursor: default;
+}
+.btn:disabled .btn__icon { background: none; opacity: 0.6; }
+.btn:disabled:active { transform: none; }
 
 .gradeadd { margin-top: var(--sp-5); }
 .swatches { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
@@ -464,7 +366,7 @@ ul { margin: 0; padding: 0; list-style: none; }
 .swatch:active { transform: scale(0.9); }
 .swatch--lg { width: 52px; height: 52px; }
 
-.profilelist, .levellist, .h2hlist, .sessionlist { display: flex; flex-direction: column; }
+.profilelist, .h2hlist, .sessionlist { display: flex; flex-direction: column; }
 .profilerow { display: flex; align-items: center; gap: var(--sp-2); }
 .profilerow { border-bottom: 1px solid var(--shell-line); }
 .profilerow:last-child { border-bottom: 0; }
@@ -479,17 +381,33 @@ ul { margin: 0; padding: 0; list-style: none; }
   display: grid; place-items: center; width: 34px; height: 34px; flex: 0 0 auto;
   border-radius: var(--r-tight); background: var(--shell); font-weight: 700; font-size: 0.875rem;
 }
-.levelrow, .h2hrow, .sessionrow {
+.h2hrow, .sessionrow {
   display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3);
   min-height: var(--tap-min);
   padding: 0.5rem 0; border-bottom: 1px solid var(--shell-line);
 }
-.levelrow__name { flex: 1; font-size: 0.9375rem; }
 
 /* ============================================================
    점수표
    ============================================================ */
-.dials { display: flex; flex-wrap: wrap; gap: var(--sp-4); margin-top: var(--sp-3); }
+/*
+ * 2열+1열이면 셋이 한 묶음으로 안 보이고 설명도 두 줄로 깨진다.
+ * 한 줄에 라벨과 값을 붙이고 설명은 바로 아래에 왼쪽으로 정렬한다.
+ */
+.dials { display: flex; flex-direction: column; gap: var(--sp-4); margin-top: var(--sp-3); }
+.dials .dial {
+  display: grid; grid-template-columns: 1fr auto;
+  align-items: center; gap: 0.3rem var(--sp-3);
+  /*
+   * .dial 의 flex: 1 1 8rem 은 가로로 늘어놓는 .fieldrow 를 보고 쓴 값이다.
+   * .dials 는 세로 flex 라 같은 flex-basis 가 '높이 128px' 로 먹혀,
+   * 내용이 70px 인 칸이 128px 을 차지하고 있었다. 세 칸에서 175px.
+   */
+  flex: 0 0 auto;
+}
+.dials .dial__label { grid-column: 1; margin: 0; }
+.dials .dial .field { grid-column: 2; grid-row: 1; width: 6rem; text-align: center; }
+.dials .dial .hint { grid-column: 1 / -1; grid-row: 2; margin: 0; }
 .fieldrow .dial { flex: 1 1 0; min-width: 0; }
 .fieldrow .dial .field { width: 100%; min-width: 0; }
 .fieldrow .dial input[type='date'] { min-width: 8.5rem; }
@@ -497,16 +415,23 @@ ul { margin: 0; padding: 0; list-style: none; }
 .dials .dial .field { width: 100%; }
 .dial__label { font-size: 0.9375rem; font-weight: 600; }
 .matrixwrap {
-  overflow-x: auto; margin: 0 calc(var(--sp-5) * -1); padding: 0 var(--sp-5);
-  /* 오른쪽이 뚝 잘리면 레이아웃이 깨진 것처럼 보인다. 흐려지며 이어지게 한다. */
-  -webkit-mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 26px), transparent 100%);
-  mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 26px), transparent 100%);
+  overflow-x: auto; margin: 0 calc(var(--sp-5) * -1); padding: 0 var(--sp-5) var(--sp-2);
+  /*
+   * 예전에는 오른쪽에 mask-image로 페이드를 걸었다. 그런데 마스크는 요소를
+   * 통째로 투명하게 만들어서, 배경과 대비가 큰 대각선 강조 칸 위에서만
+   * 눈에 띄었다. 스크롤 힌트가 아니라 "칸이 찢어진 것"으로 읽혔다.
+   * 스크롤바를 드러내는 쪽이 정직하고 오해도 없다.
+   */
+  scrollbar-width: thin;
+  scrollbar-color: var(--ink-3) transparent;
   scroll-snap-type: x proximity;
 }
 .matrix td, .matrix th { scroll-snap-align: end; }
+.matrixwrap::-webkit-scrollbar { height: 6px; }
+.matrixwrap::-webkit-scrollbar-thumb { background: var(--ink-3); border-radius: 3px; }
+.matrixwrap::-webkit-scrollbar-track { background: transparent; }
 .matrix { border-collapse: separate; border-spacing: 3px; font-size: 0.9375rem; }
 .matrix th { font-weight: 700; color: var(--ink-2); font-size: var(--fs-min); padding: 0.35rem 0.2rem; }
-.matrix thead .dot { width: 14px; height: 14px; }
 .matrix__lv { text-align: right; padding-right: 0.4rem !important; }
 .matrix td {
   min-width: 46px; padding: 0.5rem 0.4rem; text-align: center;
@@ -525,7 +450,7 @@ ul { margin: 0; padding: 0; list-style: none; }
 .bento__cell.is-tall { grid-column: span 2; }
 .bento__cell .core { padding: var(--sp-5); display: flex; flex-direction: column; gap: 0.2rem; }
 .bento__value {
-  display: flex; align-items: center; gap: 0.4rem;
+  display: flex; align-items: baseline; gap: 0.4rem;
   font-size: 1.5rem; font-weight: 800; letter-spacing: -0.035em;
 }
 .is-wide .bento__value { font-size: 2rem; }
@@ -537,7 +462,16 @@ ul { margin: 0; padding: 0; list-style: none; }
 
 .gradebars { display: flex; flex-direction: column; gap: 0.55rem; margin-top: var(--sp-3); }
 .gradebar { display: flex; align-items: center; gap: var(--sp-2); font-size: 0.9375rem; }
-.gradebar.is-zero .gradebar__track { opacity: 0.55; }
+/*
+ * 0인 단계는 물러나 보여야 하지만, 줄 전체에 opacity 를 걸면 글자까지 흐려진다.
+ * --ink-2 가 45% 로 깔리면 대비가 3.53:1 로 떨어져 기준(4.5)에 미달했다.
+ * 흐리게 만드는 건 색이 있는 부분만, 글자는 대비를 지키는 색으로 바꾼다.
+ */
+.gradebar.is-zero .gradebar__track { background: var(--shell); }
+.gradebar.is-zero .gradebar__label,
+.gradebar.is-zero .gradebar__n { color: var(--ink-3); }
+/* 홀드는 흐리게 하지 않는다. 45% 로 깔면 노랑이 올리브가 되어 갈색과 헷갈린다.
+   빈 막대와 흐린 글자만으로 이미 '0' 이 읽힌다. */
 .gradebar__label { width: 3.5rem; flex: 0 0 auto; color: var(--ink-2); }
 .gradebar__track {
   flex: 1; height: 7px; border-radius: 3.5px; overflow: hidden;
@@ -567,6 +501,23 @@ ul { margin: 0; padding: 0; list-style: none; }
    손가락 아래에서 입력창이 도망간다. */
 .modal__sheet:has(.pickerbody),
 .modal__sheet:has(.editlist) { height: 84dvh; }
+/*
+ * 좁은 화면에서 날짜·레벨 칸이 세로로 쌓이면 상단 절반을 먹고 개수 목록이
+ * 세 줄만 남는다. 두 칸을 한 줄에 붙이고 라벨을 옆으로 눕혀 자리를 아낀다.
+ */
+@media (max-width: 400px) {
+  .modal__sheet:has(.editlist) { height: 92dvh; }
+  .editlist ~ .editfoot { padding-top: var(--sp-2); }
+  .fieldrow:has(input[type='date']) { gap: var(--sp-2); }
+  .fieldrow:has(input[type='date']) .dial {
+    flex-direction: row; align-items: center; gap: 0.4rem;
+  }
+  .fieldrow:has(input[type='date']) .dial__label {
+    font-size: 0.75rem; white-space: nowrap; color: var(--ink-3);
+  }
+  .fieldrow .dial input[type='date'] { min-width: 0; }
+  .editrow { padding: 0.3rem 0; }
+}
 
 .modal__sheet {
   width: 100%; max-width: 560px; max-height: 92dvh;
@@ -602,7 +553,7 @@ ul { margin: 0; padding: 0; list-style: none; }
 }
 .editrow__label { flex: 1; font-size: 0.9375rem; }
 .editrow .field { width: 4.5rem; }
-.field--xs { width: 4rem; min-width: 0; min-height: 36px; text-align: center; padding: 0.3rem 0.5rem; }
+.field--xs { width: 4rem; min-width: 0; min-height: 44px; text-align: center; padding: 0.3rem 0.5rem; }
 .editfoot {
   /* 스크롤과 무관하게 항상 보여야 한다. 저장 버튼에 닿을 수 없으면 기능이 없는 셈이다. */
   position: sticky; bottom: 0; z-index: 2;
@@ -639,11 +590,9 @@ ul { margin: 0; padding: 0; list-style: none; }
 .pickerbody .gymlist { flex: 1 1 auto; }
 .pickerhead {
   position: sticky; top: 0; z-index: 3;
-  display: flex; flex-direction: column; gap: var(--sp-3);
-  gap: var(--sp-2);
+  display: flex; flex-direction: column; gap: var(--sp-2);
   padding: 2px 0 var(--sp-3);
   background: var(--core);
-  box-shadow: 0 1px 0 var(--shell-line);
 }
 /* 섹션 제목이 스크롤되며 헤더 아래로 지나간다. 경계를 분명히 둔다. */
 .gymsec + .gymsec { margin-top: var(--sp-4); }
@@ -665,44 +614,66 @@ ul { margin: 0; padding: 0; list-style: none; }
    홀드 실루엣 - 난이도를 색과 모양으로 이중 부호화한다
    ============================================================ */
 .hold { display: block; flex: 0 0 auto; }
-.holdcell { display: grid; place-items: center; flex: 0 0 auto; }
-
 /* 난이도 카드: 벽에 홀드가 박힌 모습 */
-.gcard {
-  align-items: center;
-  border-radius: var(--r-core);
-}
-.gcard .hold { transition: transform var(--dur-tap) var(--ease-spring); }
-.gcard:active .hold { transform: scale(0.92) rotate(-3deg); }
-.gcard.has-count .hold { transform: scale(1.04); }
-
 /* 홀드를 순서대로 늘어놓은 띠. 가운뎃점 나열을 대체한다 */
 .holdstrip { display: inline-flex; gap: 3px; align-items: center; margin-top: 0.3rem; }
-/* 홀드가 없는 짐도 같은 폭을 차지해야 이름 시작점이 흔들리지 않는다 */
+/*
+ * 홀드가 없는 짐도 같은 폭을 차지해야 이름 시작점이 흔들리지 않는다.
+ * 다만 폭을 고정하고 overflow로 자르면 홀드가 반쪽만 남아 그 짐의 색 구성이
+ * 틀리게 전달된다. 폭에 맞춰 개수를 줄이고, 남은 색이 있으면 그렇게 알린다.
+ */
 .gymrow__dots {
   display: flex; gap: 2px; flex: 0 0 auto; align-items: center;
-  width: 84px; overflow: hidden;
+  /*
+   * 폭을 못 박아 둔다. 내용에 맞춰 늘어나면 색 자료가 없는 짐(84px)과
+   * 있는 짐(103px)의 이름 시작점이 19px 어긋나, 목록을 훑을 때 줄이 흔들린다.
+   */
+  width: 114px;
 }
-@media (max-width: 380px) { .gymrow__dots { width: 60px; } }
+/* 10px 은 모바일 최소선(13px) 아래였다. 홀드가 몇 개 더 있다는 뜻이라 못 읽으면 없느니만 못하다 */
+/* 색 등급을 쓰지 않는 곳. 빈 칸으로 두면 목록이 들쭉날쭉하다 */
+.gymrow__nocolor {
+  width: 15px; height: 15px; flex: 0 0 auto;
+  border: 1px dashed var(--shell-line); border-radius: 4px;
+}
+.gymrow__more {
+  font-size: var(--fs-min); color: var(--ink-3); font-weight: 600;
+  margin-left: 2px; font-variant-numeric: tabular-nums;
+  min-width: 1.6rem;  /* +9 와 +12 의 폭이 달라 이름 시작점이 흔들리지 않도록 */
+}
+@media (max-width: 400px) {
+  /*
+   * 좁은 화면에서는 홀드를 줄여 5개 + 나머지 개수가 폭 안에 다 들어오게 한다.
+   * 예전에는 4번째부터 CSS 로 숨겼는데, '+N' 은 자바스크립트가 (전체 − 5) 로
+   * 세므로 9단계 짐이 좁은 화면에서 3개만 보이면서 '+4' 라고 적혀 있었다.
+   * 실제로 감춰진 건 6개다. 개수를 줄이려면 숫자도 같이 줄여야 하는데
+   * 그건 화면 폭을 자바스크립트가 알아야 한다는 뜻이라, 크기만 줄인다.
+   */
+  .gymrow__dots { width: 94px; gap: 1px; }
+  .gymrow__dots .hold { width: 12px; height: 12px; }
+}
 .gradebar .hold { flex: 0 0 auto; }
 .bento__value .hold { flex: 0 0 auto; }
 .matrix thead .hold { margin: 0 auto; }
 .editrow .hold { flex: 0 0 auto; }
 
 /* 선두와의 점수 차는 별도 태그로 분리해 한 줄에 점을 늘어놓지 않는다 */
-.board__gap {
-  display: inline-block; margin-left: 0.4rem; padding: 0.05rem 0.35rem;
-  background: var(--shell); border-radius: var(--r-tight);
-  font-size: 0.6875rem; color: var(--ink-2);
-}
-
 /* 색 팔레트: 홀드가 들어간 타일 */
 .swatches { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
 .swatch:active { transform: scale(0.92); }
+/* 이미 목록에 있는 색. 누를 수는 있지만 새로 넣을 게 아님을 알린다 */
+/* 같은 이유. 흐리게 하는 건 홀드 그림뿐이고, 이름은 읽히는 색으로 남긴다 */
+.swatch.is-used .hold { opacity: 0.35; }
+.swatch.is-used .swatch__name { color: var(--ink-3); }
+.swatch.is-used::after {
+  content: ''; position: absolute; right: 2px; bottom: 2px;
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--ink); box-shadow: 0 0 0 1.5px var(--core);
+}
+.swatch { position: relative; }
+/* 색 고르기에서 지금 쓰는 색. 표시가 없으면 뭘 바꾸는 중인지 알 수 없다 */
+.swatch.is-on { box-shadow: inset 0 0 0 2px var(--ink); }
 .swatch--lg { width: 52px; height: 52px; }
-
-/* 선택된 칩 안의 개수는 반전 색을 따라가야 한다 */
-.chip[aria-pressed='true'] .chip__count { color: var(--bg-elevated); }
 
 /* ============================================================
    숙련도 선택
@@ -719,8 +690,7 @@ ul { margin: 0; padding: 0; list-style: none; }
   .banner strong { font-size: 0.8125rem; }
   .banner .holdstrip { margin-top: 0.15rem; }
   .banner .hint:last-of-type { display: none; }   /* 출처 줄은 짐 설정에서도 볼 수 있다 */
-  .board__row { min-height: 48px; }
-  .section { margin-top: var(--sp-4); }
+    .section { margin-top: var(--sp-4); }
 }
 
 /* ── 극단 색 홀드 대비 보강 ──
@@ -736,7 +706,7 @@ ul { margin: 0; padding: 0; list-style: none; }
 
 
 /* 목록 마지막 행 아래 구분선은 카드가 잘린 것처럼 보인다 */
-.levelrow:last-child, .h2hrow:last-child, .sessionrow:last-child,
+.h2hrow:last-child, .sessionrow:last-child,
 .graderow:last-child, .editrow:last-child { border-bottom: 0; }
 .gymrow:last-child { border-bottom: 0; }
 
@@ -759,12 +729,6 @@ ul { margin: 0; padding: 0; list-style: none; }
 }
 
 /* 길게 누르는 중임을 알린다. 감소는 손을 뗄 때 일어난다. */
-.gcard.is-pressing { transform: scale(0.97); }
-.gcard.is-held {
-  transform: scale(0.94);
-  box-shadow: inset 0 0 0 2px var(--hairline);
-}
-
 /* ============================================================
    입력 격자 — 난이도(행) x 참가자(열)
    참가자를 전환하지 않고 한 화면에서 전원을 기록한다
@@ -776,7 +740,14 @@ ul { margin: 0; padding: 0; list-style: none; }
      :has(> :nth-child(n)) 는 구형 사파리에서 지원되지 않는다. */
   display: grid; gap: 4px; align-items: stretch;
 }
-.grid__head { position: sticky; top: 0; z-index: 2; background: var(--bg); padding-bottom: 2px; }
+/*
+ * 아래 여백이 2px 이면 스크롤 중 다음 행 셀의 둥근 아랫변이 그 틈으로 비쳐
+ * 헤더 밑에 정체불명의 선이 그어진 것처럼 보인다. 셀 모서리 반경만큼 덮는다.
+ */
+.grid__head {
+  position: sticky; top: 0; z-index: 2;
+  background: var(--bg); padding-bottom: 8px;
+}
 .grid__corner { display: flex; align-items: flex-end; padding-bottom: 0.4rem; }
 .grid__person {
   display: flex; flex-direction: column; align-items: center; gap: 1px;
@@ -785,15 +756,23 @@ ul { margin: 0; padding: 0; list-style: none; }
   border-radius: var(--r-core);
 }
 .grid__person.is-lead { border-color: var(--hairline); background: var(--core); }
-.grid__top { display: flex; align-items: center; gap: 0.2rem; max-width: 100%; min-width: 0; }
+/*
+ * 순위 배지와 이름을 한 줄에 붙여 두면 5명일 때 이름이 '동…' 한 글자로 잘린다.
+ * 자리가 모자라면 배지를 윗줄로 올려 이름에 열 폭을 통째로 내준다.
+ */
+.grid__top {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
+  gap: 0 0.2rem; max-width: 100%; min-width: 0;
+}
 .grid__name {
   font-size: 0.9375rem; font-weight: 700; min-width: 0;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 /* 순위는 배지로만 알린다. 열 자리는 바뀌지 않는다. */
+/* 배지 글자는 12px 로 맞춘다. 11px 은 감사 기준(12) 아래였다 */
 .grid__rank {
   flex: 0 0 auto; padding: 0 0.2rem;
-  font-size: 0.6875rem; font-weight: 700; color: var(--ink-3);
+  font-size: 0.75rem; font-weight: 700; color: var(--ink-3);
 }
 .grid__rank.is-first {
   background: var(--ink); color: var(--bg-elevated);
@@ -801,16 +780,30 @@ ul { margin: 0; padding: 0; list-style: none; }
 }
 .grid__score { font-size: 1.0625rem; font-weight: 800; letter-spacing: -0.03em; }
 .grid__grade {
-  display: flex; align-items: center; gap: 0.45rem;
+  /* gap 대신 홀드의 margin 을 쓴다. 자리가 빠듯할 때 아래 이음선이
+     gap 몫까지 가져가 이름이 '빨…' 로 잘리던 문제를 피한다. */
+  display: flex; align-items: center; gap: 0;
   padding: 0 0.2rem; min-width: 0;
 }
+.grid__grade > .hold { margin-right: 0.45rem; }
 .grid__label {
   font-size: 0.9375rem; font-weight: 600;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
+/*
+ * 혼자 기록할 때는 이름 칸이 절반을 차지해 이름과 칸 사이가 190pt 벌어진다.
+ * 그 사이를 가는 선으로 이어 준다. 여럿이면 남는 폭이 없어 폭 0 이 되어 사라진다.
+ * 여백은 margin 이 아니라 그러데이션의 투명 구간으로 준다.
+ * margin 은 자리가 없을 때도 폭을 먹지만, 그러데이션은 배치에 영향이 없다.
+ */
+.grid__grade::after {
+  content: ''; flex: 1 1 0; min-width: 0; align-self: center; height: 1px;
+  background: linear-gradient(to right, transparent 0.5rem, var(--shell-line) 0.5rem);
+}
 .cell {
   display: grid; place-items: center;
-  min-height: 52px; padding: 0.3rem;
+  /* 좌우 여백을 줄여야 5명일 때 '+110점' 이 13px 로 들어간다 */
+  min-height: 52px; padding: 0.3rem 0.15rem;
   background: var(--core); border: 1px solid var(--core-line);
   border-radius: var(--r-core); box-shadow: var(--core-inset);
   -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
@@ -818,8 +811,63 @@ ul { margin: 0; padding: 0; list-style: none; }
               box-shadow var(--dur-tap) var(--ease-spring);
 }
 .cell.has-count { box-shadow: var(--ambient); border-color: var(--hairline); }
-.cell.is-mylevel { background: var(--shell); }
+/*
+ * 내 레벨과 같은 난이도. 배경을 바꾸면 비활성 칸으로 오독되므로 표식만 둔다.
+ * 세로 막대를 가운데 높이에 두었더니 좁은 칸에서 숫자 바로 옆에 붙어
+ * '❙0' 이 '10' 으로 읽혔다. 숫자와 겹칠 수 없는 모서리로 옮긴다.
+ */
+.cell.is-mylevel::before {
+  content: ''; position: absolute; left: 6px; top: 6px;
+  width: 4px; height: 4px; border-radius: 50%;
+  background: var(--ink-3);
+}
+.cell { position: relative; }
 .cell.is-pressing { transform: scale(0.96); }
 .cell.is-held { transform: scale(0.92); box-shadow: inset 0 0 0 2px var(--hairline); }
-.cell__count { font-size: 1.375rem; font-weight: 800; letter-spacing: -0.04em; }
-.cell__unit { font-size: 0.75rem; opacity: 0.6; }
+/* 넓으면 한 줄(4  23점), 좁으면 두 줄로 접힌다. 칸 너비에 따라 저절로 갈린다. */
+.cell__body {
+  display: flex; flex-wrap: wrap;
+  align-items: baseline; justify-content: center;
+  gap: 0 0.35rem; max-width: 100%;
+}
+/* 줄높이를 조이지 않으면 두 줄로 접힌 칸만 6px 높아져 그 행만 툭 튀어나온다 */
+.cell__count { font-size: 1.375rem; font-weight: 800; letter-spacing: -0.04em; line-height: 1.05; }
+.cell__unit { font-size: var(--fs-min); color: var(--ink-3); font-weight: 500; line-height: 1.1; }
+
+/* 데이터가 아직 없어 숨긴 섹션의 자리 표시 */
+.placeholder-note {
+  padding: var(--sp-4); border: 1px dashed var(--shell-line);
+  border-radius: var(--r-core); color: var(--ink-3);
+  font-size: var(--fs-min); text-align: center;
+}
+
+/* 모서리 칸: 두 방향 안내를 세로로 쌓는다 */
+.matrix__corner { line-height: 1.25; }
+.matrix__corner span { display: block; white-space: nowrap; }
+/* 납작한 홀드가 원형의 절반 이하로 보여 목록의 세로 리듬이 흔들렸다.
+   실제 크기는 그대로 두고 시각 무게만 맞춘다. */
+.gradelist .hold, .gradebar .hold, .editrow .hold { transform: scale(1.08); }
+/* 좌우 여백은 손잡이 반지름(약 6px)과 맞춘다. 10px 이면 오른쪽 끝이 4px 어긋난다 */
+.levelpick__ticks {
+  display: flex; justify-content: space-between; width: 100%;
+  padding: 0 6px; margin-top: -6px;
+}
+.levelpick__ticks span {
+  width: 1px; height: 5px; background: var(--shell-line);
+}
+/* 세션 편집: 개수 증감 */
+.stepper { display: flex; align-items: center; gap: 2px; flex: 0 0 auto; }
+/* 44x44. ::after 로 손가락 범위만 넓혀 봤지만, 절대 배치된 가짜 요소가
+   scrollWidth 를 늘려 '글자 잘림' 오탐을 만들었다. 그냥 보이는 크기를 키운다. */
+.stepper__btn {
+  width: 44px; height: 44px; flex: 0 0 auto;
+  background: var(--shell); border: 1px solid var(--shell-line);
+  border-radius: var(--r-tight); color: var(--ink-2);
+  font-size: 1rem; font-weight: 700; line-height: 1.2;
+}
+.stepper__btn:active { transform: scale(0.94); }
+.stepper .field--xs { width: 3.4rem; }
+
+
+/* 플레이스홀더 대비가 4.07:1로 기준(4.5)에 못 미쳤다 */
+.field::placeholder { color: var(--ink-3); opacity: 1; }

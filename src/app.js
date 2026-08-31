@@ -83,7 +83,10 @@ const actions = {
       }
       return next;
     });
-    openGymPicker(ctx);
+    // 예전에는 여기서 openGymPicker(ctx) 를 다시 불러 목록을 갱신했다.
+    // 그러면 열려 있던 모달 위에 새 모달이 한 겹 더 쌓인다. 별을 세 번 누르면
+    // 모달 3개에 행 330개가 되고, 스크롤 위치도 매번 날아간다.
+    // 목록 갱신은 선택기가 스스로 한다 (gym-picker.js 의 refresh).
   },
   verifyGym(gymId) { patchGym(gymId, markVerified); },
   setGymVerified(gymId, on) {
@@ -149,11 +152,20 @@ const actions = {
   saveSession(session) { store.saveSession(session); reload(); },
   deleteSession(id) { store.deleteSession(id); reload(); },
 
-  openProfilePicker() { profilePicker(); },
+  /*
+   * 예전에는 참가자 목록을 띄웠다. 그런데 대결 격자는 이미 모든 참가자를
+   * 보여주므로, 목록에서 이름을 눌러도 화면이 그대로였다. 누른 사람은
+   * 아무 일도 안 일어났다고 느낀다. 세 군데 호출부의 뜻이 모두 '만들기' 라
+   * 바로 이름 입력으로 간다.
+   */
+  openProfilePicker() { newProfile(); },
   openNewProfile() { newProfile(); },
   deleteProfile(id) {
     store.deleteProfile(id);
-    if (state.ui.profileId === id) state.ui.profileId = null;
+    if (state.ui.profileId === id) {
+      // null 로 두면 다른 참가자가 남아 있어도 기록 화면이 빈 상태가 된다
+      state.ui.profileId = store.loadAll().profiles[0]?.id ?? null;
+    }
     reload();
   },
   openNewGym() { newGym(); },
@@ -184,31 +196,19 @@ const ctx = { state, actions };
 /* ============================================================
    작은 모달들
    ============================================================ */
-function profilePicker() {
-  const body = h('div', {},
-    state.profiles.length === 0
-      ? h('p', { class: 'subtitle', style: { marginBottom: '1rem' } }, '아직 프로필이 없습니다.')
-      : h('ul', { class: 'profilelist' }, state.profiles.map((p) =>
-          h('li', { class: 'profilerow' },
-            h('button', {
-              class: 'profilerow__pick', type: 'button',
-              onclick: () => { actions.setProfile(p.id); sheet.close(); },
-            },
-              h('span', { class: 'avatar' }, p.name.slice(0, 1)),
-              h('span', { class: 'profilerow__name' }, p.name),
-            ),
-          ))),
-    h('div', { style: { marginTop: '1rem' } },
-      button('새 참가자', {
-        onClick: () => { sheet.close(); newProfile(); }, variant: 'solid', trailing: 'plus',
-      }),
-    ),
-  );
-  const sheet = modal('참가자', body);
+/*
+ * 빈 칸으로 '추가' 를 누르면 아무 일도 일어나지 않았다. 조용히 삼키면
+ * 버튼이 고장 난 것처럼 보인다. 비어 있는 동안은 아예 못 누르게 한다.
+ */
+function gate(input, btn) {
+  const sync = () => { btn.disabled = !input.value.trim(); };
+  input.addEventListener('input', sync);
+  sync();
+  return btn;
 }
 
 function newProfile() {
-  const input = h('input', { class: 'field', placeholder: '이름', autofocus: true });
+  const input = h('input', { class: 'field', placeholder: '이름', 'aria-label': '참가자 이름' });
   const submit = () => {
     const name = input.value.trim();
     if (!name) return;
@@ -219,17 +219,18 @@ function newProfile() {
     reload();
   };
   input.addEventListener('keydown', (e) => { if (e.key === 'Enter') submit(); });
+  const addBtn = gate(input, button('추가', { onClick: submit, variant: 'solid', trailing: 'check' }));
   const sheet = modal('새 참가자',
     h('div', {}, input,
-      h('div', { style: { marginTop: '1rem' } },
-        button('추가', { onClick: submit, variant: 'solid', trailing: 'check' }))),
+      h('div', { style: { marginTop: '1rem' } }, addBtn)),
   );
   setTimeout(() => input.focus(), 50);
 }
 
 function newGym() {
-  const name = h('input', { class: 'field', placeholder: '클라이밍장 이름' });
-  const gu = h('input', { class: 'field field--sm', placeholder: '구 (예: 강남구)' });
+  // 값이 채워지면 placeholder 는 사라진다. 무슨 칸인지 라벨로 남긴다 (짐 설정 화면과 같은 꼴)
+  const name = h('input', { class: 'field', placeholder: '예: 더클라임 강남점', 'aria-label': '클라이밍장 이름' });
+  const gu = h('input', { class: 'field', placeholder: '예: 강남구', 'aria-label': '자치구' });
   const submit = async () => {
     if (!name.value.trim()) return;
     const { createGym } = await import('./domain/gym.js');
@@ -240,13 +241,19 @@ function newGym() {
     reload();
     actions.openGymSettings(gym.id);
   };
+  for (const el of [name, gu]) {
+    el.addEventListener('keydown', (e) => { if (e.key === 'Enter') submit(); });
+  }
+  const addBtn = gate(name, button('추가', { onClick: submit, variant: 'solid', trailing: 'check' }));
   const sheet = modal('클라이밍장 추가',
     h('div', {},
-      h('div', { class: 'fieldrow' }, name, gu),
+      h('div', { class: 'fieldrow' },
+        h('label', { class: 'dial' }, h('span', { class: 'dial__label' }, '이름'), name),
+        h('label', { class: 'dial' }, h('span', { class: 'dial__label' }, '자치구'), gu),
+      ),
       h('p', { class: 'hint', style: { marginTop: '0.75rem' } },
-        '추가 후 난이도 색을 등록하는 화면으로 넘어갑니다.'),
-      h('div', { style: { marginTop: '1rem' } },
-        button('추가', { onClick: submit, variant: 'solid', trailing: 'check' })),
+        '추가하면 난이도 색을 등록하는 화면으로 넘어가요.'),
+      h('div', { style: { marginTop: '1rem' } }, addBtn),
     ),
   );
   setTimeout(() => name.focus(), 50);
@@ -313,7 +320,7 @@ function tabBar() {
       tab('profile', 'user', '프로필', actions.openProfiles),
       // 짐이 없어도 짐 설정 화면으로 먼저 들어간다. 다른 화면 위에 모달만
       // 띄우면 어디로 갔는지 알 수 없고 탭 표시도 어긋난다.
-      tab('gym', 'gear', '짐 설정', () => actions.openGymSettings(state.ui.gymId)),
+      tab('gym', 'gear', '클라이밍장', () => actions.openGymSettings(state.ui.gymId)),
     ),
   );
 }
@@ -333,7 +340,7 @@ async function boot() {
       store.replaceAll({ ...loaded, gyms, meta: { ...loaded.meta, seedVersion: version, seeded: true } });
       loaded = store.loadAll();
     } catch (err) {
-      console.warn('시드를 불러오지 못해 기존 목록을 유지합니다.', err);
+      console.warn('시드를 불러오지 못해 기존 목록을 유지해요.', err);
     }
   }
 

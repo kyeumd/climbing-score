@@ -17,16 +17,16 @@ export function viewStats(ctx) {
       h('div', { class: 'viewhead' }, h('h1', { class: 'title' }, '기록')),
       panel(
         eyebrow('아직 기록 없음'),
-        h('h2', { class: 'title', style: { margin: '0.5rem 0 0.35rem' } }, '무엇을 깼는지 남겨 볼까요'),
+        h('h2', { class: 'title', style: { margin: '0.5rem 0 0.35rem' } }, '완등 기록을 남겨 볼까요?'),
         h('p', { class: 'subtitle', style: { marginBottom: '1rem' } },
-          !gym ? '클라이밍장을 고르고 완등을 기록하면 여기에 점수 추이가 쌓입니다.'
-               : '프로필을 만들고 완등을 기록하면 여기에 점수 추이가 쌓입니다.'),
+          !gym ? '클라이밍장을 고르고 완등을 기록하면 여기에 점수 추이가 쌓여요.'
+               : '프로필을 만들고 완등을 기록하면 여기에 점수 추이가 쌓여요.'),
         h('div', { class: 'btnrow' },
           !gym && button('클라이밍장 고르기', {
-            onClick: actions.openGymPicker, variant: 'solid', trailing: 'arrow',
+            onClick: actions.openGymPicker, variant: 'solid', trailing: 'next',
           }),
           !profile && button('프로필 만들기', {
-            onClick: actions.openProfilePicker, variant: gym ? 'solid' : '', trailing: 'arrow',
+            onClick: actions.openProfilePicker, variant: gym ? 'solid' : '', trailing: 'next',
           }),
         ),
       ),
@@ -35,20 +35,23 @@ export function viewStats(ctx) {
 
   const stats = gymStats(state.sessions, gym, profile.id);
   const h2h = headToHead({ sessions: state.sessions, gym, profileId: profile.id, profiles: state.profiles });
-  const gyms = sortGyms(state.gyms.filter((g) => !g.archived));
+
+  /*
+   * 예전에는 등록된 짐 110곳을 전부 칩으로 깔았다. 기록이 있는 곳은 하나뿐인데
+   * 나머지 109개를 누르면 빈 화면이 나오고, 정작 지금 보고 있는 짐의 칩은
+   * 가로 스크롤 저 너머에 있어 화면에 없었다. 기록이 있는 곳만 남긴다.
+   */
+  const recorded = new Set(state.sessions.filter((x) => x.profileId === profile.id).map((x) => x.gymId));
+  const gyms = sortGyms(state.gyms.filter((g) => !g.archived && (recorded.has(g.id) || g.id === gym.id)));
 
   return h('div', { class: 'view' },
     h('div', { class: 'viewhead' },
-      button('뒤로', { onClick: actions.goHome, variant: 'ghost', small: true }),
+      // 탭으로 들어오는 화면이라 '뒤로'는 갈 곳이 없다. 탭바가 늘 아래에 있다.
       h('h1', { class: 'title' }, '기록'),
     ),
 
-    h('div', { class: 'chips' },
-      gyms.map((g) => h('button', {
-        class: 'chip', type: 'button', 'aria-pressed': String(g.id === gym.id),
-        onclick: () => actions.setGym(g.id),
-      }, g.name)),
-    ),
+    // 고를 곳이 하나뿐이면 고르는 줄 자체가 필요 없다
+    gyms.length > 1 && gymChips(gyms, gym, actions),
 
     h('div', { class: 'bento' },
       stat('누적 점수', stats.totalScore.toLocaleString('ko-KR'), '점', 'is-wide'),
@@ -57,10 +60,14 @@ export function viewStats(ctx) {
       stat('최고 단계', stats.topGrade?.label ?? '없음', '', 'is-tall', stats.topGrade),
     ),
 
-    stats.trend.length > 1 && h('div', { class: 'section' },
+    h('div', { class: 'section' },
       panel(
         eyebrow('세션별 점수'),
-        sparkline(stats.trend),
+        // 그냥 숨기면 기능이 없는 앱으로 보인다. 왜 아직 없는지 알린다.
+        stats.trend.length > 1
+          ? sparkline(stats.trend)
+          : h('p', { class: 'placeholder-note' },
+              '세션이 두 번 이상 쌓이면 점수 추이를 보여드려요.'),
       ),
     ),
 
@@ -109,7 +116,7 @@ export function viewStats(ctx) {
               class: 'sessionrow is-tappable',
               onclick: () => openSessionEditor(session, gym, ctx),
             },
-              h('span', { class: 'num hint' }, session.date.slice(5).replace('-', '월 ') + '일'),
+              h('span', { class: 'num hint' }, `${Number(session.date.split('-')[1])}월 ${Number(session.date.split('-')[2])}일`),
               h('span', { class: 'num' }, `${score.toLocaleString('ko-KR')}점`),
             );
           }),
@@ -117,6 +124,23 @@ export function viewStats(ctx) {
       ),
     ),
   );
+}
+
+/** 지금 보는 짐의 칩이 화면 밖에 있으면 어디를 보고 있는지 알 수 없다 */
+function gymChips(gyms, gym, actions) {
+  const row = h('div', { class: 'chips' },
+    gyms.map((g) => h('button', {
+      class: 'chip', type: 'button', 'aria-pressed': String(g.id === gym.id),
+      onclick: () => actions.setGym(g.id),
+    }, g.name)),
+  );
+  requestAnimationFrame(() => {
+    const on = row.querySelector('[aria-pressed="true"]');
+    if (!on || !row.isConnected) return;
+    // scrollIntoView 는 페이지까지 움직인다. 이 줄만 옆으로 민다.
+    row.scrollLeft = on.offsetLeft - (row.clientWidth - on.offsetWidth) / 2;
+  });
+  return row;
 }
 
 function stat(label, value, unit, extra = '', grade) {

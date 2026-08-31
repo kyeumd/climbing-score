@@ -60,7 +60,6 @@ const after = await state();
 ok('프로필이 저장됨', after.profiles.includes('민서'), after.profiles);
 ok('모달이 닫힘', (await p.count('.modal')) === 0);
 const board = await p.eval(() => ({
-  rows: document.querySelectorAll('.board__row').length,
   cards: document.querySelectorAll('.cell').length,
   name: document.querySelector('.grid__name')?.textContent ?? null,
   deck: document.querySelector('.section-head .eyebrow')?.textContent ?? null,

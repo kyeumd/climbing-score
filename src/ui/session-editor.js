@@ -12,6 +12,13 @@ export function openSessionEditor(session, gym, ctx) {
   const totalEl = h('strong', { class: 'num' }, '');
   const rows = h('ul', { class: 'editlist' });
 
+  const setCount = (gradeId, next) => {
+    const v = Math.max(0, Math.round(next) || 0);
+    if (v === 0) delete draft.counts[gradeId];
+    else draft.counts[gradeId] = v;
+    redraw();
+  };
+
   const redraw = () => {
     totalEl.textContent = `${scoreOf(draft, gym).toLocaleString('ko-KR')}점`;
     rows.replaceChildren(...allGrades(gym).map((grade) => {
@@ -25,17 +32,22 @@ export function openSessionEditor(session, gym, ctx) {
           grade.retired && h('span', { class: 'hint' }, ' (더 이상 안 씀)'),
         ),
         h('span', { class: 'hint num' }, `${unit.toLocaleString('ko-KR')}점`),
-        h('input', {
-          class: 'field field--xs num', type: 'number', min: 0, value: count,
-          'aria-label': `${grade.label} 완등 수`,
-          onchange: (e) => {
-            const v = Math.max(0, Number(e.target.value) || 0);
-            if (v === 0) delete draft.counts[grade.id];
-            else draft.counts[grade.id] = v;
-            e.target.value = v;
-            redraw();
-          },
-        }),
+        // 11개 행을 전부 키보드로 치게 하면 번거롭다. 옆에 증감을 둔다.
+        h('span', { class: 'stepper' },
+          h('button', {
+            class: 'stepper__btn', type: 'button', 'aria-label': `${grade.label} 하나 빼기`,
+            onclick: () => { setCount(grade.id, count - 1); },
+          }, '−'),
+          h('input', {
+            class: 'field field--xs num', type: 'number', min: 0, value: count,
+            'aria-label': `${grade.label} 완등 수`,
+            onchange: (e) => { setCount(grade.id, Number(e.target.value) || 0); },
+          }),
+          h('button', {
+            class: 'stepper__btn', type: 'button', 'aria-label': `${grade.label} 하나 더하기`,
+            onclick: () => { setCount(grade.id, count + 1); },
+          }, '+'),
+        ),
       );
     }));
   };
@@ -69,7 +81,7 @@ export function openSessionEditor(session, gym, ctx) {
       h('div', { class: 'btnrow' },
         button('삭제', {
           onClick: () => {
-            if (confirm('이 세션을 지웁니다. 계속할까요?')) {
+            if (confirm('이 날 기록을 지울까요? 되돌릴 수 없어요.')) {
               actions.deleteSession(draft.id);
               sheet.close();
             }

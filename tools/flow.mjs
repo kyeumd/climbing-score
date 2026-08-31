@@ -11,69 +11,61 @@
  *   node tools/flow.mjs 기록       이름에 '기록'이 든 흐름만
  */
 import { launch, sleep } from './cdp.mjs';
+import { open, HELPERS as BASE } from './seed.mjs';
 import { readdirSync, unlinkSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 
 const OUT = 'tools/flows';
-const DEMO = 'http://localhost:8099/tools/demo.html';
-const FRESH = 'http://localhost:8099/index.html';
 const filter = process.argv[2] ?? null;
 
-/** 브라우저 안에서 도는 헬퍼들 */
+/** seed.mjs 의 헬퍼에 이 도구에서만 쓰는 둘을 얹는다 */
 const HELPERS = `
-  const $ = (s, n = 0) => document.querySelectorAll(s)[n];
-  const byText = (s, t) => [...document.querySelectorAll(s)].find(e => e.textContent.includes(t));
-  const tap = (el) => { if (!el) throw new Error('없음');
-    el.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
-    el.dispatchEvent(new PointerEvent('pointerup', { bubbles: true }));
-    // .gcard는 pointer 이벤트로 동작하지만 일반 버튼은 click 핸들러를 쓴다
-    if (!el.classList.contains('gcard')) el.click(); };
+  ${BASE}
+  const $ = q;
   const hold = (el) => new Promise(r => {
     el.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
     setTimeout(() => { el.dispatchEvent(new PointerEvent('pointerup', { bubbles: true })); r(); }, 600); });
-  const wait = (ms) => new Promise(r => setTimeout(r, ms));
 `;
 
 const FLOWS = [
   {
     name: '완등 기록',
-    url: DEMO,
     steps: [
       ['시작', null],
-      ['초록 탭 (+1)', `tap($('.gcard', 3))`],
-      ['초록 두 번 더', `tap($('.gcard', 3)); await wait(250); tap($('.gcard', 3))`],
-      ['남색 탭 (역전 시도)', `tap($('.gcard', 5)); await wait(250); tap($('.gcard', 5))`],
-      ['길게 눌러 취소', `await hold($('.gcard', 5))`],
+      ['초록 탭 (+1)', `tap($('.grid__row button', 3))`],
+      ['초록 두 번 더', `tap($('.grid__row button', 3)); await wait(250); tap($('.grid__row button', 3))`],
+      ['남색 탭 (역전 시도)', `tap($('.grid__row button', 5)); await wait(250); tap($('.grid__row button', 5))`],
+      ['길게 눌러 취소', `await hold($('.grid__row button', 5))`],
     ],
   },
   {
     name: '참가자 추가',
-    url: DEMO,
     steps: [
       ['시작', null],
       ['참가자 추가', `tap(byText('.btn', '참가자 추가'))`],
-      ['새 참가자', `tap(byText('.modal .btn', '새 참가자'))`],
       ['이름 입력', `const i = $('.modal .field'); i.value = '민서';
                     i.dispatchEvent(new Event('input', { bubbles: true }))`],
       ['추가 완료', `tap(byText('.modal .btn', '추가'))`],
-      ['새 참가자로 기록', `tap($('.gcard', 2))`],
+      // .grid__row button 을 전체에서 세면 열이 늘어난 만큼 어긋난다.
+      // 두 번째 줄의 두 번째 칸(= 새 참가자)을 콕 집는다.
+      ['새 참가자로 기록', `tap(q('.grid__row', 1).querySelectorAll('.cell')[1])`],
     ],
   },
   {
     name: '짐 바꾸기',
-    url: DEMO,
     steps: [
       ['시작', null],
       ['짐 선택기 열기', `tap($('.matchbar__gym'))`],
-      ['구 칩 선택', `tap($('.chip', 2))`],
-      ['짐 고르기', `tap($('.gymrow__pick', 1))`],
+      // 자치구 칩은 없앴다. 검색창이 지역까지 찾는다.
+      ['지역으로 검색', `const i = $('.field[type=search]'); i.value = '송파';
+                       i.dispatchEvent(new Event('input', { bubbles: true }))`],
+      ['짐 고르기', `tap($('.gymrow__pick'))`],
       ['난이도 확인 배너', `null`],
       ['맞아요 누르기', `tap(byText('.btn', '맞아요'))`],
     ],
   },
   {
     name: '난이도 편집',
-    url: DEMO,
     steps: [
       ['짐 설정', `tap($('.tab', 3))`],
       ['색 추가', `tap($('.swatch', 6))`],
@@ -85,7 +77,6 @@ const FLOWS = [
   },
   {
     name: '숙련도 변경',
-    url: DEMO,
     steps: [
       ['프로필', `tap($('.tab', 2))`],
       ['숙련도 열기', `tap($('.profilerow .iconbtn'))`],
@@ -97,7 +88,6 @@ const FLOWS = [
   },
   {
     name: '세션 수정',
-    url: DEMO,
     steps: [
       ['기록', `tap($('.tab', 1))`],
       ['세션 열기', `$('.sessionrow').click()`],
@@ -108,7 +98,6 @@ const FLOWS = [
   },
   {
     name: '첫 실행',
-    url: FRESH,
     fresh: true,
     steps: [
       ['빈 상태', null],
@@ -116,26 +105,35 @@ const FLOWS = [
       ['검색', `const i = $('.field[type=search]'); i.value = '더클라임';
                i.dispatchEvent(new Event('input', { bubbles: true }))`],
       ['짐 선택', `tap($('.gymrow__pick'))`],
-      ['프로필 고르기', `tap(byText('.btn', '프로필'))`],
-      ['새 참가자', `tap(byText('.modal .btn', '새 참가자'))`],
+      // 색 순서 확인 배너가 먼저 뜬다. 버튼 이름은 '프로필' 이 아니라 '참가자 추가' 다.
+      ['색 순서 확인', `const ok = byText('.btn', '맞아요'); if (ok) tap(ok)`],
+      ['참가자 추가', `tap(byText('.btn', '참가자 추가'))`],
       ['이름 입력 후 추가', `const i = $('.modal .field'); i.value = '나';
                           i.dispatchEvent(new Event('input', { bubbles: true }));
                           await wait(200); tap(byText('.modal .btn', '추가'))`],
-      ['첫 완등 기록', `tap($('.gcard', 2))`],
+      ['첫 완등 기록', `tap($('.grid__row button', 2))`],
     ],
   },
 ];
 
-for (const f of readdirSync(OUT)) { if (f.endsWith('.png')) unlinkSync(`${OUT}/${f}`); }
+// 이름을 걸러 한 흐름만 돌릴 때도 전부 지우고 있었다. 아무것도 안 맞으면
+// 남아 있던 스트립까지 사라져, 방금 지운 걸 다시 찍어야 했다. 돌릴 것만 지운다.
+const targets = FLOWS.filter((f) => !filter || f.name.includes(filter));
+if (!targets.length) {
+  console.log(`'${filter}' 와 맞는 흐름이 없습니다: ${FLOWS.map((f) => f.name).join(', ')}`);
+  process.exit(1);
+}
+for (const f of readdirSync(OUT)) {
+  if (!f.endsWith('.png')) continue;
+  if (targets.some((t) => f.includes(t.name.replace(/\s/g, '')))) unlinkSync(`${OUT}/${f}`);
+}
 
-for (const flow of FLOWS) {
-  if (filter && !flow.name.includes(filter)) continue;
+for (const flow of targets) {
   const page = await (await launch({ width: 414, height: 896, dark: true })).connect();
   const frames = [];
   try {
-    await page.goto(flow.url, { wait: 700 });
-    if (flow.fresh) { await page.eval(() => localStorage.clear()); }
-    await page.goto(flow.url, { wait: 2400 });
+    // 데모가 아니라 실제 앱을 눌러서 상태를 만든다 (seed.mjs 주석 참고)
+    await open(page, { seed: !flow.fresh, sleep });
 
     for (const [label, code] of flow.steps) {
       if (code && code !== 'null') {

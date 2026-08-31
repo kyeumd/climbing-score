@@ -3,6 +3,7 @@ import { h, panel, button, icon, onPressAndHold, eyebrow } from './components.js
 import { hold } from './hold.js';
 import { activeGrades } from '../domain/gym.js';
 import { scoreFor } from '../domain/scoring.js';
+import { josa, levelLabel } from '../domain/text.js';
 import { findSession, createSession, bumpCount, scoreOf, sendsOf } from '../domain/session.js';
 
 export function viewMatch(ctx) {
@@ -57,7 +58,7 @@ function verifyBanner({ actions }, gym) {
           gym.grades.slice().sort((a, b) => a.order - b.order).map((g) => hold(g, { size: 20, bolt: false }))),
       ),
       h('p', { class: 'hint' },
-        gym.gradesSource ? '아직 확인되지 않았어요. 클라이밍 기록 앱 자료를 참고했습니다.'
+        gym.gradesSource ? '아직 확인되지 않았어요. 클라이밍 기록 앱 자료를 참고했어요.'
                          : '아직 확인되지 않았어요.'),
     ),
     h('div', { class: 'banner__actions' },
@@ -74,10 +75,10 @@ function noGrades({ actions }, gym) {
     h('h2', { class: 'title', style: { marginTop: '0.5rem' } }, '난이도 색을 먼저 등록해 주세요'),
     h('p', { class: 'subtitle', style: { margin: '0.5rem 0 1.25rem' } },
       kinds
-        ? `${gym.name}은 ${kinds} 중심으로 알려진 곳이라 색 등급 자료가 없습니다. 색으로 난이도를 나눈다면 벽에 붙은 안내판 순서대로 넣어 주세요.`
-        : `${gym.name}의 색 체계는 공개 자료가 없습니다. 벽에 붙은 안내판 순서대로 넣어 주세요.`),
+        ? `${gym.name}${josa(gym.name, '은/는')} ${kinds} 중심으로 알려진 곳이라 색 등급 자료가 없어요. 색으로 난이도를 나눈다면 벽에 붙은 안내판 순서대로 넣어 주세요.`
+        : `${gym.name}의 색 체계는 공개 자료가 없어요. 벽에 붙은 안내판 순서대로 넣어 주세요.`),
     button('난이도 설정하기', {
-      onClick: () => actions.openGymSettings(gym.id), variant: 'solid', trailing: 'arrow',
+      onClick: () => actions.openGymSettings(gym.id), variant: 'solid', trailing: 'next',
     }),
   );
 }
@@ -89,15 +90,21 @@ function emptyGym({ state, actions }) {
     eyebrow('시작'),
     h('h2', { class: 'title', style: { marginTop: '0.5rem' } }, '오늘 어디서 하나요?'),
     h('p', { class: 'subtitle', style: { margin: '0.5rem 0 1.25rem' } },
-      `서울 실내 클라이밍장 ${state.gyms.filter((g) => !g.archived).length}곳이 들어 있습니다. 목록에 없으면 직접 추가할 수 있어요.`),
-    button('클라이밍장 고르기', { onClick: actions.openGymPicker, variant: 'solid', trailing: 'arrow' }),
+      `서울 실내 클라이밍장 ${state.gyms.filter((g) => !g.archived).length}곳이 들어 있어요. 목록에 없으면 직접 추가할 수 있어요.`),
+    button('클라이밍장 고르기', { onClick: actions.openGymPicker, variant: 'solid', trailing: 'next' }),
     ),
   );
 }
 
 /* ---------- 입력 격자: 난이도 x 참가자 ---------- */
 
-/** 첫 칸은 난이도 이름, 나머지는 참가자 수만큼 균등 분할 */
+/**
+ * 첫 칸은 난이도 이름, 나머지는 참가자 수만큼 균등 분할.
+ *
+ * 참가자 칸에 상한을 걸어 봤지만 1명일 때 오히려 나빴다. 칸이 좁아진 만큼
+ * 난이도 이름과 칸 사이의 빈 띠가 넓어져, 이름과 칸을 잇는 눈길이 더 멀어진다.
+ * 칸을 늘려 두고 안을 채우는 편이 낫다(cell 참고).
+ */
 function tpl(n) {
   const first = n >= 4 ? 60 : n === 3 ? 72 : 84;
   return `minmax(${first}px, ${n >= 4 ? 0.8 : 1}fr) repeat(${n}, minmax(0, 1fr))`;
@@ -117,7 +124,7 @@ function inputGrid({ state, actions }, gym, grades) {
         eyebrow('참가자 없음'),
         h('h2', { class: 'title', style: { margin: '0.4rem 0 0.35rem' } }, '누가 오늘 같이 하나요'),
         h('p', { class: 'subtitle', style: { marginBottom: '1rem' } },
-          '참가자를 추가하면 여기에서 바로 완등을 기록할 수 있습니다.'),
+          '참가자를 추가하면 여기에서 바로 완등을 기록할 수 있어요.'),
         button('참가자 추가', { onClick: actions.openProfilePicker, variant: 'solid', trailing: 'plus' }),
       ),
     );
@@ -147,9 +154,10 @@ function inputGrid({ state, actions }, gym, grades) {
     h('div', { class: 'section-head' },
       h('div', {},
         eyebrow('오늘의 기록'),
-        h('p', { class: 'hint', style: { marginTop: '0.3rem' } }, '탭하면 +1, 길게 누르면 −1'),
+        // 칸에 '+34점' 이 함께 뜨므로, 탭이 올리는 게 개수라는 걸 못 박아 준다
+        h('p', { class: 'hint', style: { marginTop: '0.3rem' } }, '탭하면 완등 +1, 길게 누르면 −1'),
       ),
-      button('참가자', { onClick: actions.openProfilePicker, small: true, trailing: 'plus' }),
+      button('참가자 추가', { onClick: actions.openProfilePicker, small: true, trailing: 'plus' }),
     ),
     h('div', { class: 'grid' },
       // 머리글: 사람 이름과 현재 점수
@@ -164,13 +172,15 @@ function inputGrid({ state, actions }, gym, grades) {
             title: `${r.profile.name} 숙련도 바꾸기`,
           },
             h('span', { class: 'grid__top' },
-              rows.length > 1 && r.score > 0
+              // 0점인 사람만 배지를 빼면 그 칸만 모양이 달라진다.
+              // 아무도 기록이 없을 때만 순위를 감춘다.
+              rows.length > 1 && lead > 0
                 ? h('span', { class: `grid__rank num${top ? ' is-first' : ''}` }, `${rank}위`)
                 : null,
               h('span', { class: 'grid__name' }, r.profile.name),
             ),
             h('span', { class: 'grid__score num' }, r.score.toLocaleString('ko-KR')),
-            h('span', { class: 'hint num' }, `LV${r.level}`),
+            h('span', { class: 'hint num' }, levelLabel(r.level)),
           );
         }),
       ),
@@ -187,8 +197,8 @@ function inputGrid({ state, actions }, gym, grades) {
     ),
     rows.length > 1 && h('p', { class: 'hint', style: { marginTop: 'var(--sp-3)' } },
       lead > 0 && lead > (ordered[1]?.score ?? 0)
-        ? `${ordered[0].profile.name}이 ${(lead - ordered[1].score).toLocaleString('ko-KR')}점 앞서고 있어요.`
-        : lead > 0 ? '동점입니다.' : '아직 기록이 없어요.'),
+        ? `${ordered[0].profile.name}${josa(ordered[0].profile.name, '이/가')} ${(lead - ordered[1].score).toLocaleString('ko-KR')}점 앞서고 있어요.`
+        : lead > 0 ? '동점예요.' : '아직 기록이 없어요.'),
   );
 }
 
@@ -200,8 +210,14 @@ function cell({ grade, profile, level, session, gym, actions }) {
     type: 'button',
     'aria-label': `${profile.name} ${grade.label} ${count}개, 한 개당 ${unit}점`,
   },
-    h('span', { class: 'cell__count num' }, count || ''),
-    h('span', { class: 'cell__unit hint num' }, count ? '' : `${unit.toLocaleString('ko-KR')}`),
+    // 개당 점수는 늘 '+34점' 으로 적는다. 예전에는 기록이 없을 때만 '110점' 을
+    // 띄웠는데, 완등 110개로 읽는 사람이 있었다. + 를 붙이면 누르면 오르는 값이라는
+    // 뜻이 분명해지고, 굵은 개수와도 헷갈리지 않는다.
+    // 칸이 넓으면 한 줄로, 좁으면 위아래로 접힌다(flex-wrap).
+    h('span', { class: 'cell__body' },
+      count ? h('span', { class: 'cell__count num' }, String(count)) : null,
+      h('span', { class: 'cell__unit num' }, `+${unit.toLocaleString('ko-KR')}점`),
+    ),
   );
   onPressAndHold(el, {
     onTap: () => actions.bump(session, grade.id, +1),

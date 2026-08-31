@@ -46,8 +46,19 @@ function outlineFor(hex) {
 }
 
 /** 등급 순서마다 다른 홀드 모양. 같은 짐 안에서 형태가 반복되지 않는다. */
-export function holdShape(order) {
-  return SHAPES[order % SHAPES.length];
+/**
+ * 모양은 색 이름으로 정한다.
+ *
+ * 예전에는 난이도 순서(order)로 골랐다. 그러면 같은 초록이라도 목록에서는
+ * 4번째라 타원, 팔레트에서는 7번째라 삼각형으로 나와 화면마다 생김새가
+ * 달라졌다. 모양이 색을 알아보는 단서인데 그 역할을 못 했다.
+ * 이름을 해시해 고르면 어디서 그리든 같은 색은 같은 모양이 된다.
+ */
+export function holdShape(label, fallbackOrder = 0) {
+  if (typeof label !== 'string' || !label) return SHAPES[fallbackOrder % SHAPES.length];
+  let hash = 0;
+  for (let i = 0; i < label.length; i++) hash = (hash * 31 + label.charCodeAt(i)) | 0;
+  return SHAPES[Math.abs(hash) % SHAPES.length];
 }
 
 /**
@@ -57,7 +68,7 @@ export function holdShape(order) {
  */
 export function hold(grade, { size = 22, bolt = true } = {}) {
   const ns = 'http://www.w3.org/2000/svg';
-  const shape = holdShape(grade.order ?? 0);
+  const shape = holdShape(grade.label, grade.order ?? 0);
 
   const svg = document.createElementNS(ns, 'svg');
   svg.setAttribute('viewBox', '0 0 24 24');

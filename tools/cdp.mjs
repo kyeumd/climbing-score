@@ -4,20 +4,48 @@
  * dump-dom과 달리 "진짜로 눌러본" 결과를 얻는다.
  */
 import { spawn } from 'node:child_process';
-import { writeFileSync } from 'node:fs';
+import { writeFileSync, readFileSync, rmSync, existsSync } from 'node:fs';
 
 const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 let launchSeq = 0;
 
-export async function launch({ port = 9333, width = 414, height = 896, dark = true } = {}) {
-  // 포트와 프로필을 매번 새로 잡는다. 공유하면 두 번째 실행이 기존 브라우저에
-  // 탭만 열고 끝나서, 내가 보는 페이지와 실제 페이지가 어긋난다.
-  port = port + (launchSeq % 200);
+/*
+ * 띄운 브라우저를 전부 기억해 두고 프로세스가 끝날 때 정리한다.
+ * 스크립트가 중간에 던지면 close() 가 실행되지 않아 헤드리스 크롬이 살아남는데,
+ * 그게 쌓이면 다음 실행이 그 좀비에 붙어 버린다. 그러면 방금 만든 화면이 아니라
+ * 남의 화면을 검사하게 되고, 도구는 아무 문제 없다고 보고한다.
+ */
+const alive = new Set();
+let cleanupHooked = false;
+function hookCleanup() {
+  if (cleanupHooked) return;
+  cleanupHooked = true;
+  const bye = () => { for (const p of [...alive]) kill(p); };
+  process.on('exit', bye);
+  for (const sig of ['SIGINT', 'SIGTERM']) process.on(sig, () => { bye(); process.exit(1); });
+  process.on('uncaughtException', (e) => { bye(); throw e; });
+}
+
+function kill(handle) {
+  alive.delete(handle);
+  try { handle.proc.kill('SIGKILL'); } catch {}
+  try {
+    if (handle.profile && existsSync(handle.profile)) {
+      rmSync(handle.profile, { recursive: true, force: true });
+    }
+  } catch {}
+}
+
+export async function launch({ width = 414, height = 896, dark = true } = {}) {
+  hookCleanup();
+  // 포트를 직접 고르지 않는다. 0 을 주면 크롬이 빈 포트를 잡고 그 번호를
+  // DevToolsActivePort 파일에 적어 준다. 번호를 우리가 정하면 앞선 실행이 남긴
+  // 브라우저와 충돌해, 새로 띄운 줄 알고 옛 브라우저를 조종하게 된다.
   const profile = `/tmp/cdp-climbing-${process.pid}-${launchSeq++}`;
   const args = [
-    `--remote-debugging-port=${port}`,
+    '--remote-debugging-port=0',
     '--headless=new', '--disable-gpu', '--no-first-run', '--no-default-browser-check',
     '--hide-scrollbars', `--user-data-dir=${profile}`, '--disable-application-cache',
     `--window-size=${width},${height}`,
@@ -25,23 +53,37 @@ export async function launch({ port = 9333, width = 414, height = 896, dark = tr
     'about:blank',
   ];
   const proc = spawn(CHROME, args, { stdio: 'ignore' });
+  const handle = { proc, profile };
+  alive.add(handle);
+
+  const portFile = `${profile}/DevToolsActivePort`;
+  let port = null;
+  for (let i = 0; i < 100; i++) {
+    await sleep(100);
+    try {
+      const first = readFileSync(portFile, 'utf8').split('\n')[0].trim();
+      if (first) { port = Number(first); break; }
+    } catch {}
+  }
+  if (!port) { kill(handle); throw new Error('Chrome이 포트를 열지 못했습니다'); }
 
   let target = null;
   for (let i = 0; i < 60; i++) {
-    await sleep(200);
     try {
       const list = await (await fetch(`http://127.0.0.1:${port}/json/list`)).json();
       target = list.find((t) => t.type === 'page');
       if (target) break;
     } catch {}
+    await sleep(150);
   }
-  if (!target) throw new Error('Chrome에 붙지 못했습니다');
-  return new Page(proc, target.webSocketDebuggerUrl, { width, height }, dark);
+  if (!target) { kill(handle); throw new Error('Chrome에 붙지 못했습니다'); }
+  return new Page(handle, target.webSocketDebuggerUrl, { width, height }, dark);
 }
 
 class Page {
-  constructor(proc, wsUrl, viewport, dark = true) {
-    this.proc = proc;
+  constructor(handle, wsUrl, viewport, dark = true) {
+    this.handle = handle;
+    this.proc = handle.proc;
     this.wsUrl = wsUrl;
     this.viewport = viewport;
     this.dark = dark;
@@ -89,19 +131,41 @@ class Page {
     return this;
   }
 
-  send(method, params = {}) {
+  /*
+   * 타임아웃이 15초였다. 기계가 바쁘면(로드 90 넘는 상황을 실제로 봤다) 멀쩡한
+   * Runtime.evaluate 도 그 안에 답을 못 준다. 그러면 도구는 '검사 실패'라고 적는데,
+   * 앱에는 아무 문제가 없다. 도구가 거짓말을 하는 또 하나의 방식이다.
+   * 진짜로 멈춘 경우는 어차피 60초를 넘기므로 넉넉히 준다.
+   */
+  send(method, params = {}, { timeout = 60000 } = {}) {
     const id = ++this.id;
     return new Promise((resolve, reject) => {
       this.pending.set(id, { resolve, reject });
       this.ws.send(JSON.stringify({ id, method, params }));
       setTimeout(() => {
-        if (this.pending.has(id)) { this.pending.delete(id); reject(new Error(`timeout: ${method}`)); }
-      }, 15000);
+        if (this.pending.has(id)) {
+          this.pending.delete(id);
+          reject(new Error(`timeout: ${method} (${timeout / 1000}초). 기계가 바쁜지 확인하세요`));
+        }
+      }, timeout);
     });
   }
 
+  /*
+   * 고정 대기 뒤에 바로 localStorage 를 만지면, 기계가 바쁠 때 아직 about:blank 에
+   * 머물러 있어 SecurityError 가 난다. 실제로 라이트 테마 8개 화면이 그렇게 죽었다.
+   * 몇 밀리초를 기다릴지 찍는 대신 도착을 확인한다.
+   */
   async goto(url, { wait = 900 } = {}) {
     await this.send('Page.navigate', { url });
+    if (/^https?:/.test(url)) {
+      const base = url.split('#')[0].split('?')[0];
+      for (let i = 0; i < 80; i++) {
+        const here = await this.eval(() => location.href).catch(() => '');
+        if (here.startsWith(base)) break;
+        await sleep(100);
+      }
+    }
     await sleep(wait);
   }
 
@@ -233,7 +297,7 @@ class Page {
 
   async close() {
     try { this.ws?.close(); } catch {}
-    this.proc.kill();
+    kill(this.handle);
   }
 }
 
