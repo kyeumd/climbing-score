@@ -529,11 +529,29 @@ ul { margin: 0; padding: 0; list-style: none; }
   .editrow { padding: 0.3rem 0; }
 }
 
+/*
+ * 바텀 시트.
+ *
+ * 예전에는 카드와 똑같은 --core 표면에 카드와 똑같은 그림자였다. 그래서 화면
+ * 위로 떠오른 게 아니라 '아래에 놓인 또 하나의 회색 상자'로 보였다.
+ * 셋을 바꾼다 — 표면을 한 단 올리고(--bg-elevated), 그림자를 들어올리고,
+ * 위쪽에 1px 하이라이트를 넣어 모서리에 빛이 걸리게 한다.
+ */
 .modal__sheet {
   width: 100%; max-width: 560px; max-height: 92dvh;
   display: flex; flex-direction: column;
   transform: translateY(16px);
   transition: transform var(--dur-move) var(--ease-spring);
+}
+.modal__sheet > .core {
+  background: var(--bg-elevated);
+  box-shadow: var(--ambient-lift), inset 0 1px 0 rgba(255, 246, 230, 0.08);
+}
+/* 손잡이. 바텀 시트는 잡아 내릴 수 있다는 신호가 있어야 시트로 읽힌다 */
+.modal__sheet > .core::before {
+  content: ''; align-self: center; flex: 0 0 auto;
+  width: 36px; height: 4px; margin: -0.35rem 0 var(--sp-4);
+  border-radius: 2px; background: var(--track);
 }
 .modal.is-open .modal__sheet { transform: translateY(0); }
 .modal__sheet > .core {
@@ -544,11 +562,16 @@ ul { margin: 0; padding: 0; list-style: none; }
   display: flex; flex-direction: column;
   min-height: 0; overflow-y: auto; overscroll-behavior: contain;
 }
+/* 제목과 내용이 같은 여백으로 떨어져 있어 어디까지가 머리인지 알 수 없었다.
+   실선 하나로 가른다. 여백만으로 가르려면 여백이 훨씬 커야 한다. */
 .modal__head {
   flex: 0 0 auto;
   display: flex; align-items: center; justify-content: space-between;
-  gap: var(--sp-3); margin-bottom: var(--sp-4);
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-4); padding-bottom: var(--sp-3);
+  border-bottom: 1px solid var(--shell-line);
 }
+.modal__head .title { font-size: 1.25rem; letter-spacing: -0.028em; }
 @media (min-width: 640px) { .modal { align-items: center; } }
 
 /* ============================================================

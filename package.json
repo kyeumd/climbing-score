@@ -19,6 +19,7 @@
     "audit:modal": "node tools/modal-audit.mjs"
   },
   "devDependencies": {
-    "axe-core": "^4.13.0"
+    "axe-core": "^4.13.0",
+    "vanilla-calendar-pro": "^3.3.1"
   }
 }
