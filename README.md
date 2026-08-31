@@ -78,9 +78,10 @@ tools/        검증용 페이지 (앱 코드 아님)
 한 장으로 합쳐서 훑고, 이상한 칸만 원본으로 확대해서 본다.
 
 ```bash
-npm run review          # 전 화면·모달 22종을 한 장의 컨택트 시트로  → tools/shots/_sheet.png
+npm run review          # 전 화면·모달 25종 캡처                     → tools/shots/dark/
 npm run review:light    # 라이트 테마
 npm run review:small    # 360x640 좁은 화면
+npm run review:grid     # 참가자 1~5명일 때의 입력 격자             → tools/shots/grid-dark/
 npm run flow            # 상호작용 흐름 7종을 스텝별 스트립으로      → tools/flows/_all.png
 npm run flow 완등       # 특정 흐름만
 ```
@@ -90,20 +91,35 @@ npm run flow 완등       # 특정 흐름만
 
 ### 왜 이렇게까지 하는가
 
-이전에 자동 검사가 "0건"이라고 해서 넘어갔다가 놓친 것들이 있다. 원인은 넷이었다.
+이전에 자동 검사가 "0건"이라고 해서 넘어갔다가 놓친 것들이 있다.
+전부 **도구가 엉뚱한 것을 보고 있었다**는 한 가지 이야기다.
 
 | 원인 | 대책 |
 |---|---|
 | 서버가 `Cache-Control`을 안 보내 고쳐도 브라우저는 옛 화면을 렌더 | `tools/dev-server.py` (no-store) |
-| 검사용 브라우저가 프로필을 공유해 옛 페이지를 검사 | 실행마다 프로필·포트 분리 + CDP 캐시 끄기 |
+| 검사용 브라우저가 프로필을 공유해 옛 페이지를 검사 | 실행마다 프로필 분리 + CDP 캐시 끄기 |
+| 스크립트가 던지면 헤드리스 크롬이 살아남아, 다음 실행이 **좀비의 탭에 붙어** 남의 화면을 검사 | `--remote-debugging-port=0` 으로 크롬이 포트를 고르게 하고, `exit`·`SIGINT`·예외에서 전부 정리 |
+| 감사기가 `tools/demo.html` 을 열어, 데모에만 있는 문제를 보고하고 **실제 앱은 한 번도 안 봄** | 시드·조작 코드를 `tools/seed.mjs` 로 모아 세 도구가 실제 앱을 누른다 |
+| 시드가 늘 참가자 1명이라 **여럿일 때의 격자를 검토 루프가 못 봄** | `tools/shot-grid.mjs` 로 1~5명을 각각, 감사기에도 3명 화면 추가 |
+| 시드가 늘 같은 상태만 만들어 **확인 배너·색 없는 짐·즐겨찾기·은퇴 등급을 한 번도 안 봄** | 시드에 갈래(`gym`·`confirm`·`record`)를 주고 장면 5개 추가. 넣자마자 모달이 겹겹이 쌓이는 버그가 나왔다 |
+| 죽은 CSS·죽은 선택자가 "처리돼 있다"는 인상을 줌 (`iconbtn--danger` 는 아무 효과도 없었다) | 클래스와 코드를 대조해 25개 제거, 감사기 선택자도 정리 |
+| e2e 페이지가 사라진 UI를 단정 (열어 봐야만 알 수 있음) | `npm run e2e` 로 헤드리스 자동 실행 |
+| **개발 서버가 죽으면** 화면마다 다른 오류가 쏟아져 앱 문제로 보임 (실제로 19건) | `seed.mjs` 가 시작할 때 한 번 확인하고, 안 되면 띄우는 명령과 함께 멈춘다 |
+| 탐색 후 고정 대기 → 바쁠 때 `about:blank` 에서 다음 줄이 실행됨 | `goto` 가 도착을 확인한다 |
 | 뷰포트 하나만 검사 (문제는 좁은 화면에서만 발생) | `review:small`, 감사기 뷰포트 3종 |
 | `getBoundingClientRect`로 클리핑 여부를 *추정* | `document.elementFromPoint`로 브라우저에 직접 질의 |
+| 규칙이 오탐을 쏟아 내 진짜가 묻힘 (고정 바 가림 164건, 한 글자 버튼의 줄간격) | 고정 바 가림은 세어서 넘기고 **건수를 출력**, 줄 수는 `Range` 로 실측 |
 
 ## 테스트
 
 ```bash
-npm test                      # 도메인 로직 19개
+npm test                      # 도메인 로직 28개
+npm run e2e                   # 페이지 E2E — 기록 흐름·세션 수정 (헤드리스, 20개 단정)
 ```
+
+`e2e` 는 반드시 자동으로 돌린다. 브라우저로 직접 열어야만 결과가 보이던 시절에는
+아무도 열지 않았고, 몇 번의 UI 개편 전에 사라진 클래스를 붙들고 조용히 실패한 채 남아 있었다.
+기대 점수는 상수로 박지 않고 `domain` 에서 계산한다.
 
 ```bash
 npm run scrape                # 암장 목록·난이도 재수집 (tools/cache에 캐시)
@@ -125,13 +141,12 @@ npm run audit:a11y            # axe-core 접근성 감사 (agent-browser 필요)
 브라우저 동작은 `tools/`의 페이지로도 확인합니다.
 
 ```bash
-# 시나리오 데이터가 채워진 데모
-open "http://localhost:8080/tools/demo.html"
-open "http://localhost:8080/tools/demo.html?theme=light&route=stats"
-
 # 상호작용 E2E (콘솔 대신 페이지 하단에 결과가 찍힘)
 open "http://localhost:8080/tools/e2e-record.html"
 open "http://localhost:8080/tools/e2e-editor.html"
+
+# 눈으로 볼 데모. 자동 검사에는 쓰지 않는다 (실제 앱과 마크업이 다르다)
+open "http://localhost:8080/tools/demo.html?theme=light&route=stats"
 ```
 
 `demo.html` 파라미터: `theme=light`, `route=stats|profile|gym|scoreTable|picker`, `gym=<이름 일부>`
