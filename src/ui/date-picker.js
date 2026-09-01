@@ -23,14 +23,21 @@ export function prettyDate(iso) {
   return `${m}월 ${d}일 (${WEEK[dt.getDay()]})`;
 }
 
-export function openDatePicker({ state, actions }) {
+/**
+ * 기본값은 기록 화면의 날짜(state.ui.date)를 바꾸는 것이다.
+ * 세션 편집처럼 다른 값을 고쳐야 하는 곳은 value/onPick 을 넘긴다.
+ * 그래야 앱 안에 네이티브 <input type=date> 가 하나도 남지 않는다.
+ */
+export function openDatePicker({ state, actions }, { value, onPick } = {}) {
+  const current = value ?? state.ui.date;
+  const commit = onPick ?? ((iso) => actions.setDate(iso));
   const mount = h('div', { class: 'datepick' });
   const sheet = modal('날짜 고르기',
     h('div', {},
       mount,
       h('div', { class: 'datepick__foot' },
         button('오늘로', {
-          onClick: () => { actions.setDate(localDate()); sheet.close(); },
+          onClick: () => { commit(localDate()); sheet.close(); },
           small: true,
         }),
       ),
@@ -38,16 +45,18 @@ export function openDatePicker({ state, actions }) {
   );
 
   const cal = new Calendar(mount, {
-    selectedDates: [state.ui.date],
+    selectedDates: [current],
     // 미래 기록은 만들 수 없다. 오늘까지만 고를 수 있게 한다.
+    // 옵션 이름은 dateMax 다. disableDatesAfter 로 적었더니 라이브러리가
+    // 모르는 키를 조용히 버려서, 다음 달 날짜도 그대로 눌렸다.
     displayDatesOutside: false,
-    disableDatesAfter: localDate(),
+    dateMax: localDate(),
     locale: 'ko-KR',
     firstWeekday: 0,
     onClickDate(self) {
       const picked = self.context.selectedDates[0];
       if (!picked) return;
-      actions.setDate(picked);
+      commit(picked);
       sheet.close();
     },
   });

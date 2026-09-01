@@ -15,6 +15,15 @@
   --shell:         rgba(60, 48, 32, 0.04);   /* Double-Bezel 외곽 셸 */
   --shell-line:    rgba(60, 48, 32, 0.10);
   --core:          #FFFEFB;                  /* Double-Bezel 내부 코어 */
+  /* 지금 컨테이너의 표면. 시트 안에서는 시트 색으로 덮어쓴다.
+     스티키 바가 이 값을 따르지 않으면 시트 위에 색이 다른 띠가 떠 보인다. */
+  --surface:       var(--core);
+  /* 입력칸은 표면보다 한 단 아래로 파여야 '적는 곳'으로 읽힌다.
+     흰 시트 위에 흰 입력칸은 1px 테두리 말고는 존재감이 없었다. */
+  --sunken:        #F0EDE6;
+  --sunken-line:   rgba(60, 48, 32, 0.16);
+  --sunken-inset:  inset 0 1px 2px rgba(60, 48, 32, 0.07);
+  --shell-hover:   #F1EEE7;   /* 버튼 호버. --shell 은 반투명이라 겹치면 탁해진다 */
   --core-line:     rgba(60, 48, 32, 0.06);
   --core-inset:    inset 0 1px 0 rgba(255, 255, 255, 0.9);
   --ink:           #191713;
@@ -75,6 +84,10 @@
     --shell:         rgba(255, 246, 230, 0.05);
     --shell-line:    rgba(255, 246, 230, 0.16);
     --core:          #1D1B18;
+    --sunken:        #121110;   /* 시트(#191714)보다 한 단 아래. 더 어두우면 구멍이 아니라 검은 상자가 된다 */
+    --sunken-line:   rgba(255, 246, 230, 0.11);
+    --sunken-inset:  inset 0 1px 2px rgba(0, 0, 0, 0.5);
+    --shell-hover:   #262320;
     --core-line:     rgba(255, 246, 230, 0.075);
     --core-inset:    inset 0 1px 0 rgba(255, 246, 230, 0.07);
     --ink:           #F4F0E8;   /* 분필 흰색 */

@@ -5,7 +5,7 @@
  * 찾으므로("강남"만 쳐도 강남구 짐이 나온다) 드롭다운은 같은 일을 두 번
  * 하는 셈이고, 25개 항목짜리 네이티브 select는 손으로 고르기도 나쁘다.
  *
- * 대신 자주 가는 곳(★)을 맨 위에 따로 모은다. 목록이 110곳이라 스크롤로
+ * 대신 자주 가는 곳(★)을 맨 위에 따로 모은다. 목록이 112곳이라 스크롤로
  * 찾는 것보다 그게 훨씬 빠르다.
  */
 import { h, button, icon, modal } from './components.js';
@@ -98,7 +98,7 @@ function gymRow(gym, { state, actions }, close, refresh) {
   const noGrades = gym.grades.length === 0;
   // 색 등급을 안 쓰는 암장이다. "난이도 미등록"으로 적으면 데이터가 빠진 줄 안다.
   const kinds = gym.kinds?.length ? gym.kinds.join('·') : null;
-  // 110곳 목록에서 지금 어디를 보고 있는지 표시가 없으면, 바꾸러 왔다가 길을 잃는다
+  // 112곳 목록에서 지금 어디를 보고 있는지 표시가 없으면, 바꾸러 왔다가 길을 잃는다
   const current = gym.id === state.ui.gymId;
   return h('li', { class: 'gymrow' },
     h('button', {

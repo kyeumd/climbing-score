@@ -86,12 +86,16 @@ export function openLevels(profile, { actions }) {
     const next = Math.max(0, Math.min(MAX_LEVEL, v));
     readout.textContent = levelLabel(next);
     slider.value = next;
+    // 트랙은 한 덩어리라 채운 만큼을 CSS 로 알려 줘야 한다.
+    // 안 그러면 Lv.0 과 Lv.8 의 막대가 똑같이 생긴다.
+    slider.style.setProperty('--pct', `${(next / MAX_LEVEL) * 100}%`);
     actions.setLevel(profile.id, next);
   };
 
   const slider = h('input', {
     class: 'levelpick__slider', type: 'range', min: 0, max: MAX_LEVEL, step: 1, value: current,
     'aria-label': '내 숙련도 레벨',
+    style: { '--pct': `${(current / MAX_LEVEL) * 100}%` },
     oninput: (e) => apply(Number(e.target.value)),
   });
 

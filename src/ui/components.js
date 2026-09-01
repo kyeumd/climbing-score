@@ -159,14 +159,42 @@ export function onPressAndHold(el, { onTap, onHold, delay = 250 }) {
 /** 모달. backdrop-blur는 고정 요소에만 허용된다(성능 가드레일). */
 let modalSeq = 0;
 
+/* 시트 안에서 탭으로 옮겨 다닐 수 있는 것들. 순서는 DOM 순서를 따른다. */
+const FOCUSABLE = 'a[href], button:not(:disabled), input:not(:disabled), '
+  + 'select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])';
+
 export function modal(title, body, { onClose } = {}) {
+  // 닫은 뒤에는 열기 전에 있던 자리로 돌려보낸다. 안 그러면 포커스가 <body> 로
+  // 떨어져, 키보드 사용자는 탭을 처음부터 다시 눌러 내려와야 한다.
+  const restoreTo = document.activeElement;
   const close = () => {
     wrap.remove();
     unlockScroll();
     document.removeEventListener('keydown', onKey);
+    if (restoreTo?.isConnected) restoreTo.focus();
     onClose?.();
   };
-  const onKey = (e) => { if (e.key === 'Escape') close(); };
+  /*
+   * aria-modal="true" 만 적어 두고 실제로는 아무것도 막지 않고 있었다.
+   * 짐 선택기에서 탭을 누르면 시트 뒤의 기록 격자(.cell)와 탭바로 빠져나가,
+   * 보이지도 않는 곳에 포커스가 서 있었다. 여기서 가둔다.
+   *
+   * 모달이 겹쳐 열릴 수 있으므로(세션 편집 → 날짜 고르기) 맨 위 시트만 처리한다.
+   */
+  const onKey = (e) => {
+    if (document.querySelector('.modal:last-of-type') !== wrap) return;
+    if (e.key === 'Escape') { close(); return; }
+    if (e.key !== 'Tab') return;
+    const items = [...sheet.querySelectorAll(FOCUSABLE)]
+      .filter((el) => el.offsetParent !== null || el === document.activeElement);
+    if (!items.length) return;
+    const first = items[0];
+    const last = items[items.length - 1];
+    const here = document.activeElement;
+    if (!sheet.contains(here)) { e.preventDefault(); (e.shiftKey ? last : first).focus(); return; }
+    if (e.shiftKey && here === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && here === last) { e.preventDefault(); first.focus(); }
+  };
   document.addEventListener('keydown', onKey);
 
   const titleId = `modal-title-${++modalSeq}`;
@@ -189,7 +217,14 @@ export function modal(title, body, { onClose } = {}) {
   // 모달이 열린 채 뒤 페이지가 스크롤되면 배경이 밀려 어지럽다.
   // 스크롤 위치를 고정하고 닫을 때 되돌린다.
   lockScroll();
-  requestAnimationFrame(() => wrap.classList.add('is-open'));
+  requestAnimationFrame(() => {
+    wrap.classList.add('is-open');
+    // 열자마자 포커스를 시트 안으로 들여놓는다. 검색창이 있으면 거기가 목적지다.
+    const target = sheet.querySelector('input[type=search]')
+      ?? sheet.querySelector('.modal__body ' + FOCUSABLE)
+      ?? sheet.querySelector(FOCUSABLE);
+    target?.focus({ preventScroll: true });
+  });
   return { close, el: wrap };
 }
 

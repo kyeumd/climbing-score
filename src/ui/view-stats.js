@@ -37,7 +37,7 @@ export function viewStats(ctx) {
   const h2h = headToHead({ sessions: state.sessions, gym, profileId: profile.id, profiles: state.profiles });
 
   /*
-   * 예전에는 등록된 짐 110곳을 전부 칩으로 깔았다. 기록이 있는 곳은 하나뿐인데
+   * 예전에는 등록된 짐 112곳을 전부 칩으로 깔았다. 기록이 있는 곳은 하나뿐인데
    * 나머지 109개를 누르면 빈 화면이 나오고, 정작 지금 보고 있는 짐의 칩은
    * 가로 스크롤 저 너머에 있어 화면에 없었다. 기록이 있는 곳만 남긴다.
    */

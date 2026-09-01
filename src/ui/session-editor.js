@@ -1,15 +1,17 @@
 /** 과거 세션 편집 (설계서 7.3절). 잘못 기록한 날을 고치는 유일한 경로. */
-import { h, button, modal } from './components.js';
+import { h, button, icon, modal } from './components.js';
 import { hold } from './hold.js';
 import { allGrades } from '../domain/gym.js';
 import { scoreFor } from '../domain/scoring.js';
 import { scoreOf } from '../domain/session.js';
+import { openDatePicker, prettyDate } from './date-picker.js';
 
 export function openSessionEditor(session, gym, ctx) {
   const { actions } = ctx;
   let draft = { ...session, counts: { ...session.counts } };
 
   const totalEl = h('strong', { class: 'num' }, '');
+  const dateEl = h('span', { class: 'num' }, prettyDate(session.date));
   const rows = h('ul', { class: 'editlist' });
 
   const setCount = (gradeId, next) => {
@@ -37,7 +39,7 @@ export function openSessionEditor(session, gym, ctx) {
           h('button', {
             class: 'stepper__btn', type: 'button', 'aria-label': `${grade.label} 하나 빼기`,
             onclick: () => { setCount(grade.id, count - 1); },
-          }, '−'),
+          }, icon('minus', { size: 16 })),
           h('input', {
             class: 'field field--xs num', type: 'number', min: 0, value: count,
             'aria-label': `${grade.label} 완등 수`,
@@ -46,7 +48,7 @@ export function openSessionEditor(session, gym, ctx) {
           h('button', {
             class: 'stepper__btn', type: 'button', 'aria-label': `${grade.label} 하나 더하기`,
             onclick: () => { setCount(grade.id, count + 1); },
-          }, '+'),
+          }, icon('plus', { size: 16 })),
         ),
       );
     }));
@@ -54,12 +56,16 @@ export function openSessionEditor(session, gym, ctx) {
 
   const body = h('div', {},
     h('div', { class: 'fieldrow', style: { marginBottom: '0.75rem' } },
-      h('label', { class: 'dial' },
+      h('div', { class: 'dial' },
         h('span', { class: 'dial__label' }, '날짜'),
-        h('input', {
-          class: 'field field--sm num', type: 'date', value: draft.date,
-          onchange: (e) => { draft.date = e.target.value || draft.date; },
-        }),
+        // 네이티브 달력은 기기마다 다르게 뜬다. 기록 화면과 같은 시트를 쓴다.
+        h('button', {
+          class: 'field field--btn', type: 'button',
+          onclick: () => openDatePicker(ctx, {
+            value: draft.date,
+            onPick: (iso) => { draft.date = iso; dateEl.textContent = prettyDate(iso); },
+          }),
+        }, dateEl),
       ),
       h('label', { class: 'dial' },
         h('span', { class: 'dial__label' }, '그날의 레벨'),
