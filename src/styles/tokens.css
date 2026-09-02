@@ -26,10 +26,10 @@
   --surface:       var(--core);
   /* 파인 자리를 색으로 만들지 않는다. 테두리를 굵게 해 입력칸임을 알린다. */
   --sunken:        #FFFFFF;
-  --sunken-line:   rgba(0, 0, 0, 0.55);
+  --sunken-line:   #000000;
   --sunken-inset:  none;
   --shell-hover:   rgba(0, 0, 0, 0.07);
-  --core-line:     rgba(0, 0, 0, 0.55);      /* 상자 테두리 */
+  --core-line:     #000000;                  /* 상자 테두리 — 참조처럼 꽉 찬 실선 */
   --core-inset:    none;
   --ink:           #000000;
   --ink-2:         rgba(0, 0, 0, 0.86);
@@ -89,10 +89,10 @@
     --shell-line:    rgba(255, 255, 255, 0.30);
     --core:          #000000;
     --sunken:        #000000;
-    --sunken-line:   rgba(255, 255, 255, 0.55);
+    --sunken-line:   #FFFFFF;
     --sunken-inset:  none;
     --shell-hover:   rgba(255, 255, 255, 0.12);
-    --core-line:     rgba(255, 255, 255, 0.55);
+    --core-line:     #FFFFFF;
     --core-inset:    none;
     --ink:           #FFFFFF;
     --ink-2:         rgba(255, 255, 255, 0.88);
