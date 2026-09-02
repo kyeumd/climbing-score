@@ -198,6 +198,41 @@ export function onPressAndHold(el, { onTap, onHold, delay = 250 }) {
   el.addEventListener('contextmenu', (e) => e.preventDefault());
 }
 
+/**
+ * 두 번 눌러야 실행되는 버튼.
+ *
+ * window.confirm 은 브라우저가 그리는 팝업이라 앱과 생김새가 다르고, 모바일에서는
+ * 스크롤 도중 잘못 닫기 쉽다. 취소로 닫히면 아무 일도 안 일어나므로 "삭제가
+ * 동작하지 않는다" 로 읽힌다.
+ *
+ * 첫 탭에서 무장하고(모양이 바뀌고 이름표도 바뀐다) 두 번째 탭에서 실행한다.
+ * 잠시 두거나 포커스가 떠나면 스스로 풀린다.
+ */
+export function dangerButton({ label, armedLabel, onConfirm, iconName = 'close', size = 16, className = '', ms = 2600 }) {
+  let armed = false;
+  let timer = null;
+  const disarm = () => {
+    armed = false;
+    clearTimeout(timer);
+    btn.classList.remove('is-armed');
+    btn.setAttribute('aria-label', label);
+    btn.title = label;
+  };
+  const btn = h('button', {
+    class: className, type: 'button', 'aria-label': label, title: label,
+    onclick: () => {
+      if (armed) { disarm(); onConfirm(); return; }
+      armed = true;
+      btn.classList.add('is-armed');
+      btn.setAttribute('aria-label', armedLabel);
+      btn.title = armedLabel;
+      timer = setTimeout(disarm, ms);
+    },
+  }, icon(iconName, { size }));
+  btn.addEventListener('blur', disarm);
+  return btn;
+}
+
 /** 모달. backdrop-blur는 고정 요소에만 허용된다(성능 가드레일). */
 let modalSeq = 0;
 

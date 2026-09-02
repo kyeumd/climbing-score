@@ -865,6 +865,30 @@ ul { margin: 0; padding: 0; list-style: none; }
 .grid__drop:active { transform: scale(0.9); }
 /* 빼기가 떠 있는 동안에는 이름·점수가 그 아래로 숨지 않게 자리를 내준다 */
 .grid__cell:has(.grid__drop) .grid__person { padding-right: var(--tap-min); }
+/*
+ * 한 번 누른 뒤(무장). 브라우저 확인창을 없앤 대신, 다음 탭이 실행이라는 걸
+ * 눈에 보이게 해야 한다. 색을 새로 들이지 않고 반전으로 알린다.
+ */
+.is-armed {
+  background: var(--ink) !important;
+  color: var(--bg) !important;
+  border-color: var(--ink) !important;
+}
+
+/* 이름 고치기 — 난이도 이름 칸(.graderow__label)과 같은 꼴 */
+.profilerow__rename {
+  flex: 0 1 7rem; min-width: 0; min-height: var(--tap-min);
+  padding: 0.4rem 0.6rem;
+  background: var(--sunken); border: 1px solid var(--sunken-line);
+  box-shadow: var(--sunken-inset);
+  transition: border-color var(--dur-tap) var(--ease-spring);
+}
+.profilerow__rename:hover { border-color: var(--hairline); }
+/* 이름이 두 군데(읽기 전용 줄 + 입력칸) 보이면 헷갈린다. 좁으면 읽기 쪽을 접는다 */
+@media (max-width: 420px) {
+  .profilerow__pick .profilerow__name { display: none; }
+  .profilerow__rename { flex: 1 1 auto; }
+}
 /* 이름 받는 칸. 사람 칸과 같은 높이로 서야 머리글 줄이 흔들리지 않는다 */
 .grid__new {
   min-height: 0; height: 100%; padding: 0.4rem 0.5rem;

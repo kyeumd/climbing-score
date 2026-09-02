@@ -1,5 +1,5 @@
 /** 당일 대결 화면 (설계서 7.1절). 앱을 열면 여기가 뜬다. */
-import { h, panel, button, icon, onPressAndHold, eyebrow } from './components.js';
+import { h, panel, button, icon, onPressAndHold, eyebrow, dangerButton } from './components.js';
 import { hold } from './hold.js';
 import { activeGrades } from '../domain/gym.js';
 import { scoreFor } from '../domain/scoring.js';
@@ -138,6 +138,15 @@ function nameField(actions, extraClass = '') {
     onkeydown: (e) => {
       if (e.key === 'Escape') { actions.stopAddProfile(); return; }
       if (e.key !== 'Enter') return;
+      /*
+       * 한글 IME 는 마지막 글자를 조합하는 중이다. 그 상태에서 누른 엔터는
+       * '조합 확정' 이지 '입력 완료' 가 아니고, keydown 은 isComposing: true 로
+       * 온다(옛 브라우저는 keyCode 229). 이걸 그냥 처리하면 아직 덜 만들어진
+       * 값으로 사람을 붙이고, 브라우저가 뒤이어 확정한 마지막 글자는 새로
+       * 비워진 칸에 떨어져 또 한 명이 된다 — "이름 마지막 글자가 쪼개져서
+       * 추가로 만들어지는" 게 이것이다. 확정 뒤에 오는 엔터만 받는다.
+       */
+      if (e.isComposing || e.keyCode === 229) return;
       e.preventDefault();
       const v = e.target.value.trim();
       if (v) actions.addProfile(v);
@@ -246,11 +255,13 @@ function inputGrid(ctx, gym, grades) {
        */
       return h('div', { class: 'grid__cell' },
         btn,
-        adding && h('button', {
-          class: 'grid__drop', type: 'button', 'aria-label': `${r.profile.name} 빼기`,
-          title: `${r.profile.name} 빼기`,
-          onclick: () => actions.dropProfile(r.profile.id, r.sends),
-        }, icon('close', { size: 16 })),
+        adding && dangerButton({
+          className: 'grid__drop',
+          label: `${r.profile.name} 빼기`,
+          armedLabel: `한 번 더 누르면 ${r.profile.name}${josa(r.profile.name, '이/가')} 빠져요`
+            + (r.sends ? ` (오늘 기록 ${r.sends}개도 함께)` : ''),
+          onConfirm: () => actions.dropProfile(r.profile.id),
+        }),
       );
     }),
     nameInput,

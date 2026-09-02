@@ -1,5 +1,5 @@
 /** 프로필·레벨 관리, 백업. */
-import { h, panel, button, icon, eyebrow, modal } from './components.js';
+import { h, panel, button, icon, eyebrow, modal, dangerButton } from './components.js';
 import { josa, levelLabel } from '../domain/text.js';
 import { MAX_LEVEL } from '../domain/profile.js';
 
@@ -57,22 +57,31 @@ function profileRow(profile, { state, actions }) {
         h('span', { class: 'hint num' }, levelLabel(level)),
       ),
     ),
+    /*
+     * 이름 고치기. 여기 말고는 이름을 바꿀 길이 아예 없었다 — 짐은
+     * renameGym 이 있는데 사람은 없어서, 잘못 적으면 지우고 다시 넣는 수밖에
+     * 없었다. 난이도 이름과 같은 방식(그 자리에서 입력칸)으로 맞춘다.
+     */
+    h('input', {
+      class: 'profilerow__rename', value: profile.name,
+      'aria-label': `${profile.name} 이름 고치기`,
+      'data-fkey': `profile-name:${profile.id}`,
+      onchange: (e) => actions.renameProfile(profile.id, e.target.value),
+    }),
     h('div', { class: 'graderow__ops' },
       h('button', {
         class: 'iconbtn', type: 'button', title: '숙련도 설정',
         'aria-label': `${profile.name} 숙련도 설정`,
         onclick: () => openLevels(profile, { state, actions }),
       }, icon('gear', { size: 15 })),
-      // 지우기는 X, 등급 목록의 '빼기'(−)와 글리프로 구분한다
-      h('button', {
-        class: 'iconbtn', type: 'button', title: '삭제',
-        'aria-label': `${profile.name} 삭제`,
-        onclick: () => {
-          if (confirm(`"${profile.name}"${josa(profile.name, "과/와")} 그 기록을 모두 지울까요? 되돌릴 수 없어요.`)) {
-            actions.deleteProfile(profile.id);
-          }
-        },
-      }, icon('close', { size: 15 })),
+      // 확인은 브라우저 팝업이 아니라 버튼이 맡는다. 두 번 눌러야 지워진다.
+      dangerButton({
+        className: 'iconbtn',
+        label: `${profile.name} 삭제`,
+        armedLabel: `한 번 더 누르면 ${profile.name}${josa(profile.name, '과/와')} 그 기록이 모두 지워져요`,
+        size: 15,
+        onConfirm: () => actions.deleteProfile(profile.id),
+      }),
     ),
   );
 }

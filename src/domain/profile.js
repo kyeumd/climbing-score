@@ -25,6 +25,12 @@ export function clampLevel(v) {
   return Math.min(MAX_LEVEL, Math.max(0, n));
 }
 
+/** 이름만 바꾼다. 빈 이름은 받지 않는다 — 목록에서 누구인지 알 수 없게 된다. */
+export function rename(profile, name) {
+  const next = String(name ?? '').trim();
+  return next ? { ...profile, name: next } : profile;
+}
+
 export function setLevel(profile, level) {
   return { ...profile, level: clampLevel(level) };
 }

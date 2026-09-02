@@ -8,7 +8,7 @@ import {
   retireGrade, restoreGrade, sortGyms,
 } from './domain/gym.js';
 import { findSession, createSession, bumpCount } from './domain/session.js';
-import { createProfile, setLevel as setProfileLevel } from './domain/profile.js';
+import { createProfile, setLevel as setProfileLevel, rename as renameProfileName } from './domain/profile.js';
 import { h, clear, button, icon, modal } from './ui/components.js';
 import { viewMatch } from './ui/view-match.js';
 import { viewStats } from './ui/view-stats.js';
@@ -198,13 +198,17 @@ const actions = {
     reload();
   },
   /*
-   * 격자에서 바로 빼기. 기록이 없으면 묻지 않는다 — 잘못 친 이름을 지우는
-   * 데 확인 창이 뜨면 그게 또 팝업이다. 기록이 있을 때만 되묻는다.
+   * 격자에서 바로 빼기. 확인은 브라우저 팝업이 아니라 버튼이 맡는다
+   * (components.js 의 dangerButton — 두 번 눌러야 실행된다).
    */
-  dropProfile(id, sends = 0) {
+  dropProfile(id) { actions.deleteProfile(id); },
+  renameProfile(id, name) {
     const p = state.profiles.find((x) => x.id === id);
-    if (sends > 0 && !confirm(`${p?.name ?? '이 참가자'}의 오늘 기록 ${sends}개도 함께 사라져요. 뺄까요?`)) return;
-    actions.deleteProfile(id);
+    if (!p) return;
+    const next = renameProfileName(p, name);
+    if (next === p) { render(); return; }   // 빈 이름 — 원래 이름을 되돌려 그린다
+    store.saveProfile(next);
+    reload();
   },
   deleteProfile(id) {
     store.deleteProfile(id);
@@ -273,7 +277,13 @@ function newGym() {
     actions.openGymSettings(gym.id);
   };
   for (const el of [name, gu]) {
-    el.addEventListener('keydown', (e) => { if (e.key === 'Enter') submit(); });
+    el.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter') return;
+      // 한글 조합 중 엔터는 '조합 확정' 이지 '입력 완료' 가 아니다.
+      // 여기서 받으면 덜 만들어진 이름으로 짐이 저장된다.
+      if (e.isComposing || e.keyCode === 229) return;
+      submit();
+    });
   }
   const addBtn = gate(name, button('추가', { onClick: submit, variant: 'solid', trailing: 'check' }));
   const sheet = modal('클라이밍장 추가',
