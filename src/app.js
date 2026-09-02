@@ -34,14 +34,32 @@ let root;
 function persistGym(gym) { store.saveGym(gym); reload(); }
 function persistProfile(p) { store.saveProfile(p); reload(); }
 
-function reload() {
+function reloadState() {
   const loaded = store.loadAll();
   state.profiles = loaded.profiles;
   state.gyms = loaded.gyms;
   state.sessions = loaded.sessions;
   state.meta = loaded.meta;
+}
+
+function reload() {
+  reloadState();
   render();
 }
+
+/*
+ * 화면을 통째로 다시 그리지 않고 숫자만 고쳐 쓰는 자리.
+ *
+ * render() 는 clear(root) 로 전부 부수고 새로 만든다. 그래서 스크롤 위치와
+ * 포커스·캐럿을 손으로 되붙이는 코드가 아래에 붙어 있다. 되붙일 수 없는 것이
+ * 하나 있는데, 지금 손가락이 누르고 있는 요소다. 완등 +1 한 번에 176개
+ * 칸이 통째로 교체되니, 누르는 중에 값이 바뀌는 상호작용(길게 눌러 감소)은
+ * 자기가 붙어 있던 DOM 노드를 잃는다.
+ *
+ * 개수가 바뀌는 것뿐인데 구조를 부술 이유가 없다. 기록 격자가 자기를
+ * 갱신하는 함수를 여기 걸어 두고, bump 는 그걸 먼저 부른다.
+ */
+let liveSync = null;
 
 function patchGym(gymId, fn) {
   const gym = state.gyms.find((g) => g.id === gymId);
@@ -147,8 +165,14 @@ const actions = {
       profileId: session.profileId, gymId: session.gymId, date: session.date,
     });
     const base = existing ?? session;
-    store.saveSession(bumpCount(base, gradeId, delta));
-    reload();
+    const next = bumpCount(base, gradeId, delta);
+    // 0 에서 더 빼는 건 아무것도 바꾸지 않는다. 저장도 렌더도 하지 않는다.
+    if (existing && (existing.counts?.[gradeId] ?? 0) === (next.counts?.[gradeId] ?? 0)) return;
+    store.saveSession(next);
+    reloadState();
+    // 격자 구조는 그대로고 숫자만 달라졌다. 부수지 않고 고쳐 쓴다.
+    if (liveSync?.()) return;
+    render();
   },
 
   saveSession(session) { store.saveSession(session); reload(); },
@@ -193,7 +217,12 @@ const actions = {
   },
 };
 
-const ctx = { state, actions };
+const ctx = {
+  state,
+  actions,
+  /* 기록 격자가 '나는 이렇게 스스로 갱신한다'고 알려 오는 통로 */
+  setLiveSync(fn) { liveSync = fn; },
+};
 
 /* ============================================================
    작은 모달들
@@ -287,6 +316,8 @@ function render() {
   const focusKey = active?.dataset?.fkey ?? null;
   const caret = focusKey && 'selectionStart' in active ? active.selectionStart : null;
 
+  // 새로 그리면 이전 격자의 갱신 함수는 죽은 노드를 가리킨다
+  liveSync = null;
   clear(root);
   root.append(views[state.ui.route]());
   root.append(tabBar());

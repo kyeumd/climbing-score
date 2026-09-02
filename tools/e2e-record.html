@@ -90,8 +90,25 @@ const hold = (get, ms = 600) => new Promise((r) => {
     r();
   }, ms);
 });
+/*
+ * 근본 불변식: 개수가 바뀌어도 칸은 같은 DOM 노드로 남는다.
+ *
+ * 예전에는 render() 가 clear(root) 로 전부 부수고 새로 만들었다. 완등 +1
+ * 한 번에 176개 칸이 교체되니, 누르고 있던 셀이 사라져 pointerup 이 영영
+ * 오지 않았고 감소 인터벌이 죽지 않았다. 그 위에 붙는 증상들(꾹 눌러 0 으로
+ * 만든 뒤 탭이 안 먹음)을 하나씩 막는 대신, 여기서 뿌리를 지킨다.
+ */
+const beforeNode = cell(2, 0);
+tap(cell(2, 0)); await wait(250);
+ok('탭해도 칸이 같은 노드로 남는다', cell(2, 0) === beforeNode);
+ok('탭하면 +1', score(0) === unit(초록) * 3, `가=${score(0)}`);
+
 await hold(() => cell(2, 0)); await wait(250);
-ok('길게 누르면 −1', score(0) === unit(초록), `가=${score(0)} 기대=${unit(초록)}`);
+ok('길게 누르면 −1', score(0) === unit(초록) * 2, `가=${score(0)} 기대=${unit(초록) * 2}`);
+ok('길게 눌러도 칸이 같은 노드로 남는다', cell(2, 0) === beforeNode);
+
+await hold(() => cell(2, 0)); await wait(250);
+ok('길게 누르면 −1 (두 번째)', score(0) === unit(초록), `가=${score(0)} 기대=${unit(초록)}`);
 
 /*
  * 꾹 눌러 0 으로 만든 뒤에도 탭이 먹어야 한다.

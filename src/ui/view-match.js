@@ -121,7 +121,8 @@ function tpl(n) {
  *
  * 세로는 난이도, 가로는 참가자. 각 칸을 탭하면 그 사람의 그 난이도가 +1.
  */
-function inputGrid({ state, actions }, gym, grades) {
+function inputGrid(ctx, gym, grades) {
+  const { state, actions } = ctx;
   const people = state.profiles;
   if (!people.length) {
     return h('section', { class: 'section' },
@@ -135,25 +136,139 @@ function inputGrid({ state, actions }, gym, grades) {
     );
   }
 
-  const rows = people.map((profile) => {
-    const level = profile.level ?? 0;
-    const session = findSession(state.sessions, {
-      profileId: profile.id, gymId: gym.id, date: state.ui.date,
-    }) ?? createSession({
-      profileId: profile.id, gymId: gym.id, date: state.ui.date,
-      level, scoreTable: gym.scoreTable,
+  /*
+   * 줄별 점수와 순위를 지금 상태에서 다시 센다.
+   * 처음 그릴 때와 나중에 고쳐 쓸 때가 같은 값을 봐야 하므로 한 곳에 둔다.
+   */
+  const compute = () => {
+    // 열 순서는 참가자 추가 순서로 고정한다
+    const rows = state.profiles.map((profile) => {
+      const level = profile.level ?? 0;
+      const session = findSession(state.sessions, {
+        profileId: profile.id, gymId: gym.id, date: state.ui.date,
+      }) ?? createSession({
+        profileId: profile.id, gymId: gym.id, date: state.ui.date,
+        level, scoreTable: gym.scoreTable,
+      });
+      return { profile, level, session, score: scoreOf(session, gym), sends: sendsOf(session) };
     });
-    return { profile, level, session, score: scoreOf(session, gym), sends: sendsOf(session) };
-  });   // 열 순서는 참가자 추가 순서로 고정한다
+    // 순위는 점수로 매기되 자리는 바꾸지 않는다. 동점은 같은 순위.
+    const ordered = [...rows].sort((a, b) => b.score - a.score);
+    const rankOf = new Map();
+    ordered.forEach((r, i) => {
+      const prev = ordered[i - 1];
+      rankOf.set(r.profile.id, prev && prev.score === r.score ? rankOf.get(prev.profile.id) : i + 1);
+    });
+    return { rows, ordered, rankOf, lead: ordered[0]?.score ?? 0 };
+  };
 
-  // 순위는 점수로 매기되 자리는 바꾸지 않는다. 동점은 같은 순위.
-  const ordered = [...rows].sort((a, b) => b.score - a.score);
-  const rankOf = new Map();
-  ordered.forEach((r, i) => {
-    const prev = ordered[i - 1];
-    rankOf.set(r.profile.id, prev && prev.score === r.score ? rankOf.get(prev.profile.id) : i + 1);
-  });
-  const lead = ordered[0]?.score ?? 0;
+  let m = compute();
+  const n = m.rows.length;
+  const isTop = (r) => n > 1 && m.rankOf.get(r.profile.id) === 1 && r.score > 0;
+  // 0점인 사람만 배지를 빼면 그 칸만 모양이 달라진다.
+  // 아무도 기록이 없을 때만 순위를 감춘다.
+  const showRank = () => n > 1 && m.lead > 0;
+  const footText = () => {
+    const [a, b] = m.ordered;
+    if (m.lead > 0 && m.lead > (b?.score ?? 0)) {
+      return `${a.profile.name}${josa(a.profile.name, '이/가')} `
+        + `${(m.lead - b.score).toLocaleString('ko-KR')}점 앞서고 있어요.`;
+    }
+    return m.lead > 0 ? '동점예요.' : '아직 기록이 없어요.';
+  };
+
+  // 고쳐 쓸 노드를 들고 있는다. 다시 찾느라 DOM 을 훑지 않는다.
+  const heads = new Map();   // profileId -> { btn, top, rankEl, scoreEl }
+  const cells = new Map();   // `${profileId}:${gradeId}` -> { el, body, countEl, unitEl }
+
+  const head = h('div', { class: 'grid__head', style: { gridTemplateColumns: tpl(n) } },
+    h('span', { class: 'grid__corner hint' }, '난이도'),
+    m.rows.map((r) => {
+      const rankEl = h('span', { class: `grid__rank num${isTop(r) ? ' is-first' : ''}` },
+        `${m.rankOf.get(r.profile.id)}위`);
+      const scoreEl = h('span', { class: 'grid__score num' }, r.score.toLocaleString('ko-KR'));
+      const top = h('span', { class: 'grid__top' },
+        showRank() ? rankEl : null,
+        h('span', { class: 'grid__name' }, r.profile.name),
+      );
+      const btn = h('button', {
+        class: `grid__person${isTop(r) ? ' is-lead' : ''}`,
+        type: 'button', onclick: () => actions.openLevelPicker(r.profile.id),
+        title: `${r.profile.name} 숙련도 바꾸기`,
+      }, top, scoreEl, h('span', { class: 'hint num' }, levelLabel(r.level)));
+      heads.set(r.profile.id, { btn, top, rankEl, scoreEl });
+      return btn;
+    }),
+  );
+
+  const body = grades.map((grade) => h('div', {
+    class: 'grid__row', style: { gridTemplateColumns: tpl(n) },
+  },
+    h('span', { class: 'grid__grade' },
+      hold(grade, { size: 20 }),
+      h('span', { class: 'grid__label' }, grade.label),
+    ),
+    m.rows.map((r) => {
+      const el = cell({ grade, ...r, gym, actions });
+      cells.set(`${r.profile.id}:${grade.id}`, {
+        el,
+        body: el.querySelector('.cell__body'),
+        countEl: el.querySelector('.cell__count') ?? h('span', { class: 'cell__count num' }, ''),
+        unitEl: el.querySelector('.cell__unit'),
+      });
+      return el;
+    }),
+  ));
+
+  const foot = n > 1
+    ? h('p', { class: 'hint', style: { marginTop: 'var(--sp-3)' } }, footText())
+    : null;
+
+  /*
+   * 개수가 바뀌었을 때 부수지 않고 고쳐 쓴다.
+   *
+   * 구조(참가자 목록·난이도)가 그대로일 때만 맡는다. 달라졌으면 false 를
+   * 돌려주고, 그때는 app.js 가 평소대로 전부 다시 그린다.
+   */
+  const sync = () => {
+    if (state.profiles.length !== n) return false;
+    if (!state.profiles.every((p, i) => p.id === m.rows[i].profile.id)) return false;
+    m = compute();
+
+    for (const r of m.rows) {
+      const hd = heads.get(r.profile.id);
+      if (!hd) return false;
+      hd.scoreEl.textContent = r.score.toLocaleString('ko-KR');
+      hd.rankEl.textContent = `${m.rankOf.get(r.profile.id)}위`;
+      hd.rankEl.classList.toggle('is-first', isTop(r));
+      hd.btn.classList.toggle('is-lead', isTop(r));
+      // 첫 기록이 들어오면 순위 배지가 그제서야 생긴다
+      if (showRank() && !hd.rankEl.isConnected) hd.top.prepend(hd.rankEl);
+      else if (!showRank() && hd.rankEl.isConnected) hd.rankEl.remove();
+
+      for (const grade of grades) {
+        const c = cells.get(`${r.profile.id}:${grade.id}`);
+        if (!c) return false;
+        const count = r.session.counts?.[grade.id] ?? 0;
+        const unit = scoreFor(gym.scoreTable, r.level, grade);
+        // className 을 통째로 덮으면 지금 누르고 있는 is-pressing/is-held 가 날아간다
+        c.el.classList.toggle('has-count', count > 0);
+        c.el.classList.toggle('is-mylevel', grade.order === r.level);
+        c.el.setAttribute('aria-label',
+          `${r.profile.name} ${grade.label} ${count}개, 한 개당 ${unit}점`);
+        c.unitEl.textContent = `+${unit.toLocaleString('ko-KR')}점`;
+        if (count) {
+          c.countEl.textContent = String(count);
+          if (!c.countEl.isConnected) c.body.prepend(c.countEl);
+        } else if (c.countEl.isConnected) {
+          c.countEl.remove();
+        }
+      }
+    }
+    if (foot) foot.textContent = footText();
+    return true;
+  };
+  ctx.setLiveSync(sync);
 
   return h('section', { class: 'section' },
     h('div', { class: 'section-head' },
@@ -164,46 +279,8 @@ function inputGrid({ state, actions }, gym, grades) {
       ),
       button('참가자 추가', { onClick: actions.openProfilePicker, small: true, trailing: 'plus' }),
     ),
-    h('div', { class: 'grid' },
-      // 머리글: 사람 이름과 현재 점수
-      h('div', { class: 'grid__head', style: { gridTemplateColumns: tpl(rows.length) } },
-        h('span', { class: 'grid__corner hint' }, '난이도'),
-        rows.map((r) => {
-          const rank = rankOf.get(r.profile.id);
-          const top = rows.length > 1 && rank === 1 && r.score > 0;
-          return h('button', {
-            class: `grid__person${top ? ' is-lead' : ''}`,
-            type: 'button', onclick: () => actions.openLevelPicker(r.profile.id),
-            title: `${r.profile.name} 숙련도 바꾸기`,
-          },
-            h('span', { class: 'grid__top' },
-              // 0점인 사람만 배지를 빼면 그 칸만 모양이 달라진다.
-              // 아무도 기록이 없을 때만 순위를 감춘다.
-              rows.length > 1 && lead > 0
-                ? h('span', { class: `grid__rank num${top ? ' is-first' : ''}` }, `${rank}위`)
-                : null,
-              h('span', { class: 'grid__name' }, r.profile.name),
-            ),
-            h('span', { class: 'grid__score num' }, r.score.toLocaleString('ko-KR')),
-            h('span', { class: 'hint num' }, levelLabel(r.level)),
-          );
-        }),
-      ),
-      // 본문: 난이도마다 사람별 칸
-      grades.map((grade) => h('div', {
-        class: 'grid__row', style: { gridTemplateColumns: tpl(rows.length) },
-      },
-        h('span', { class: 'grid__grade' },
-          hold(grade, { size: 20 }),
-          h('span', { class: 'grid__label' }, grade.label),
-        ),
-        rows.map((r) => cell({ grade, ...r, gym, actions })),
-      )),
-    ),
-    rows.length > 1 && h('p', { class: 'hint', style: { marginTop: 'var(--sp-3)' } },
-      lead > 0 && lead > (ordered[1]?.score ?? 0)
-        ? `${ordered[0].profile.name}${josa(ordered[0].profile.name, '이/가')} ${(lead - ordered[1].score).toLocaleString('ko-KR')}점 앞서고 있어요.`
-        : lead > 0 ? '동점예요.' : '아직 기록이 없어요.'),
+    h('div', { class: 'grid' }, head, body),
+    foot,
   );
 }
 
