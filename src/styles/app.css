@@ -77,8 +77,7 @@ ul { margin: 0; padding: 0; list-style: none; }
 .hint     { font-size: var(--fs-min); color: var(--ink-3); line-height: 1.45; }
 .subtitle { color: var(--ink-2); }
 .section  { margin-top: var(--sp-7); }
-/* 참조 화면처럼 절 제목 위에 가로 실선을 긋는다. 구획이 선으로 읽힌다. */
-.section-head { border-top: 1px solid var(--core-line); padding-top: var(--sp-4); }
+
 .section-head {
   display: flex; align-items: flex-end; justify-content: space-between;
   gap: var(--sp-3); margin-bottom: var(--sp-3);
@@ -640,15 +639,9 @@ ul { margin: 0; padding: 0; list-style: none; }
      다크에서 rgb(29,27,24) 띠가 rgb(25,23,20) 시트 위에 떠 보였다. */
   --surface: var(--bg-elevated);
   background: var(--bg-elevated);
-  /* 떠 있음을 그림자 대신 굵은 테두리로 알린다 */
+  /* 테두리 하나면 된다. 예전에는 여기에 inset 그림자로 같은 선을 한 번 더
+     그려, 같은 자리에 흰 선이 두 겹으로 앉아 있었다. */
   border-color: var(--hairline);
-  box-shadow: inset 0 0 0 1px var(--hairline);
-}
-/* 손잡이. 바텀 시트는 잡아 내릴 수 있다는 신호가 있어야 시트로 읽힌다 */
-.modal__sheet > .core::before {
-  content: ''; align-self: center; flex: 0 0 auto;
-  width: 36px; height: 4px; margin: -0.35rem 0 var(--sp-4);
-  border-radius: 2px; background: var(--track);
 }
 .modal.is-open .modal__sheet { transform: translateY(0); }
 .modal__sheet > .core {
@@ -730,16 +723,17 @@ ul { margin: 0; padding: 0; list-style: none; }
    ============================================================ */
 :where(a, button, input, select, textarea, [tabindex]):focus-visible,
 .matrixwrap:focus-visible, .chips:focus-visible {
-  outline: 2px solid var(--ink);
-  outline-offset: 2px;
-  border-radius: var(--r-tight);
+  /*
+   * offset 2px 로 띄웠더니, 이미 흰 테두리를 두른 입력칸 바깥에 흰 상자가
+   * 하나 더 생겼다. 같은 색 같은 모양이 두 겹이라 그냥 선이 는 것처럼 보인다.
+   * 액센트로 칠하고 테두리에 붙여, 가장자리가 굵어지며 색이 바뀌게 한다.
+   */
+  outline: 2px solid var(--accent);
+  outline-offset: 0;
 }
-/* 이미 둥근 컨트롤은 링도 같은 곡률을 따라야 모서리가 어긋나지 않는다 */
-.btn:focus-visible, .field:focus-visible, .chip:focus-visible { border-radius: var(--r-pill); }
-.matrixwrap:focus-visible, .chips:focus-visible { border-radius: var(--r-pill); }
-.swatch:focus-visible, .graderow__dot:focus-visible,
-.gymrow__star:focus-visible, .iconbtn:focus-visible { border-radius: var(--r-tight); }
-.field:focus-visible { border-color: var(--hairline); }
+/* 가장자리가 없는 컨트롤(목록 줄·격자 칸)은 링을 조금 띄워야 글자에 닿지 않는다 */
+.gymrow__pick:focus-visible, .cell:focus-visible,
+.grid__person:focus-visible, .tab:focus-visible { outline-offset: -2px; }
 
 /* 점수표 헤더에 색 이름 한 글자 — 도트만으로는 어떤 색인지 알 수 없다 */
 .matrix__head { display: flex; flex-direction: column; align-items: center; gap: 2px; }
@@ -1088,13 +1082,17 @@ ul { margin: 0; padding: 0; list-style: none; }
 }
 .stepper__btn:hover { background: var(--shell); color: var(--ink); }
 .stepper__btn:active { transform: scale(0.9); background: var(--shell-hover); }
-/* 개수 칸도 파인 상자 대신 밑줄만. 0 이면 더 물러나 있게 한다. */
+/*
+ * 개수 칸에는 아무 선도 두지 않는다.
+ *
+ * 밑줄을 그었더니 바로 아래 행 구분선과 18px 간격으로 나란히 놓여, 줄마다
+ * 가로선이 두 개씩 11번 반복됐다. 고칠 수 있는 값이라는 건 양옆의 −/+ 와
+ * 포커스 링이 이미 말해 준다.
+ */
 .stepper .field--xs {
   width: 3rem; background: none; border: 0; box-shadow: none;
-  border-bottom: 1.5px solid var(--sunken-line); border-radius: 0;
   font-size: 1.0625rem; font-weight: 700;
 }
-.stepper .field--xs:hover, .stepper .field--xs:focus { border-bottom-color: var(--hairline); }
 
 
 /* 플레이스홀더 대비가 4.07:1로 기준(4.5)에 못 미쳤다 */
