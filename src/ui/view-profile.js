@@ -82,21 +82,32 @@ export function openLevels(profile, { actions }) {
   const current = profile.level ?? 0;
   const readout = h('span', { class: 'levelpick__value num' }, levelLabel(current));
 
-  const apply = (v) => {
+  /*
+   * 끄는 동안에는 눈에 보이는 것만 바꾸고, 손을 뗄 때 한 번 저장한다.
+   *
+   * 예전에는 input 마다 setLevel 을 불렀다. 그 안에서 프로필과 오늘 세션들을
+   * 저장하고 화면을 통째로 다시 그린다. 0→8 아홉 단계를 옮기는 데만 저장이
+   * 17번 일어났고, 진짜 손가락은 그보다 훨씬 촘촘하게 쏜다. 매번 저장소
+   * 전체를 직렬화할 이유가 없다.
+   */
+  const preview = (v) => {
     const next = Math.max(0, Math.min(MAX_LEVEL, v));
     readout.textContent = levelLabel(next);
     slider.value = next;
     // 트랙은 한 덩어리라 채운 만큼을 CSS 로 알려 줘야 한다.
     // 안 그러면 Lv.0 과 Lv.8 의 막대가 똑같이 생긴다.
     slider.style.setProperty('--pct', `${(next / MAX_LEVEL) * 100}%`);
-    actions.setLevel(profile.id, next);
+    return next;
   };
+  // change 는 끌기가 끝날 때, 그리고 화살표 키로 옮길 때 한 번씩 온다
+  const commit = (v) => { actions.setLevel(profile.id, preview(v)); };
 
   const slider = h('input', {
     class: 'levelpick__slider', type: 'range', min: 0, max: MAX_LEVEL, step: 1, value: current,
     'aria-label': '내 숙련도 레벨',
     style: { '--pct': `${(current / MAX_LEVEL) * 100}%` },
-    oninput: (e) => apply(Number(e.target.value)),
+    oninput: (e) => preview(Number(e.target.value)),
+    onchange: (e) => commit(Number(e.target.value)),
   });
 
   const body = h('div', {},
