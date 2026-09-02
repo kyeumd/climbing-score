@@ -43,17 +43,19 @@ ul { margin: 0; padding: 0; list-style: none; }
 /* ============================================================
    Double-Bezel — 외곽 셸 + 내부 코어, 동심 곡률
    ============================================================ */
+/*
+ * 이중 베젤(셸 + 코어)을 접었다. 두 겹 다 테두리를 그리면 간격을 둔 이중선이
+ * 되는데, 실선 하나로 상자를 세우는 지금 언어에서는 군더더기다.
+ * 셸은 자리만 지키고 선은 코어가 그린다.
+ */
 .shell {
-  background: var(--shell);
-  border: 1px solid var(--shell-line);
-  border-radius: var(--r-shell);
-  padding: var(--r-pad);
+  background: transparent;
+  border: 0;
+  padding: 0;
 }
 .core {
   background: var(--core);
   border: 1px solid var(--core-line);
-  border-radius: var(--r-core);
-  box-shadow: var(--core-inset);
   padding: var(--sp-5);
 }
 
@@ -67,7 +69,8 @@ ul { margin: 0; padding: 0; list-style: none; }
   font-size: var(--fs-min);
   font-weight: 700;
   letter-spacing: 0.04em;   /* 자간이 넓으면 다어절 라벨의 단어 경계가 흐려진다 */
-  color: var(--ink);
+  /* 구조를 알리는 라벨은 흐린 회색으로 눕히지 않는다. 액센트로 세운다. */
+  color: var(--accent);
 }
 .title    { font-size: 1.4rem; font-weight: 700; letter-spacing: -0.03em; }
 .subtitle { font-size: 0.9375rem; color: var(--ink-2); }
@@ -262,8 +265,7 @@ ul { margin: 0; padding: 0; list-style: none; }
   display: grid; grid-template-columns: repeat(4, 1fr);
   background: var(--overlay);
   -webkit-backdrop-filter: blur(28px) saturate(140%); backdrop-filter: blur(28px) saturate(140%);
-  border: 1px solid var(--shell-line); border-radius: var(--r-shell);
-  box-shadow: var(--ambient);
+  border: 1px solid var(--core-line);
 }
 .tab {
   display: flex; flex-direction: column; align-items: center; gap: 0.15rem;
@@ -274,7 +276,7 @@ ul { margin: 0; padding: 0; list-style: none; }
               transform var(--dur-tap) var(--ease-spring);
 }
 .tab:active { transform: scale(0.94); }
-.tab.is-on { color: var(--ink); font-weight: 700; }
+.tab.is-on { color: var(--accent); font-weight: 700; }
 .tab.is-on svg { transform: scale(1.06); }
 
 /* ============================================================
@@ -618,7 +620,9 @@ ul { margin: 0; padding: 0; list-style: none; }
      다크에서 rgb(29,27,24) 띠가 rgb(25,23,20) 시트 위에 떠 보였다. */
   --surface: var(--bg-elevated);
   background: var(--bg-elevated);
-  box-shadow: var(--ambient-lift), inset 0 1px 0 rgba(255, 246, 230, 0.08);
+  /* 떠 있음을 그림자 대신 굵은 테두리로 알린다 */
+  border-color: var(--hairline);
+  box-shadow: inset 0 0 0 1px var(--hairline);
 }
 /* 손잡이. 바텀 시트는 잡아 내릴 수 있다는 신호가 있어야 시트로 읽힌다 */
 .modal__sheet > .core::before {
@@ -735,7 +739,7 @@ ul { margin: 0; padding: 0; list-style: none; }
 .gymsec__title {
   margin: 0 0 var(--sp-1);
   padding: var(--sp-2) 0 0.35rem;
-  font-size: var(--fs-min); font-weight: 700; color: var(--ink-3);
+  font-size: var(--fs-min); font-weight: 700; color: var(--accent);
   letter-spacing: 0.02em;
 }
 .gymlist__foot {
@@ -849,13 +853,13 @@ ul { margin: 0; padding: 0; list-style: none; }
   width: 26px; height: 26px; margin-top: -10px;
   border-radius: var(--r-tight);
   background: var(--ink); border: 2px solid var(--bg-elevated);
-  box-shadow: var(--ambient);
+  outline: 1px solid var(--hairline);
   transition: transform var(--dur-tap) var(--ease-spring);
 }
 .levelpick__slider::-moz-range-thumb {
   width: 26px; height: 26px; border-radius: var(--r-tight);
   background: var(--ink); border: 2px solid var(--bg-elevated);
-  box-shadow: var(--ambient);
+  outline: 1px solid var(--hairline);
 }
 .levelpick__slider:active::-webkit-slider-thumb { transform: scale(1.12); }
 .levelpick__scale { display: flex; justify-content: space-between; width: 100%; }
@@ -925,7 +929,10 @@ ul { margin: 0; padding: 0; list-style: none; }
   position: sticky; top: 0; z-index: 2;
   background: var(--bg); padding-bottom: 8px;
 }
-.grid__corner { display: flex; align-items: flex-end; padding-bottom: 0.4rem; }
+.grid__corner {
+  display: flex; align-items: flex-end; padding-bottom: 0.4rem;
+  color: var(--accent); font-weight: 700;
+}
 .grid__person {
   display: flex; flex-direction: column; align-items: center; gap: 1px;
   padding: 0.45rem 0.3rem;
@@ -987,7 +994,8 @@ ul { margin: 0; padding: 0; list-style: none; }
   transition: transform var(--dur-tap) var(--ease-spring),
               box-shadow var(--dur-tap) var(--ease-spring);
 }
-.cell.has-count { box-shadow: var(--ambient); border-color: var(--hairline); }
+/* 그림자가 없으니 강조는 선으로 낸다 */
+.cell.has-count { border-color: var(--hairline); box-shadow: inset 0 0 0 1px var(--hairline); }
 /*
  * 내 레벨과 같은 난이도. 배경을 바꾸면 비활성 칸으로 오독되므로 표식만 둔다.
  *
@@ -1001,7 +1009,7 @@ ul { margin: 0; padding: 0; list-style: none; }
 .cell.is-mylevel::before {
   content: ''; position: absolute; left: 0; top: 0;
   width: 18px; height: 2px;
-  background: var(--ink-3);
+  background: var(--accent);
 }
 .cell { position: relative; }
 .cell.is-pressing { transform: scale(0.96); }
