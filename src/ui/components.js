@@ -166,12 +166,29 @@ export function onPressAndHold(el, { onTap, onHold, delay = 250 }) {
     // 활성 포인터가 아니면 던진다. 그물을 먼저 치고, 실패해도 넘어간다 —
     // 여기서 예외가 새면 아래 타이머가 걸리지 않아 누르기 자체가 죽는다.
     try { el.setPointerCapture?.(e.pointerId); } catch { /* 잡을 포인터가 없다 */ }
+    /*
+     * 임계점에서 첫 감소를 바로 준다.
+     *
+     * 예전에는 여기서 실행하지 않고 손 뗄 때로 미뤘다. onHold 안에서 화면을
+     * 다시 그리면 누르고 있던 요소가 사라졌기 때문인데, 이제 격자는 부수지
+     * 않고 숫자만 고쳐 쓰므로(view-match.js 의 sync) 그럴 이유가 없다.
+     *
+     * 미룬 대가가 컸다. 250ms 에는 아무 일도 안 일어나고 450ms 에 처음
+     * 줄더니, 그 뒤로 200ms 마다 계속 줄었다. 2개짜리는 650ms 만에 0이 된다.
+     * 누른 사람은 언제 '먹었는지' 모른 채 값이 쓸려 나가는 걸 본다.
+     *
+     * 바로 한 번 줄이고, 한 박자(700ms) 쉰 뒤에 반복을 시작한다. 그래서
+     * 보통의 길게 누르기는 정확히 -1 이고 — 화면에 적힌 그대로다 —
+     * 여러 개를 지우려고 계속 붙들고 있을 때만 이어서 줄어든다.
+     */
     timer = setTimeout(() => {
-      el.classList.add('is-held');     // 여기서 감소를 실행하지 않는다
+      el.classList.add('is-held');
+      fired += 1;
+      onHold?.();
       navigator.vibrate?.(14);
-      // 누른 채로 두면 계속 줄어든다. 여러 개를 지울 때 손을 떼고 다시
-      // 누르기를 반복하지 않아도 된다.
-      repeat = setInterval(() => { fired += 1; onHold?.(); navigator.vibrate?.(8); }, 200);
+      timer = setTimeout(() => {
+        repeat = setInterval(() => { fired += 1; onHold?.(); navigator.vibrate?.(8); }, 250);
+      }, 700);
     }, delay);
   });
 
