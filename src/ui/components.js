@@ -122,13 +122,49 @@ export function onPressAndHold(el, { onTap, onHold, delay = 250 }) {
     fired = 0;
     downAt = 0;
     el.classList.remove('is-pressing', 'is-held');
+    // 손을 뗐으니 그물도 걷는다
+    window.removeEventListener('pointerup', onUp);
+    window.removeEventListener('pointercancel', reset);
+    el.removeEventListener('pointerup', onUp);
+    el.removeEventListener('pointercancel', reset);
+  };
+
+  /*
+   * 손 떼기를 el 과 window 양쪽에서 받는다. 둘 중 어느 쪽이 먼저 와도 되고,
+   * reset() 이 downAt 을 0 으로 돌리므로 뒤따라 오는 쪽은 그냥 돌아간다.
+   *
+   * el 만으로는 모자란다. 반복이 한 번 돌면 onHold 안에서 화면을 다시 그리고,
+   * 그 순간 누르고 있던 el 은 DOM 에서 사라진다. 손을 떼면 새로 만들어진 셀이
+   * 그 이벤트를 받는데 그쪽 downAt 은 0 이라 그냥 돌아간다. 아무도
+   * clearInterval 을 부르지 않아 200ms 마다 bump(-1) 과 전체 렌더가 영원히
+   * 돌고, 그 사이에 낀 탭은 매번 교체되는 요소 위에서 삼켜졌다.
+   * ("꾹 눌러 0 으로 만든 뒤 클릭 안 됨")
+   *
+   * window 만으로도 모자란다. 떨어져 나간 요소에 직접 쏜 이벤트는 문서
+   * 트리에 없으니 window 까지 올라오지 않는다.
+   */
+  const onUp = (e) => {
+    if (!downAt) return;
+    const held = performance.now() - downAt >= delay;
+    const already = fired;
+    reset();
+    e.preventDefault();
+    // 반복이 한 번도 실행되지 않았다면(타이머가 돌기 전에 뗐다면) 여기서 한 번 줄인다
+    if (!held) onTap?.(e);
+    else if (already === 0) onHold?.(e);
   };
 
   el.addEventListener('pointerdown', (e) => {
     if (e.button != null && e.button !== 0) return;
     downAt = performance.now();
     el.classList.add('is-pressing');
-    el.setPointerCapture?.(e.pointerId);
+    window.addEventListener('pointerup', onUp);
+    window.addEventListener('pointercancel', reset);
+    el.addEventListener('pointerup', onUp);
+    el.addEventListener('pointercancel', reset);
+    // 활성 포인터가 아니면 던진다. 그물을 먼저 치고, 실패해도 넘어간다 —
+    // 여기서 예외가 새면 아래 타이머가 걸리지 않아 누르기 자체가 죽는다.
+    try { el.setPointerCapture?.(e.pointerId); } catch { /* 잡을 포인터가 없다 */ }
     timer = setTimeout(() => {
       el.classList.add('is-held');     // 여기서 감소를 실행하지 않는다
       navigator.vibrate?.(14);
@@ -138,18 +174,6 @@ export function onPressAndHold(el, { onTap, onHold, delay = 250 }) {
     }, delay);
   });
 
-  el.addEventListener('pointerup', (e) => {
-    if (!downAt) return;
-    const held = performance.now() - downAt >= delay;
-    const already = fired;
-    reset();
-    e.preventDefault();
-    // 반복이 한 번도 실행되지 않았다면(타이머가 돌기 전에 뗐다면) 여기서 한 번 줄인다
-    if (!held) onTap?.(e);
-    else if (already === 0) onHold?.(e);
-  });
-
-  el.addEventListener('pointercancel', reset);
   el.addEventListener('pointerleave', reset);
   // 브라우저가 뒤따라 보내는 click을 막는다. 안 막으면 한 번 더 세진다.
   el.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); });

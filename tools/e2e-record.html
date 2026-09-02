@@ -72,12 +72,52 @@ const ranks = [...document.querySelectorAll('.grid__rank')].map((e) => e.textCon
 ok('순위 배지가 둘 다 나온다', ranks.length === 2, ranks.join(','));
 ok('점수가 높은 쪽이 1위', ranks[score(0) > score(1) ? 0 : 1] === '1위', ranks.join(','));
 
-const hold = (el) => new Promise((r) => {
-  el.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerId: 1 }));
-  setTimeout(() => { el.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerId: 1 })); r(); }, 600);
+/*
+ * 실제 브라우저는 손을 뗄 때 '지금 손가락 아래에 있는' 요소로 pointerup 을 보낸다.
+ * 누르고 있는 사이 화면이 다시 그려졌다면 그건 처음 누른 그 요소가 아니다.
+ *
+ * 예전에는 처음 잡아 둔 참조에 그대로 쐈다. 떨어져 나간 요소도 자기 리스너는
+ * 그대로 들고 있으니 정리 코드가 늘 불렸고, 그래서 "꾹 눌러 0 으로 만든 뒤
+ * 클릭이 안 되는" 진짜 버그를 이 자리에서 한 번도 잡지 못했다.
+ * 놓을 때 다시 찾는다.
+ */
+const hold = (get, ms = 600) => new Promise((r) => {
+  const start = typeof get === 'function' ? get() : get;
+  start.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerId: 1 }));
+  setTimeout(() => {
+    const now = (typeof get === 'function' ? get() : null) ?? start;
+    now.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerId: 1 }));
+    r();
+  }, ms);
 });
-await hold(cell(2, 0)); await wait(250);
+await hold(() => cell(2, 0)); await wait(250);
 ok('길게 누르면 −1', score(0) === unit(초록), `가=${score(0)} 기대=${unit(초록)}`);
+
+/*
+ * 꾹 눌러 0 으로 만든 뒤에도 탭이 먹어야 한다.
+ *
+ * 예전에는 손 떼기를 셀 자신에게서 받았다. 반복 감소가 한 번 돌면 화면을
+ * 다시 그려 그 셀이 DOM 에서 사라지고, pointerup 은 영영 오지 않아
+ * clearInterval 이 불리지 않았다. 200ms 마다 bump(-1) 과 전체 렌더가
+ * 영원히 돌면서 이후의 탭을 전부 삼켰다.
+ */
+await hold(() => cell(2, 0)); await wait(300);          // 남은 개수를 0 으로
+const zeroAt = score(0);
+const domBefore = document.querySelectorAll('.cell').length;
+let churn = 0;
+const mo = new MutationObserver(() => { churn++; });
+mo.observe(document.getElementById('app'), { childList: true, subtree: true });
+await wait(700);
+mo.disconnect();
+ok('손을 뗀 뒤에는 화면이 저절로 다시 그려지지 않는다', churn === 0, `${churn}회`);
+ok('0 까지 줄어든다', zeroAt === 0, `${zeroAt}점`);
+
+cell(2, 0).dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerId: 1 }));
+await wait(60);
+cell(2, 0).dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerId: 1 }));
+await wait(300);
+ok('0 으로 만든 뒤에도 탭이 먹는다', score(0) === unit(초록),
+   `가=${score(0)} 기대=${unit(초록)}`);
 
 // 별을 눌러도 모달이 겹치지 않는가
 // (예전에는 즐겨찾기 갱신을 openGymPicker 재호출로 해서 누를 때마다 한 겹씩 쌓였다)
