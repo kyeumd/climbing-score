@@ -23,7 +23,7 @@ const store = createLocalStorageAdapter();
 
 const state = {
   ...emptyState(),
-  ui: { route: 'match', gymId: null, profileId: null, date: localDate(), gymSettingsId: null },
+  ui: { route: 'match', gymId: null, profileId: null, date: localDate(), gymSettingsId: null, adding: false },
 };
 
 let root;
@@ -184,8 +184,28 @@ const actions = {
    * 아무 일도 안 일어났다고 느낀다. 세 군데 호출부의 뜻이 모두 '만들기' 라
    * 바로 이름 입력으로 간다.
    */
-  openProfilePicker() { newProfile(); },
-  openNewProfile() { newProfile(); },
+  /*
+   * 참가자는 팝업이 아니라 격자 안에서 바로 붙였다 뗀다.
+   * adding 이 켜지면 머리글 맨 끝에 이름 칸이 한 열 생긴다.
+   */
+  startAddProfile() { state.ui.adding = true; render(); },
+  stopAddProfile() { state.ui.adding = false; render(); },
+  addProfile(name) {
+    const profile = createProfile({ name, primaryGymId: state.ui.gymId });
+    store.saveProfile(profile);
+    if (!state.ui.profileId) state.ui.profileId = profile.id;
+    // adding 을 켜 둔 채 다시 그린다. 이름 칸이 그대로 남아 다음 이름을 받는다.
+    reload();
+  },
+  /*
+   * 격자에서 바로 빼기. 기록이 없으면 묻지 않는다 — 잘못 친 이름을 지우는
+   * 데 확인 창이 뜨면 그게 또 팝업이다. 기록이 있을 때만 되묻는다.
+   */
+  dropProfile(id, sends = 0) {
+    const p = state.profiles.find((x) => x.id === id);
+    if (sends > 0 && !confirm(`${p?.name ?? '이 참가자'}의 오늘 기록 ${sends}개도 함께 사라져요. 뺄까요?`)) return;
+    actions.deleteProfile(id);
+  },
   deleteProfile(id) {
     store.deleteProfile(id);
     if (state.ui.profileId === id) {
@@ -236,26 +256,6 @@ function gate(input, btn) {
   input.addEventListener('input', sync);
   sync();
   return btn;
-}
-
-function newProfile() {
-  const input = h('input', { class: 'field', placeholder: '이름', 'aria-label': '참가자 이름' });
-  const submit = () => {
-    const name = input.value.trim();
-    if (!name) return;
-    const profile = createProfile({ name, primaryGymId: state.ui.gymId });
-    store.saveProfile(profile);
-    state.ui.profileId = profile.id;
-    sheet.close();
-    reload();
-  };
-  input.addEventListener('keydown', (e) => { if (e.key === 'Enter') submit(); });
-  const addBtn = gate(input, button('추가', { onClick: submit, variant: 'solid', trailing: 'check' }));
-  const sheet = modal('새 참가자',
-    h('div', {}, input,
-      h('div', { style: { marginTop: '1rem' } }, addBtn)),
-  );
-  setTimeout(() => input.focus(), 50);
 }
 
 function newGym() {

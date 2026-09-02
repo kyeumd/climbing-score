@@ -45,14 +45,17 @@ const SEED = `
   const ok = await until(() => byText('.btn', '맞아요') || byText('.btn', '참가자 추가'), '대결 화면');
   if (ok.textContent.includes('맞아요')) { tap(ok); await wait(400); }
 
+  // 이름 칸은 한 번만 연다. 열린 채로 이름·엔터를 이어 친다.
+  tap(await until(() => byText('.btn', '참가자 추가'), '참가자 버튼'));
   for (const name of NAMES) {
-    tap(await until(() => byText('.btn', '참가자 추가'), '참가자 버튼'));
-    const input = await until(() => q('.modal .field'), '이름 입력칸');
-    input.value = name;
-    input.dispatchEvent(new Event('input', { bubbles: true }));
-    tap(await until(() => byText('.modal .btn', '추가'), '추가 버튼'));
+    const input = await until(() => q('.grid__new'), '이름 칸');
+    input.focus(); input.value = name;
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
     await wait(350);
   }
+  const still = q('.grid__new');
+  if (still) still.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+  await wait(300);
 
   // 사람마다 다른 만큼 기록해 순위 배지와 자릿수 차이를 만든다
   await until(() => q('.grid__row'), '기록 격자');

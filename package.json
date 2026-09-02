@@ -16,10 +16,10 @@
     "flow": "node tools/flow.mjs",
     "audit:ui": "node tools/ui-audit.mjs",
     "audit:visual": "node tools/visual-audit.mjs",
-    "audit:modal": "node tools/modal-audit.mjs",
     "audit:scroll": "node tools/scroll-audit.mjs",
     "audit:lines": "node tools/line-audit.mjs",
-    "build": "node tools/build-dist.mjs"
+    "build": "node tools/build-dist.mjs",
+    "audit:mobile": "node tools/mobile-audit.mjs"
   },
   "devDependencies": {
     "axe-core": "^4.13.0",

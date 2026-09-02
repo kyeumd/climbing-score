@@ -39,8 +39,8 @@ const PROBE = function (focusSel) {
 };
 
 for (const [label, code, focus] of [
-  ['새 참가자', `tap(byText('.btn', '참가자 추가'))`, '.modal .field'],
-  ['새 참가자(포커스 없음)', `tap(byText('.btn', '참가자 추가'))`, null],
+  ['날짜 고르기', `tap(q('.matchbar__date'))`, null],
+  ['색 고르기', `tap(q('.tab', 3)); await wait(600); tap(q('.graderow__dot'))`, null],
 ]) {
   const page = await (await launch({ width: 414, height: 896, dark: true })).connect();
   await openApp(page, { sleep });

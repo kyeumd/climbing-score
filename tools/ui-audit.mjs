@@ -176,13 +176,17 @@ const SCREENS = [
   { name: '대결(데이터 있음)', code: null },
   // 1명 시드로는 순위 배지·좁아진 열·접힌 칸이 한 번도 화면에 오르지 않는다
   { name: '대결(여러 명)', code: `
+    // 격자 머리글의 이름 칸에서 이어 붙인다. 팝업은 뜨지 않는다.
+    tap(await until(() => byText('.btn', '참가자 추가'), '참가자 버튼'));
     for (const name of ['지수', '박하늘']) {
-      tap(await until(() => byText('.btn', '참가자 추가'), '참가자 버튼'));
-      const i = await until(() => q('.modal .field'), '이름 입력칸');
-      i.value = name; i.dispatchEvent(new Event('input', { bubbles: true }));
-      tap(await until(() => byText('.modal .btn', '추가'), '추가 버튼'));
-      await wait(350);
+      const i = await until(() => q('.grid__new'), '이름 칸');
+      i.focus(); i.value = name;
+      i.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+      await wait(400);
     }
+    const open = q('.grid__new');
+    if (open) open.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    await wait(300);
     tap(q('.grid__row', 6).querySelectorAll('.cell')[2]); await wait(200);
   ` },
   { name: '기록/통계',        code: `tap(q('.tab', 1))` },

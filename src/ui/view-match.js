@@ -121,17 +121,50 @@ function tpl(n) {
  *
  * 세로는 난이도, 가로는 참가자. 각 칸을 탭하면 그 사람의 그 난이도가 +1.
  */
+/*
+ * 이름 받는 칸.
+ *
+ * 엔터를 치면 그 사람이 붙고 칸은 비워진 채 남는다. 이름·엔터·이름·엔터로
+ * 몇 명이든 이어 붙일 수 있다. 비운 채 엔터나 Esc, 또는 다른 데를 누르면 닫힌다.
+ *
+ * data-fkey 를 달아 두면 render() 가 다시 그린 뒤 포커스를 되돌려 준다.
+ * 한 명 붙일 때마다 화면 전체가 다시 그려지므로, 없으면 매번 키보드가 내려간다.
+ */
+function nameField(actions, extraClass = '') {
+  return h('input', {
+    class: `field grid__new${extraClass ? ' ' + extraClass : ''}`, type: 'text',
+    placeholder: '이름', 'aria-label': '참가자 이름',
+    autocomplete: 'off', enterkeyhint: 'done', 'data-fkey': 'new-profile',
+    onkeydown: (e) => {
+      if (e.key === 'Escape') { actions.stopAddProfile(); return; }
+      if (e.key !== 'Enter') return;
+      e.preventDefault();
+      const v = e.target.value.trim();
+      if (v) actions.addProfile(v);
+      else actions.stopAddProfile();
+    },
+    onblur: (e) => { if (!e.target.value.trim()) actions.stopAddProfile(); },
+  });
+}
+
 function inputGrid(ctx, gym, grades) {
   const { state, actions } = ctx;
   const people = state.profiles;
   if (!people.length) {
+    // 아무도 없을 때도 같은 칸을 쓴다. 여기서만 팝업을 띄우면 첫 사람만
+    // 다른 방식으로 넣게 되고, 무엇보다 첫 사람을 넣을 길이 아예 막힌다.
     return h('section', { class: 'section' },
       panel(
         eyebrow('참가자 없음'),
         h('h2', { class: 'title', style: { margin: '0.4rem 0 0.35rem' } }, '누가 오늘 같이 하나요'),
         h('p', { class: 'subtitle', style: { marginBottom: '1rem' } },
           '참가자를 추가하면 여기에서 바로 완등을 기록할 수 있어요.'),
-        button('참가자 추가', { onClick: actions.openProfilePicker, variant: 'solid', trailing: 'plus' }),
+        state.ui.adding
+          ? h('div', {},
+              nameField(actions, 'grid__new--wide'),
+              h('p', { class: 'hint', style: { marginTop: '0.5rem' } },
+                '이름을 적고 엔터. 계속 이어서 넣을 수 있어요.'))
+          : button('참가자 추가', { onClick: actions.startAddProfile, variant: 'solid', trailing: 'plus' }),
       ),
     );
   }
@@ -164,6 +197,10 @@ function inputGrid(ctx, gym, grades) {
 
   let m = compute();
   const n = m.rows.length;
+  // 이름을 받는 중이면 머리글 맨 끝에 한 열을 더 낸다. 다 넣으면 사라지므로
+  // 평소 열 너비를 잡아먹지 않는다.
+  const adding = !!state.ui.adding;
+  const cols = tpl(n + (adding ? 1 : 0));
   const isTop = (r) => n > 1 && m.rankOf.get(r.profile.id) === 1 && r.score > 0;
   // 0점인 사람만 배지를 빼면 그 칸만 모양이 달라진다.
   // 아무도 기록이 없을 때만 순위를 감춘다.
@@ -181,7 +218,9 @@ function inputGrid(ctx, gym, grades) {
   const heads = new Map();   // profileId -> { btn, top, rankEl, scoreEl }
   const cells = new Map();   // `${profileId}:${gradeId}` -> { el, body, countEl, unitEl }
 
-  const head = h('div', { class: 'grid__head', style: { gridTemplateColumns: tpl(n) } },
+  const nameInput = adding ? nameField(actions) : null;
+
+  const head = h('div', { class: 'grid__head', style: { gridTemplateColumns: cols } },
     h('span', { class: 'grid__corner hint' }, '난이도'),
     m.rows.map((r) => {
       const rankEl = h('span', { class: `grid__rank num${isTop(r) ? ' is-first' : ''}` },
@@ -197,12 +236,28 @@ function inputGrid(ctx, gym, grades) {
         title: `${r.profile.name} 숙련도 바꾸기`,
       }, top, scoreEl, h('span', { class: 'hint num' }, levelLabel(r.level)));
       heads.set(r.profile.id, { btn, top, rankEl, scoreEl });
-      return btn;
+      /*
+       * 빼기는 이름 칸이 열려 있는 동안에만 보인다.
+       *
+       * 늘 띄워 두려면 손가락이 닿게 44px 로 세워야 하는데, 그러면 사람 칸
+       * 위쪽 절반을 덮어 기록하다가 잘못 눌러 사람이 사라진다. 작게 두면
+       * (28px 로 뒀다가 감사에 걸렸다) 이번엔 눌리지 않는다.
+       * 넣고 빼는 일은 한 번에 몰아서 하므로, 그때만 제대로 된 크기로 낸다.
+       */
+      return h('div', { class: 'grid__cell' },
+        btn,
+        adding && h('button', {
+          class: 'grid__drop', type: 'button', 'aria-label': `${r.profile.name} 빼기`,
+          title: `${r.profile.name} 빼기`,
+          onclick: () => actions.dropProfile(r.profile.id, r.sends),
+        }, icon('close', { size: 16 })),
+      );
     }),
+    nameInput,
   );
 
   const body = grades.map((grade) => h('div', {
-    class: 'grid__row', style: { gridTemplateColumns: tpl(n) },
+    class: 'grid__row', style: { gridTemplateColumns: cols },
   },
     h('span', { class: 'grid__grade' },
       hold(grade, { size: 20 }),
@@ -218,6 +273,8 @@ function inputGrid(ctx, gym, grades) {
       });
       return el;
     }),
+    // 이름 칸이 열려 있으면 각 줄에도 빈 칸을 하나 둬야 열이 어긋나지 않는다
+    adding ? h('span', { 'aria-hidden': 'true' }) : null,
   ));
 
   const foot = n > 1
@@ -277,7 +334,7 @@ function inputGrid(ctx, gym, grades) {
         // 칸에 '+34점' 이 함께 뜨므로, 탭이 올리는 게 개수라는 걸 못 박아 준다
         h('p', { class: 'hint', style: { marginTop: '0.3rem' } }, '탭하면 완등 +1, 길게 누르면 −1'),
       ),
-      button('참가자 추가', { onClick: actions.openProfilePicker, small: true, trailing: 'plus' }),
+      button('참가자 추가', { onClick: actions.startAddProfile, small: true, trailing: 'plus' }),
     ),
     h('div', { class: 'grid' }, head, body),
     foot,

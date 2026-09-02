@@ -588,7 +588,16 @@ ul { margin: 0; padding: 0; list-style: none; }
    모달 — 진입 애니메이션은 transform/opacity만
    ============================================================ */
 .modal {
-  position: fixed; inset: 0; z-index: 40;
+  /*
+   * height 를 dvh 로 못 박는다.
+   *
+   * inset: 0 만 두면 상자가 '레이아웃 뷰포트'를 따라간다. 모바일 브라우저는
+   * 주소창이 보이는 동안 레이아웃 뷰포트를 실제 보이는 높이보다 크게 잡으므로,
+   * align-items: flex-end 인 이 상자는 시트를 화면 아래(주소창 높이만큼)로
+   * 밀어낸다. 시트만 92dvh 를 쓰고 담는 상자는 안 써서 둘이 어긋나 있었다.
+   * 데스크톱과 헤드리스에서는 둘이 같아 드러나지 않는다.
+   */
+  position: fixed; inset: 0; height: 100dvh; z-index: 40;
   display: flex; align-items: flex-end; justify-content: center;
   padding: var(--sp-3) var(--sp-4) var(--sp-4);
   background: var(--scrim);
@@ -832,6 +841,37 @@ ul { margin: 0; padding: 0; list-style: none; }
 /* 색 고르기에서 지금 쓰는 색. 표시가 없으면 뭘 바꾸는 중인지 알 수 없다 */
 .swatch.is-on { box-shadow: inset 0 0 0 2px var(--ink); }
 .swatch--lg { width: 52px; height: 52px; }
+
+/* ============================================================
+   격자에서 바로 참가자 붙이고 떼기
+   ============================================================ */
+/* 사람 칸과 그 위에 얹힌 빼기 버튼을 같은 상자에 담는다 */
+.grid__cell { position: relative; display: flex; min-width: 0; }
+.grid__cell .grid__person { flex: 1 1 auto; min-width: 0; }
+/*
+ * 빼기는 모서리에 작게 둔다. 늘 크게 떠 있으면 기록하다가 잘못 누른다.
+ * 손가락 영역은 ::after 로 넓히지 않는다 — 그 가짜 상자가 스크롤을 만든 적이 있다.
+ */
+.grid__drop {
+  position: absolute; top: 0; right: 0;
+  width: var(--tap-min); height: var(--tap-min);
+  display: grid; place-items: center;
+  background: var(--bg); border: 1px solid var(--core-line);
+  color: var(--ink);
+  transition: background var(--dur-tap) var(--ease-spring),
+              transform var(--dur-tap) var(--ease-spring);
+}
+.grid__drop:hover, .grid__drop:focus-visible { background: var(--shell-hover); }
+.grid__drop:active { transform: scale(0.9); }
+/* 빼기가 떠 있는 동안에는 이름·점수가 그 아래로 숨지 않게 자리를 내준다 */
+.grid__cell:has(.grid__drop) .grid__person { padding-right: var(--tap-min); }
+/* 이름 받는 칸. 사람 칸과 같은 높이로 서야 머리글 줄이 흔들리지 않는다 */
+.grid__new {
+  min-height: 0; height: 100%; padding: 0.4rem 0.5rem;
+  text-align: center; font-weight: 650;
+}
+/* 아무도 없을 때는 격자가 없으므로 칸이 제 높이를 가져야 한다 */
+.grid__new--wide { height: auto; min-height: var(--tap-min); text-align: left; }
 
 /* ============================================================
    숙련도 선택

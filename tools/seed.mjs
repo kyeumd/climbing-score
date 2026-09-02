@@ -52,14 +52,18 @@ export const SEED = `
     '대결 화면');
   if (OPT.confirm && ok.textContent.includes('맞아요')) { tap(ok); await wait(400); }
 
-  // '참가자 추가' 는 이제 목록을 거치지 않고 바로 이름 입력으로 간다
+  // 참가자는 팝업이 아니라 격자 머리글에 열리는 이름 칸에서 바로 붙인다
   const addBtn = byText('.btn', '참가자 추가');
   if (addBtn) {
     tap(addBtn);
-    const nameInput = await until(() => q('.modal .field'), '이름 입력칸');
+    const nameInput = await until(() => q('.grid__new'), '이름 칸');
     nameInput.value = '동균';
-    nameInput.dispatchEvent(new Event('input', { bubbles: true }));
-    tap(await until(() => byText('.modal .btn', '추가'), '추가 버튼'));
+    nameInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    await until(() => q('.grid__name'), '참가자 열');
+    // 이름 칸을 닫아 원래 열 너비로 돌려놓는다
+    const still = q('.grid__new');
+    if (still) still.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    await wait(200);
   }
 
   if (OPT.record) {
