@@ -8,3 +8,4 @@ tools/flows/
 tools/cache/
 dogfood-output/screenshots/
 dogfood-output/videos/
+dist/

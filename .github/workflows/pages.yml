@@ -1,0 +1,51 @@
+# GitHub Pages 배포.
+#
+# 빌드라고 부르지만 하는 일은 복사뿐이다(tools/build-dist.mjs 주석 참고).
+# 번들러도 트랜스파일도 없으므로 의존성 설치도 필요 없다.
+#
+# 올리기 전에 테스트를 돌린다. 실패하면 배포하지 않는다 — 깨진 것을 공개
+# 주소로 밀어 놓고 나중에 아는 것보다 낫다.
+name: Pages 배포
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:   # 손으로도 돌릴 수 있게
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 배포는 한 번에 하나만. 밀린 것은 마지막 것만 남긴다.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      # 런타임 의존성이 0이라 설치할 것이 없다. 테스트도 node:test 내장이다.
+      - name: 단위 테스트
+        run: npm test
+      - name: 배포 폴더 만들기
+        run: node tools/build-dist.mjs
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -18,7 +18,8 @@
     "audit:visual": "node tools/visual-audit.mjs",
     "audit:modal": "node tools/modal-audit.mjs",
     "audit:scroll": "node tools/scroll-audit.mjs",
-    "audit:lines": "node tools/line-audit.mjs"
+    "audit:lines": "node tools/line-audit.mjs",
+    "build": "node tools/build-dist.mjs"
   },
   "devDependencies": {
     "axe-core": "^4.13.0",
