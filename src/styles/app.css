@@ -917,13 +917,8 @@ ul { margin: 0; padding: 0; list-style: none; }
    명단 편집 — 격자 위에 펴는 전체 폭 목록
    ============================================================ */
 
-.roster {
-  margin-bottom: var(--sp-4); padding: var(--sp-3);
-  border: 1px solid var(--core-line);
-}
-/* 오늘 세울 사람 고르기. 눌린 칩이 격자에 선다. */
-.roster__chips { margin-bottom: var(--sp-2); }
-.roster__foot { display: flex; justify-content: flex-end; margin-top: var(--sp-3); }
+/* 오늘 참가자 칩. 채워진 칩이 격자에 선다. 모드도 상자도 없다. */
+.roster__chips { margin: var(--sp-2) 0 var(--sp-3); }
 
 /* ============================================================
    입력 격자 — 난이도(행) x 참가자(열)

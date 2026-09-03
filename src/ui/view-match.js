@@ -1,8 +1,7 @@
 /** 당일 대결 화면 (설계서 7.1절). 앱을 열면 여기가 뜬다. */
-import { h, panel, button, icon, onPressAndHold, eyebrow, newPersonFields } from './components.js';
+import { h, panel, button, icon, onPressAndHold, eyebrow } from './components.js';
 import { hold } from './hold.js';
 import { activeGrades } from '../domain/gym.js';
-import { handleTaken } from '../domain/profile.js';
 import { scoreFor } from '../domain/scoring.js';
 import { josa, levelLabel } from '../domain/text.js';
 import { prettyDate } from './date-picker.js';
@@ -130,15 +129,6 @@ function tpl(n) {
  *
  * 세로는 난이도, 가로는 참가자. 각 칸을 탭하면 그 사람의 그 난이도가 +1.
  */
-/* 새 사람 넣는 칸. 아이디·닉네임 두 칸을 쓰며, 붙인 뒤에도 열린 채 남는다. */
-function personFields(state, actions) {
-  return newPersonFields({
-    onAdd: (p) => actions.addProfile(p),
-    onCancel: () => actions.stopAddProfile(),
-    isTaken: (v) => handleTaken(state.profiles, v),
-  });
-}
-
 function inputGrid(ctx, gym, grades) {
   const { state, actions } = ctx;
   const people = state.profiles;
@@ -149,9 +139,10 @@ function inputGrid(ctx, gym, grades) {
       panel(
         eyebrow('참가자 없음'),
         h('h2', { class: 'title', style: { margin: '0.4rem 0 0.35rem' } }, '누가 오늘 같이 하나요'),
-        state.ui.adding
-          ? personFields(state, actions)
-          : button('참가자 추가', { onClick: actions.startAddProfile, variant: 'solid', trailing: 'plus' }),
+        // 사람을 만드는 일은 프로필에서만 한다. 여기서는 데려다 세우기만 한다.
+        button('프로필에서 만들기', {
+          onClick: actions.openNewProfile, variant: 'solid', trailing: 'next',
+        }),
       ),
     );
   }
@@ -207,25 +198,22 @@ function inputGrid(ctx, gym, grades) {
   /*
    * 오늘 참가자.
    *
-   * 예전에는 여기서 이름도 고치고 레벨도 올리고 사람도 지웠다. 프로필 화면과
-   * 같은 일을 두 군데서 하게 되고, 대결하러 들어온 사람에게는 다 군더더기다.
-   * 여기서 하는 일은 하나다 — 오늘 온 사람을 세운다. 껐다 켜면 오늘 기록이
-   * 있는 사람이 자동으로 서므로, 보통은 이 줄을 열 일조차 없다.
+   * 모드를 없앴다. 예전에는 '참가자' 를 눌러 상자를 열고, 칩을 만지고,
+   * '완료' 를 눌러 닫아야 했다. 세 번 누를 일을 한 번으로 줄인다 —
+   * 칩 줄 자체가 컨트롤이면서 현황이다. 채워진 칩이 오늘 격자에 선 사람이다.
+   *
+   * 사람을 만드는 일은 여기 없다. 그건 프로필이 맡는다.
    */
   const playingSet = new Set(ctx.playingIds());
-  const roster = adding ? h('section', { class: 'roster' },
-    h('div', { class: 'chips roster__chips' },
-      state.profiles.map((p) => h('button', {
-        class: 'chip', type: 'button',
-        'aria-pressed': String(playingSet.has(p.id)),
-        onclick: () => actions.togglePlaying(p.id),
-      }, p.name)),
-    ),
-    personFields(state, actions),
-    h('div', { class: 'roster__foot' },
-      button('완료', { onClick: () => actions.stopAddProfile(), variant: 'solid', small: true, trailing: 'check' }),
-    ),
-  ) : null;
+  const roster = state.profiles.length > 1
+    ? h('div', { class: 'chips roster__chips', role: 'group', 'aria-label': '오늘 참가자' },
+        state.profiles.map((p) => h('button', {
+          class: 'chip', type: 'button',
+          'aria-pressed': String(playingSet.has(p.id)),
+          onclick: () => actions.togglePlaying(p.id),
+        }, p.name)),
+      )
+    : null;
 
   const head = h('div', { class: 'grid__head', style: { gridTemplateColumns: cols } },
     h('span', { class: 'grid__corner hint' }, '난이도'),
@@ -237,11 +225,10 @@ function inputGrid(ctx, gym, grades) {
         showRank() ? rankEl : null,
         h('span', { class: 'grid__name' }, r.profile.name),
       );
-      const btn = h('button', {
+      /* 이름·점수·레벨을 읽는 자리다. 누를 것이 없으므로 버튼이 아니다.
+         예전에는 눌러서 레벨 시트를 열었는데 레벨은 프로필로 옮겼다. */
+      const btn = h('div', {
         class: `grid__person${isTop(r) ? ' is-lead' : ''}`,
-        // 값 하나(레벨) 때문에 시트를 열지 않는다. 오늘 참가자 줄을 그 자리에 편다.
-        type: 'button', onclick: () => actions.startAddProfile(),
-        title: `${r.profile.name} — 눌러서 오늘 참가자 고치기`,
       }, top, scoreEl, h('span', { class: 'hint num' }, levelLabel(r.level)));
       heads.set(r.profile.id, { btn, top, rankEl, scoreEl });
       return btn;
@@ -320,12 +307,7 @@ function inputGrid(ctx, gym, grades) {
   ctx.setLiveSync(sync);
 
   return h('section', { class: 'section' },
-    h('div', { class: 'section-head' },
-      h('div', {},
-        eyebrow('오늘의 기록'),
-      ),
-      button('참가자 추가', { onClick: actions.startAddProfile, small: true, trailing: 'plus' }),
-    ),
+    eyebrow('오늘의 기록'),
     roster,
     // 사람 수를 CSS 에 알린다. 좁을 때 무엇을 접을지는 CSS 가 정한다.
     h('div', { class: `grid${n >= 4 ? ' is-tight' : ''}`, 'data-people': String(n) },

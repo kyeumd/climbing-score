@@ -52,17 +52,25 @@ export const SEED = `
     '대결 화면');
   if (OPT.confirm && ok.textContent.includes('맞아요')) { tap(ok); await wait(400); }
 
-  // 참가자는 팝업이 아니라 격자 머리글에 열리는 이름 칸에서 바로 붙인다
-  const addBtn = byText('.btn', '참가자 추가');
-  if (addBtn) {
-    tap(addBtn);
-    const nameInput = await until(() => q('.newperson__id'), '이름 칸');
-    nameInput.value = '동균';
-    nameInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
-    await until(() => q('.grid__name'), '참가자 열');
-    // 이름 칸을 닫아 원래 열 너비로 돌려놓는다
-    const still = q('.newperson__id');
-    if (still) still.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+  /*
+   * 참가자는 프로필 화면에서 만든다. 대결 화면은 명단에서 오늘 온 사람을
+   * 세우기만 하므로, 사람 자체가 없으면 거기서는 만들 수 없다.
+   */
+  if (!q('.grid__name')) {
+    tap(q('.tab', 2));
+    await wait(500);
+    tap(await until(() => byText('.section-head .btn', '추가'), '추가 버튼'));
+    const idInput = await until(() => q('.newperson__id'), '아이디 칸');
+    idInput.focus();
+    idInput.value = '동균';
+    idInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    await until(() => q('.profilerow'), '프로필 줄');
+    const done = byText('.section-head .btn', '완료');
+    if (done) tap(done);
+    await wait(300);
+    tap(q('.tab', 0));
+    // 색 등급이 없는 짐은 격자 자체가 안 그려진다. 둘 중 먼저 오는 것을 기다린다.
+    await until(() => q('.grid__name') || byText('.btn', '난이도 설정하기'), '대결 화면');
     await wait(200);
   }
 

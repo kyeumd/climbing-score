@@ -176,17 +176,19 @@ const SCREENS = [
   { name: '대결(데이터 있음)', code: null },
   // 1명 시드로는 순위 배지·좁아진 열·접힌 칸이 한 번도 화면에 오르지 않는다
   { name: '대결(여러 명)', code: `
-    // 격자 머리글의 이름 칸에서 이어 붙인다. 팝업은 뜨지 않는다.
-    tap(await until(() => byText('.btn', '참가자 추가'), '참가자 버튼'));
+    // 사람은 프로필에서 만든다. 대결 화면은 명단에서 세우기만 한다.
+    tap(q('.tab', 2)); await wait(500);
+    tap(await until(() => byText('.section-head .btn', '추가'), '추가 버튼'));
     for (const name of ['지수', '박하늘']) {
-      const i = await until(() => q('.newperson__id'), '이름 칸');
-      i.focus(); i.value = name;
-      i.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+      const i2 = await until(() => q('.newperson__id'), '아이디 칸');
+      i2.focus(); i2.value = name;
+      i2.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
       await wait(400);
     }
-    const open = q('.newperson__id');
-    if (open) open.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    const done = byText('.section-head .btn', '완료');
+    if (done) tap(done);
     await wait(300);
+    tap(q('.tab', 0)); await wait(400);
     tap(q('.grid__row', 6).querySelectorAll('.cell')[2]); await wait(200);
   ` },
   { name: '기록/통계',        code: `tap(q('.tab', 1))` },
