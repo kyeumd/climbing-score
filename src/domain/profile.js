@@ -19,6 +19,17 @@ export function createProfile({ name, level = 0, primaryGymId = null }) {
   };
 }
 
+/**
+ * 사람에게 보여 줄 ID.
+ *
+ * 닉네임은 바뀌지만 이 값은 안 바뀐다. 새 필드를 두면 이미 저장된 프로필을
+ * 모두 옮겨야 하므로, 만들 때 받은 uid 에서 뽑아 쓴다 — uid 는 절대 바뀌지 않는다.
+ */
+export function shortId(profile) {
+  const raw = String(profile?.id ?? '').replace(/^pf[_-]?/, '');
+  return `#${raw.slice(-4).toUpperCase().padStart(4, '0')}`;
+}
+
 export function clampLevel(v) {
   const n = Math.round(Number(v));
   if (!Number.isFinite(n)) return 0;

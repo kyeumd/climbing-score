@@ -19,7 +19,7 @@ export function viewScoreTable(ctx, gymId) {
         button('뒤로', { onClick: () => actions.openGymSettings(gymId), variant: 'ghost', small: true }),
         h('h1', { class: 'title' }, '점수표'),
       ),
-      panel(h('p', { class: 'subtitle' }, '난이도 색을 먼저 등록해야 점수표가 생겨요.')),
+      panel(h('p', { class: 'subtitle' }, '난이도 색이 없어요.')),
     );
   }
 
@@ -47,13 +47,7 @@ export function viewScoreTable(ctx, gymId) {
     h('div', { class: 'section' },
       panel(
         h('div', { class: 'section-head', style: { marginBottom: '0.5rem' } },
-          h('div', {},
-            eyebrow('레벨 × 난이도'),
-            h('p', { class: 'hint', style: { marginTop: '0.35rem' } },
-              '칸을 탭하면 고칠 수 있어요. 대각선이 기준 점수예요.'),
-            grades.length > 5 && h('p', { class: 'hint' },
-              `난이도 ${grades.length}단계 중 일부만 보여요. 옆으로 넘겨보세요.`),
-          ),
+          eyebrow('레벨 × 난이도'),
           Object.keys(table.overrides ?? {}).length > 0 && button('공식으로 초기화', {
             onClick: () => actions.setScoreTable(gymId, { overrides: {} }), small: true,
           }),

@@ -1,5 +1,5 @@
 /** 당일 대결 화면 (설계서 7.1절). 앱을 열면 여기가 뜬다. */
-import { h, panel, button, icon, onPressAndHold, eyebrow, dangerButton, editableText } from './components.js';
+import { h, panel, button, icon, onPressAndHold, eyebrow, confirmModal, editableText } from './components.js';
 import { hold } from './hold.js';
 import { activeGrades } from '../domain/gym.js';
 import { MAX_LEVEL } from '../domain/profile.js';
@@ -175,13 +175,8 @@ function inputGrid(ctx, gym, grades) {
       panel(
         eyebrow('참가자 없음'),
         h('h2', { class: 'title', style: { margin: '0.4rem 0 0.35rem' } }, '누가 오늘 같이 하나요'),
-        h('p', { class: 'subtitle', style: { marginBottom: '1rem' } },
-          '참가자를 추가하면 여기에서 바로 완등을 기록할 수 있어요.'),
         state.ui.adding
-          ? h('div', {},
-              nameField(actions, 'grid__new--wide'),
-              h('p', { class: 'hint', style: { marginTop: '0.5rem' } },
-                '이름을 적고 엔터. 계속 이어서 넣을 수 있어요.'))
+          ? nameField(actions, 'grid__new--wide')
           : button('참가자 추가', { onClick: actions.startAddProfile, variant: 'solid', trailing: 'plus' }),
       ),
     );
@@ -227,7 +222,7 @@ function inputGrid(ctx, gym, grades) {
       return `${a.profile.name}${josa(a.profile.name, '이/가')} `
         + `${(m.lead - b.score).toLocaleString('ko-KR')}점 앞서고 있어요.`;
     }
-    return m.lead > 0 ? '동점예요.' : '아직 기록이 없어요.';
+    return m.lead > 0 ? '동점' : '';
   };
 
   // 고쳐 쓸 노드를 들고 있는다. 다시 찾느라 DOM 을 훑지 않는다.
@@ -243,7 +238,6 @@ function inputGrid(ctx, gym, grades) {
    * 붙이고, 이름을 고치고, 레벨을 올리고, 뺀다. 시트는 하나도 뜨지 않는다.
    */
   const roster = adding ? h('section', { class: 'roster' },
-    h('p', { class: 'hint' }, '이름을 적고 엔터. 레벨은 −/+ 로 맞춰요.'),
     h('ul', { class: 'roster__list' }, m.rows.map((r) => {
       const step = (d) => () => {
         const next = Math.min(MAX_LEVEL, Math.max(0, r.level + d));
@@ -267,13 +261,17 @@ function inputGrid(ctx, gym, grades) {
             'aria-label': `${r.profile.name} 레벨 올리기`, onclick: step(+1),
           }, icon('plus', { size: 16 })),
         ),
-        dangerButton({
-          className: 'iconbtn',
-          label: `${r.profile.name} 빼기`,
-          armedLabel: `한 번 더 누르면 ${r.profile.name}${josa(r.profile.name, '이/가')} 빠져요`
-            + (r.sends ? ` (오늘 기록 ${r.sends}개도 함께)` : ''),
-          onConfirm: () => actions.dropProfile(r.profile.id),
-        }),
+        h('button', {
+          class: 'iconbtn', type: 'button',
+          'aria-label': `${r.profile.name} 빼기`, title: '빼기',
+          onclick: () => confirmModal({
+            title: '참가자 빼기',
+            message: `${r.profile.name}${josa(r.profile.name, '이/가')} 빠져요.`
+              + (r.sends ? ` 오늘 기록 ${r.sends}개도 함께 사라져요.` : ''),
+            confirmLabel: '빼기',
+            onConfirm: () => actions.dropProfile(r.profile.id),
+          }),
+        }, icon('close', { size: 15 })),
       );
     })),
     nameField(actions, 'roster__new'),
@@ -327,6 +325,7 @@ function inputGrid(ctx, gym, grades) {
   const foot = n > 1
     ? h('p', { class: 'hint', style: { marginTop: 'var(--sp-3)' } }, footText())
     : null;
+  if (foot) foot.hidden = !footText();
 
   /*
    * 개수가 바뀌었을 때 부수지 않고 고쳐 쓴다.
@@ -378,8 +377,6 @@ function inputGrid(ctx, gym, grades) {
     h('div', { class: 'section-head' },
       h('div', {},
         eyebrow('오늘의 기록'),
-        // 칸에 '+34점' 이 함께 뜨므로, 탭이 올리는 게 개수라는 걸 못 박아 준다
-        h('p', { class: 'hint', style: { marginTop: '0.3rem' } }, '탭하면 완등 +1, 길게 누르면 −1'),
       ),
       button('참가자 추가', { onClick: actions.startAddProfile, small: true, trailing: 'plus' }),
     ),

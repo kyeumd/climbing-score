@@ -185,6 +185,15 @@ const actions = {
    * adding 이 켜지면 머리글 맨 끝에 이름 칸이 한 열 생긴다.
    */
   startAddProfile() { state.ui.adding = true; render(); },
+  /* 프로필 화면에서 부르는 자리. 액션을 지우고 호출부를 안 고쳐 버튼이 죽어 있었다. */
+  openNewProfile() { state.ui.route = 'profile'; state.ui.adding = true; render(); },
+  openProfilePicker() { actions.openNewProfile(); },
+  /* 이 사람 기록 보기 — 고르고 기록 화면으로 넘어간다 */
+  showProfileStats(id) {
+    state.ui.profileId = id;
+    state.ui.route = 'stats';
+    render();
+  },
   stopAddProfile() { state.ui.adding = false; render(); },
   addProfile(name) {
     const profile = createProfile({ name, primaryGymId: state.ui.gymId });
@@ -193,10 +202,7 @@ const actions = {
     // adding 을 켜 둔 채 다시 그린다. 이름 칸이 그대로 남아 다음 이름을 받는다.
     reload();
   },
-  /*
-   * 격자에서 바로 빼기. 확인은 브라우저 팝업이 아니라 버튼이 맡는다
-   * (components.js 의 dangerButton — 두 번 눌러야 실행된다).
-   */
+  /* 확인은 부르는 쪽(confirmModal)이 이미 받았다. 여기서는 지우기만 한다. */
   dropProfile(id) { actions.deleteProfile(id); },
   renameProfile(id, name) {
     const p = state.profiles.find((x) => x.id === id);

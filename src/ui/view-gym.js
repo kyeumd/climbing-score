@@ -19,8 +19,6 @@ export function viewGym(ctx, gymId) {
       panel(
         eyebrow('선택 필요'),
         h('h2', { class: 'title', style: { margin: '0.5rem 0 0.35rem' } }, '어느 곳을 설정할까요?'),
-        h('p', { class: 'subtitle', style: { margin: '0 0 1.25rem' } },
-          '클라이밍장을 고르면 그곳의 난이도 색을 등록할 수 있어요.'),
         button('클라이밍장 고르기', {
           onClick: actions.openGymPicker, variant: 'solid', trailing: 'next',
         }),
@@ -38,11 +36,7 @@ export function viewGym(ctx, gymId) {
 
     panel(
       h('div', { class: 'section-head', style: { marginBottom: '0.75rem' } },
-        h('div', {},
-          eyebrow('난이도 색'),
-          h('p', { class: 'hint', style: { marginTop: '0.35rem' } },
-            '위에서부터 쉬운 순서로 맞춰 주세요. 벽에 붙은 안내판과 같게요.'),
-        ),
+        eyebrow('난이도 색'),
         h('label', { class: 'toggle' },
           h('input', {
             type: 'checkbox', checked: gym.gradesVerified,
@@ -55,11 +49,8 @@ export function viewGym(ctx, gymId) {
       gym.gradesSource && !gym.gradesVerified && h('p', { class: 'hint warn' },
         '클라이밍 기록 앱 자료를 참고한 초기값이라 실제와 다를 수 있어요.'),
 
-      grades.length === 0
-        ? h('p', { class: 'subtitle', style: { padding: '1rem 0' } },
-            '등록된 난이도가 없어요. 아래에서 색을 추가하세요.')
-        : h('ul', { class: 'gradelist' },
-            grades.map((g, i) => gradeRow(g, i, grades.length, gym, actions))),
+      h('ul', { class: 'gradelist' },
+        grades.map((g, i) => gradeRow(g, i, grades.length, gym, actions))),
 
       h('div', { class: 'gradeadd' },
         h('p', { class: 'hint', style: { marginBottom: '0.5rem' } }, '색 추가'),
@@ -81,8 +72,6 @@ export function viewGym(ctx, gymId) {
     h('div', { class: 'section' },
       panel(
         eyebrow('점수표'),
-        h('p', { class: 'subtitle', style: { margin: '0.5rem 0 1rem' } },
-          '내 레벨과 문제 난이도의 차이로 점수가 정해져요.'),
         button('점수표 열기', {
           onClick: () => actions.openScoreTable(gym.id), trailing: 'next',
         }),

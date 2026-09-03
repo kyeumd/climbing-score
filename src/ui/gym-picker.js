@@ -62,7 +62,6 @@ export function openGymPicker(ctx) {
     ),
     list,
     h('div', { class: 'gymlist__foot' },
-      h('p', { class: 'hint' }, '찾는 곳이 없나요?'),
       button('직접 추가', {
         onClick: () => { sheet.close(); actions.openNewGym(); },
         trailing: 'plus', small: true,

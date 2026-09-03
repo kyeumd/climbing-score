@@ -102,8 +102,6 @@ export function openSessionEditor(session, gym, ctx) {
         }),
       ),
     ),
-    h('p', { class: 'hint', style: { marginBottom: '0.75rem' } },
-      '이 세션 점수만 다시 계산돼요.'),
     rows,
     h('div', { class: 'editfoot' },
       h('span', {}, '합계 ', totalEl),
