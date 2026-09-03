@@ -1,7 +1,8 @@
 /** 짐 설정 — 난이도 등급 편집. 색 체계 없이는 앱이 성립하지 않으므로 핵심 화면. */
-import { h, panel, button, icon, eyebrow, modal } from './components.js';
+import { h, panel, button, icon, eyebrow, modal, confirmModal } from './components.js';
 import { hold, holdShape } from './hold.js';
 import { activeGrades } from '../domain/gym.js';
+import { josa } from '../domain/text.js';
 
 const PALETTE = [
   ['흰색', '#F5F5F5'], ['핑크', '#FF6FA5'], ['빨강', '#E23B34'], ['주황', '#F07C1E'],
@@ -28,6 +29,12 @@ export function viewGym(ctx, gymId) {
 
   // 은퇴한 색은 지난 기록을 세는 데만 쓰인다. 설정 목록에는 두지 않는다.
   const grades = activeGrades(gym);
+  /* 그 색으로 기록한 완등이 있는지. 있으면 빼기 전에 한 번 묻는다. */
+  const used = new Set();
+  for (const x of state.sessions) {
+    if (x.gymId !== gym.id) continue;
+    for (const [gid, n] of Object.entries(x.counts ?? {})) if (n > 0) used.add(gid);
+  }
 
   return h('div', { class: 'view' },
     h('div', { class: 'viewhead' },
@@ -51,7 +58,7 @@ export function viewGym(ctx, gymId) {
         '클라이밍 기록 앱 자료를 참고한 초기값이라 실제와 다를 수 있어요.'),
 
       h('ul', { class: 'gradelist' },
-        grades.map((g, i) => gradeRow(g, i, grades.length, gym, actions))),
+        grades.map((g, i) => gradeRow(g, i, grades.length, gym, actions, used.has(g.id)))),
 
       h('div', { class: 'gradeadd' },
         h('p', { class: 'hint', style: { marginBottom: '0.5rem' } }, '색 추가'),
@@ -106,7 +113,7 @@ export function viewGym(ctx, gymId) {
   );
 }
 
-function gradeRow(grade, i, total, gym, actions) {
+function gradeRow(grade, i, total, gym, actions, hasRecords) {
   return h('li', { class: `graderow${grade.retired ? ' is-retired' : ''}` },
     h('span', { class: 'graderow__order num' }, i + 1),
     h('button', {
@@ -126,7 +133,17 @@ function gradeRow(grade, i, total, gym, actions) {
         class: 'iconbtn', type: 'button',
         title: '빼기',
         'aria-label': `${grade.label} 빼기`,
-        onclick: () => actions.removeGrade(gym.id, grade.id),
+        /* 기록이 없으면 바로 뺀다. 있으면 지난 점수가 어떻게 되는지 알리고 묻는다 —
+           목록에서 사라지지만 계산은 그대로라는 게 눌러 보기 전에는 안 보인다. */
+        onclick: () => (hasRecords
+          ? confirmModal({
+              title: '색 빼기',
+              message: `${grade.label}${josa(grade.label, '으로/로')} 기록한 완등이 있어요.`
+                + ' 목록에서는 빠지지만 지난 점수는 그대로 남아요.',
+              confirmLabel: '빼기',
+              onConfirm: () => actions.removeGrade(gym.id, grade.id),
+            })
+          : actions.removeGrade(gym.id, grade.id)),
       }, icon('minus', { size: 15 })),
     ),
   );
