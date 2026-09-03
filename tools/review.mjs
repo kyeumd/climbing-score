@@ -34,7 +34,7 @@ const SCENES = [
   ['12 짐선택기-결과없음', `tap(q('.matchbar__gym')); await wait(600);
     const s = q('.field[type=search]'); s.value = 'zzzz'; s.dispatchEvent(new Event('input', {bubbles:true}))`],
   ['13 참가자선택', `tap(byText('.btn', '참가자 추가'))`],
-  ['14 숙련도', `tap(q('.tab', 2)); await wait(500); tap(q('.profilerow .iconbtn'))`],
+  ['14 명단 편집', `tap(byText('.btn', '참가자 추가'))`],
   ['15 세션편집', `tap(q('.tab', 1)); await wait(600); q('.sessionrow').click()`],
   ['16 색고르기', `tap(q('.tab', 3)); await wait(600); tap(q('.graderow__dot'))`],
   ['17 짐추가', `tap(q('.matchbar__gym')); await wait(600); tap(byText('.modal .btn', '직접 추가'))`],

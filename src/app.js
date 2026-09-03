@@ -154,10 +154,6 @@ const actions = {
     }
     reload();
   },
-  openLevelPicker(profileId) {
-    const p = state.profiles.find((x) => x.id === profileId);
-    if (p) import('./ui/view-profile.js').then((m) => m.openLevels(p, ctx));
-  },
 
   /** 세션이 없으면 이 시점에 만든다. 레벨과 점수표를 스냅샷으로 박는다. */
   bump(session, gradeId, delta) {

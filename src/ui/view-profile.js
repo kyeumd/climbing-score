@@ -46,92 +46,60 @@ function profileRow(profile, { state, actions }) {
   const isCurrent = profile.id === state.ui.profileId;
   const level = profile.level ?? 0;
 
+  /*
+   * 한 줄에 필요한 것만 둔다.
+   *
+   * 예전에는 이름이 두 군데 있었다 — 읽는 자리(버튼 안 텍스트)와 고치는
+   * 자리(옆에 붙인 입력칸). 좁은 화면에서 하나를 숨기는 미디어 쿼리까지
+   * 붙였는데, 그건 잘못된 걸 알면서 가린 것이다. 이름은 하나고, 그 자리에서
+   * 고친다. 평소에는 테두리 없이 글자처럼 보이다가 손이 닿으면 칸이 된다.
+   *
+   * 톱니(설정) 버튼도 없앴다. 설정할 게 레벨 하나뿐인데 그걸 열려고 버튼을
+   * 누르고 시트를 띄웠다. 값이 하나면 그 값을 바로 놓는다.
+   */
+  const lvEl = h('span', { class: 'profilerow__lv num' }, levelLabel(level));
+  const step = (d) => () => {
+    const next = Math.min(MAX_LEVEL, Math.max(0, level + d));
+    if (next !== level) actions.setLevel(profile.id, next);
+  };
+
   return h('li', { class: `profilerow${isCurrent ? ' is-current' : ''}` },
+    // 아바타가 곧 선택 표시다. 지금 기록 화면에서 보고 있는 사람은 반전된다.
     h('button', {
-      class: 'profilerow__pick', type: 'button',
+      class: 'avatar profilerow__sel', type: 'button',
+      'aria-pressed': isCurrent ? 'true' : 'false',
+      'aria-label': `${profile.name} 기록 보기`,
+      title: '이 사람 기록 보기',
       onclick: () => actions.setProfile(profile.id),
-    },
-      h('span', { class: 'avatar' }, profile.name.slice(0, 1)),
-      h('span', { class: 'profilerow__text' },
-        h('span', { class: 'profilerow__name' }, profile.name),
-        h('span', { class: 'hint num' }, levelLabel(level)),
-      ),
-    ),
-    /*
-     * 이름 고치기. 여기 말고는 이름을 바꿀 길이 아예 없었다 — 짐은
-     * renameGym 이 있는데 사람은 없어서, 잘못 적으면 지우고 다시 넣는 수밖에
-     * 없었다. 난이도 이름과 같은 방식(그 자리에서 입력칸)으로 맞춘다.
-     */
+    }, profile.name.slice(0, 1)),
+
     h('input', {
-      class: 'profilerow__rename', value: profile.name,
-      'aria-label': `${profile.name} 이름 고치기`,
+      class: 'profilerow__name', value: profile.name,
+      'aria-label': `이름 (${profile.name})`,
       'data-fkey': `profile-name:${profile.id}`,
       onchange: (e) => actions.renameProfile(profile.id, e.target.value),
     }),
-    h('div', { class: 'graderow__ops' },
+
+    h('span', { class: 'stepper' },
       h('button', {
-        class: 'iconbtn', type: 'button', title: '숙련도 설정',
-        'aria-label': `${profile.name} 숙련도 설정`,
-        onclick: () => openLevels(profile, { state, actions }),
-      }, icon('gear', { size: 15 })),
-      // 확인은 브라우저 팝업이 아니라 버튼이 맡는다. 두 번 눌러야 지워진다.
-      dangerButton({
-        className: 'iconbtn',
-        label: `${profile.name} 삭제`,
-        armedLabel: `한 번 더 누르면 ${profile.name}${josa(profile.name, '과/와')} 그 기록이 모두 지워져요`,
-        size: 15,
-        onConfirm: () => actions.deleteProfile(profile.id),
-      }),
+        class: 'stepper__btn', type: 'button',
+        'aria-label': `${profile.name} 레벨 낮추기`, onclick: step(-1),
+      }, icon('minus', { size: 16 })),
+      lvEl,
+      h('button', {
+        class: 'stepper__btn', type: 'button',
+        'aria-label': `${profile.name} 레벨 올리기`, onclick: step(+1),
+      }, icon('plus', { size: 16 })),
     ),
+
+    dangerButton({
+      className: 'iconbtn',
+      label: `${profile.name} 삭제`,
+      armedLabel: `한 번 더 누르면 ${profile.name}${josa(profile.name, '과/와')} 그 기록이 모두 지워져요`,
+      size: 15,
+      onConfirm: () => actions.deleteProfile(profile.id),
+    }),
   );
 }
 
 /** 숙련도는 사람에게 붙는다. 짐을 옮긴다고 실력이 달라지지 않으므로 값은 하나뿐이다. */
-export function openLevels(profile, { actions }) {
-  const current = profile.level ?? 0;
-  const readout = h('span', { class: 'levelpick__value num' }, levelLabel(current));
-
-  /*
-   * 끄는 동안에는 눈에 보이는 것만 바꾸고, 손을 뗄 때 한 번 저장한다.
-   *
-   * 예전에는 input 마다 setLevel 을 불렀다. 그 안에서 프로필과 오늘 세션들을
-   * 저장하고 화면을 통째로 다시 그린다. 0→8 아홉 단계를 옮기는 데만 저장이
-   * 17번 일어났고, 진짜 손가락은 그보다 훨씬 촘촘하게 쏜다. 매번 저장소
-   * 전체를 직렬화할 이유가 없다.
-   */
-  const preview = (v) => {
-    const next = Math.max(0, Math.min(MAX_LEVEL, v));
-    readout.textContent = levelLabel(next);
-    slider.value = next;
-    // 트랙은 한 덩어리라 채운 만큼을 CSS 로 알려 줘야 한다.
-    // 안 그러면 Lv.0 과 Lv.8 의 막대가 똑같이 생긴다.
-    slider.style.setProperty('--pct', `${(next / MAX_LEVEL) * 100}%`);
-    return next;
-  };
-  // change 는 끌기가 끝날 때, 그리고 화살표 키로 옮길 때 한 번씩 온다
-  const commit = (v) => { actions.setLevel(profile.id, preview(v)); };
-
-  const slider = h('input', {
-    class: 'levelpick__slider', type: 'range', min: 0, max: MAX_LEVEL, step: 1, value: current,
-    'aria-label': '내 숙련도 레벨',
-    style: { '--pct': `${(current / MAX_LEVEL) * 100}%` },
-    oninput: (e) => preview(Number(e.target.value)),
-    onchange: (e) => commit(Number(e.target.value)),
-  });
-
-  const body = h('div', {},
-    h('p', { class: 'hint', style: { marginBottom: '1.25rem' } },
-      '지금 편하게 깨는 단계를 고르세요.'),
-    h('div', { class: 'levelpick' },
-      readout,
-      slider,
-      h('div', { class: 'levelpick__ticks' },
-        Array.from({ length: MAX_LEVEL + 1 }, () => h('span', {}))),
-      h('div', { class: 'levelpick__scale hint num' },
-        h('span', {}, '쉬움'), h('span', {}, '어려움')),
-    ),
-    h('p', { class: 'hint', style: { marginTop: '1.25rem' } },
-      '레벨과 문제 난이도의 차이로 점수가 정해져요. 지난 기록은 그대로 남아요.'),
-  );
-  modal(`${profile.name}의 숙련도`, body);
-}

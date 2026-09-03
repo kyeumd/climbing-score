@@ -42,7 +42,7 @@ const SCENES = [
   ['짐 선택기', `tap(q('.matchbar__gym'))`],
   ['날짜 고르기', `tap(q('.matchbar__date'))`],
   ['참가자 추가', `tap(byText('.btn', '참가자 추가'))`],
-  ['숙련도', `tap(q('.tab', 2)); await wait(500); tap(q('.profilerow .iconbtn'))`],
+  ['명단 편집', `tap(byText('.btn', '참가자 추가'))`],
   ['세션 편집', `tap(q('.tab', 1)); await wait(600); q('.sessionrow').click()`],
   ['색 고르기', `tap(q('.tab', 3)); await wait(600); tap(q('.graderow__dot'))`],
   ['점수표', `tap(q('.tab', 3)); await wait(500); tap(byText('.btn', '점수표'))`],

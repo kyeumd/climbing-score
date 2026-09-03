@@ -2,6 +2,7 @@
 import { h, panel, button, icon, onPressAndHold, eyebrow, dangerButton } from './components.js';
 import { hold } from './hold.js';
 import { activeGrades } from '../domain/gym.js';
+import { MAX_LEVEL } from '../domain/profile.js';
 import { scoreFor } from '../domain/scoring.js';
 import { josa, levelLabel } from '../domain/text.js';
 import { prettyDate } from './date-picker.js';
@@ -111,8 +112,16 @@ function emptyGym({ state, actions }) {
  * 칸을 늘려 두고 안을 채우는 편이 낫다(cell 참고).
  */
 function tpl(n) {
-  const first = n >= 4 ? 60 : n === 3 ? 72 : 84;
-  return `minmax(${first}px, ${n >= 4 ? 0.8 : 1}fr) repeat(${n}, minmax(0, 1fr))`;
+  /*
+   * 사람이 늘면 난이도 칸부터 줄인다.
+   *
+   * 360px 에 다섯 명이면 기록 칸이 50px 까지 눌린다. 그 폭에 개수와 '+34점'
+   * 이 함께 들어가야 한다. 반면 난이도 칸은 색 이름(25px)을 안 그리면
+   * 홀드 하나면 충분하다 — 그래서 네 명부터는 이름을 접고(아래 is-tight)
+   * 칸을 홀드 크기까지 줄인다.
+   */
+  const first = n >= 4 ? 34 : n === 3 ? 72 : 84;
+  return `minmax(${first}px, ${n >= 4 ? 0 : 1}fr) repeat(${n}, minmax(0, 1fr))`;
 }
 
 /**
@@ -206,10 +215,8 @@ function inputGrid(ctx, gym, grades) {
 
   let m = compute();
   const n = m.rows.length;
-  // 이름을 받는 중이면 머리글 맨 끝에 한 열을 더 낸다. 다 넣으면 사라지므로
-  // 평소 열 너비를 잡아먹지 않는다.
   const adding = !!state.ui.adding;
-  const cols = tpl(n + (adding ? 1 : 0));
+  const cols = tpl(n);
   const isTop = (r) => n > 1 && m.rankOf.get(r.profile.id) === 1 && r.score > 0;
   // 0점인 사람만 배지를 빼면 그 칸만 모양이 달라진다.
   // 아무도 기록이 없을 때만 순위를 감춘다.
@@ -227,7 +234,53 @@ function inputGrid(ctx, gym, grades) {
   const heads = new Map();   // profileId -> { btn, top, rankEl, scoreEl }
   const cells = new Map();   // `${profileId}:${gradeId}` -> { el, body, countEl, unitEl }
 
-  const nameInput = adding ? nameField(actions) : null;
+  /*
+   * 명단 편집.
+   *
+   * 이름·레벨·빼기를 한 줄에 두려면 44px 짜리 −/+ 두 개가 들어갈 폭이 있어야
+   * 하는데, 격자 머리글은 3명만 되어도 한 칸이 78px 이라 어림없다.
+   * 그래서 편집하는 동안만 격자 위에 전체 폭 명단을 편다. 여기서 사람을
+   * 붙이고, 이름을 고치고, 레벨을 올리고, 뺀다. 시트는 하나도 뜨지 않는다.
+   */
+  const roster = adding ? h('section', { class: 'roster' },
+    h('p', { class: 'hint' }, '이름을 적고 엔터. 레벨은 −/+ 로 맞춰요.'),
+    h('ul', { class: 'roster__list' }, m.rows.map((r) => {
+      const step = (d) => () => {
+        const next = Math.min(MAX_LEVEL, Math.max(0, r.level + d));
+        if (next !== r.level) actions.setLevel(r.profile.id, next);
+      };
+      return h('li', { class: 'roster__row' },
+        h('input', {
+          class: 'roster__name', value: r.profile.name,
+          'aria-label': `이름 (${r.profile.name})`,
+          'data-fkey': `roster-name:${r.profile.id}`,
+          onchange: (e) => actions.renameProfile(r.profile.id, e.target.value),
+        }),
+        h('span', { class: 'stepper' },
+          h('button', {
+            class: 'stepper__btn', type: 'button',
+            'aria-label': `${r.profile.name} 레벨 낮추기`, onclick: step(-1),
+          }, icon('minus', { size: 16 })),
+          h('span', { class: 'roster__lv num' }, levelLabel(r.level)),
+          h('button', {
+            class: 'stepper__btn', type: 'button',
+            'aria-label': `${r.profile.name} 레벨 올리기`, onclick: step(+1),
+          }, icon('plus', { size: 16 })),
+        ),
+        dangerButton({
+          className: 'iconbtn',
+          label: `${r.profile.name} 빼기`,
+          armedLabel: `한 번 더 누르면 ${r.profile.name}${josa(r.profile.name, '이/가')} 빠져요`
+            + (r.sends ? ` (오늘 기록 ${r.sends}개도 함께)` : ''),
+          onConfirm: () => actions.dropProfile(r.profile.id),
+        }),
+      );
+    })),
+    nameField(actions, 'roster__new'),
+    h('div', { class: 'roster__foot' },
+      button('완료', { onClick: () => actions.stopAddProfile(), variant: 'solid', small: true, trailing: 'check' }),
+    ),
+  ) : null;
 
   const head = h('div', { class: 'grid__head', style: { gridTemplateColumns: cols } },
     h('span', { class: 'grid__corner hint' }, '난이도'),
@@ -241,30 +294,15 @@ function inputGrid(ctx, gym, grades) {
       );
       const btn = h('button', {
         class: `grid__person${isTop(r) ? ' is-lead' : ''}`,
-        type: 'button', onclick: () => actions.openLevelPicker(r.profile.id),
-        title: `${r.profile.name} 숙련도 바꾸기`,
+        // 값 하나(레벨) 때문에 시트를 열지 않는다. 명단 편집을 그 자리에 편다.
+        type: 'button', onclick: () => actions.startAddProfile(),
+        title: `${r.profile.name} — 눌러서 이름·레벨 고치기`,
       }, top, scoreEl, h('span', { class: 'hint num' }, levelLabel(r.level)));
       heads.set(r.profile.id, { btn, top, rankEl, scoreEl });
-      /*
-       * 빼기는 이름 칸이 열려 있는 동안에만 보인다.
-       *
-       * 늘 띄워 두려면 손가락이 닿게 44px 로 세워야 하는데, 그러면 사람 칸
-       * 위쪽 절반을 덮어 기록하다가 잘못 눌러 사람이 사라진다. 작게 두면
-       * (28px 로 뒀다가 감사에 걸렸다) 이번엔 눌리지 않는다.
-       * 넣고 빼는 일은 한 번에 몰아서 하므로, 그때만 제대로 된 크기로 낸다.
-       */
-      return h('div', { class: 'grid__cell' },
-        btn,
-        adding && dangerButton({
-          className: 'grid__drop',
-          label: `${r.profile.name} 빼기`,
-          armedLabel: `한 번 더 누르면 ${r.profile.name}${josa(r.profile.name, '이/가')} 빠져요`
-            + (r.sends ? ` (오늘 기록 ${r.sends}개도 함께)` : ''),
-          onConfirm: () => actions.dropProfile(r.profile.id),
-        }),
-      );
+      // 빼기는 명단 편집에서 한다. 여기 얹어 두면 기록하다가 잘못 눌러
+      // 사람이 사라지고, 작게 두면 손가락이 닿지 않는다.
+      return btn;
     }),
-    nameInput,
   );
 
   const body = grades.map((grade) => h('div', {
@@ -284,8 +322,6 @@ function inputGrid(ctx, gym, grades) {
       });
       return el;
     }),
-    // 이름 칸이 열려 있으면 각 줄에도 빈 칸을 하나 둬야 열이 어긋나지 않는다
-    adding ? h('span', { 'aria-hidden': 'true' }) : null,
   ));
 
   const foot = n > 1
@@ -347,7 +383,10 @@ function inputGrid(ctx, gym, grades) {
       ),
       button('참가자 추가', { onClick: actions.startAddProfile, small: true, trailing: 'plus' }),
     ),
-    h('div', { class: 'grid' }, head, body),
+    roster,
+    // 사람 수를 CSS 에 알린다. 좁을 때 무엇을 접을지는 CSS 가 정한다.
+    h('div', { class: `grid${n >= 4 ? ' is-tight' : ''}`, 'data-people': String(n) },
+      head, body),
     foot,
   );
 }

@@ -82,10 +82,8 @@ const FLOWS = [
     name: '숙련도 변경',
     steps: [
       ['프로필', `tap($('.tab', 2))`],
-      ['숙련도 열기', `tap($('.profilerow .iconbtn'))`],
-      ['LV7로 올림', `const s = $('.levelpick__slider'); s.value = 7;
-                     s.dispatchEvent(new Event('input', { bubbles: true }))`],
-      ['닫기', `tap(byText('.modal .btn', '닫기'))`],
+      ['레벨 3번 올림', `for (let i = 0; i < 3; i++) {
+                        tap($('.profilerow .stepper__btn', 1)); await wait(250); }`],
       ['대결 화면 점수 확인', `tap($('.tab', 0))`],
     ],
   },
