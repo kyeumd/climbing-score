@@ -23,7 +23,7 @@ const store = createLocalStorageAdapter();
 
 const state = {
   ...emptyState(),
-  ui: { route: 'match', gymId: null, profileId: null, date: localDate(), gymSettingsId: null, adding: false },
+  ui: { route: 'match', gymId: null, profileId: null, date: localDate(), gymSettingsId: null, adding: false, playing: null },
 };
 
 let root;
@@ -185,6 +185,25 @@ const actions = {
    * adding 이 켜지면 머리글 맨 끝에 이름 칸이 한 열 생긴다.
    */
   startAddProfile() { state.ui.adding = true; render(); },
+  /*
+   * 오늘 대결에 낄 사람.
+   *
+   * 프로필은 계속 남는 명단이고, 대결은 그중 오늘 온 사람만 세운다.
+   * playing 이 null 이면 아직 고른 적이 없다는 뜻이라, 오늘 기록이 있는
+   * 사람을 자동으로 세운다. 그래야 앱을 껐다 켜도 하던 대결이 그대로다.
+   * 아무도 기록이 없으면(하루의 시작) 명단 전원을 세운다.
+   */
+  togglePlaying(id) {
+    const now = new Set(playingIds());
+    if (now.has(id)) now.delete(id); else now.add(id);
+    // 전원을 다 빼면 격자가 사라진다. 마지막 한 명은 남긴다.
+    if (!now.size) return;
+    state.ui.playing = [...now];
+    try {
+      localStorage.setItem(PLAY_KEY, JSON.stringify({ date: state.ui.date, ids: state.ui.playing }));
+    } catch { /* 저장 못 해도 이번 세션 동안은 유지된다 */ }
+    render();
+  },
   /* 프로필 화면에서 부르는 자리. 액션을 지우고 호출부를 안 고쳐 버튼이 죽어 있었다. */
   openNewProfile() { state.ui.route = 'profile'; state.ui.adding = true; render(); },
   openProfilePicker() { actions.openNewProfile(); },
@@ -193,11 +212,11 @@ const actions = {
     const profile = createProfile({ handle, name, primaryGymId: state.ui.gymId });
     store.saveProfile(profile);
     if (!state.ui.profileId) state.ui.profileId = profile.id;
+    // 방금 만든 사람은 오늘 대결에 넣는다. 만들자마자 또 골라야 할 이유가 없다.
+    if (state.ui.playing) state.ui.playing = [...state.ui.playing, profile.id];
     // adding 을 켜 둔 채 다시 그린다. 이름 칸이 그대로 남아 다음 이름을 받는다.
     reload();
   },
-  /* 확인은 부르는 쪽(confirmModal)이 이미 받았다. 여기서는 지우기만 한다. */
-  dropProfile(id) { actions.deleteProfile(id); },
   renameProfile(id, name) {
     const p = state.profiles.find((x) => x.id === id);
     if (!p) return;
@@ -237,9 +256,40 @@ const actions = {
   },
 };
 
+/*
+ * 오늘 대결에 세울 사람.
+ *
+ * 고른 적이 없으면 명단 전원이다. '오늘 기록이 있는 사람' 을 기본으로 삼아
+ * 봤더니, 셋이 왔는데 한 명만 기록한 뒤 새로고침하면 나머지 둘이 사라졌다.
+ * 기본은 전원이고, 안 온 사람만 빼면 된다.
+ *
+ * 고른 결과는 날짜와 함께 저장한다. 껐다 켜도 그대로고, 날이 바뀌면 저절로
+ * 전원으로 돌아간다. 앱 데이터와 섞지 않으려고 열쇠를 따로 쓴다.
+ */
+const PLAY_KEY = 'climbing-score/playing';
+
+function storedPlaying() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(PLAY_KEY) || 'null');
+    return raw && raw.date === state.ui.date ? raw.ids : null;
+  } catch { return null; }
+}
+
+function playingIds() {
+  const picked = state.ui.playing ?? storedPlaying();
+  if (picked?.length) {
+    const keep = new Set(picked);
+    // 그 사이 지워진 사람은 빠지고, 열 순서는 명단 순서를 따른다
+    const kept = state.profiles.filter((p) => keep.has(p.id)).map((p) => p.id);
+    if (kept.length) return kept;
+  }
+  return state.profiles.map((p) => p.id);
+}
+
 const ctx = {
   state,
   actions,
+  playingIds,
   /* 기록 격자가 '나는 이렇게 스스로 갱신한다'고 알려 오는 통로 */
   setLiveSync(fn) { liveSync = fn; },
 };

@@ -1,8 +1,8 @@
 /** 당일 대결 화면 (설계서 7.1절). 앱을 열면 여기가 뜬다. */
-import { h, panel, button, icon, onPressAndHold, eyebrow, confirmModal, editableText, newPersonFields } from './components.js';
+import { h, panel, button, icon, onPressAndHold, eyebrow, newPersonFields } from './components.js';
 import { hold } from './hold.js';
 import { activeGrades } from '../domain/gym.js';
-import { MAX_LEVEL, handleTaken, shortId } from '../domain/profile.js';
+import { handleTaken } from '../domain/profile.js';
 import { scoreFor } from '../domain/scoring.js';
 import { josa, levelLabel } from '../domain/text.js';
 import { prettyDate } from './date-picker.js';
@@ -162,7 +162,8 @@ function inputGrid(ctx, gym, grades) {
    */
   const compute = () => {
     // 열 순서는 참가자 추가 순서로 고정한다
-    const rows = state.profiles.map((profile) => {
+    const playing = new Set(ctx.playingIds());
+    const rows = state.profiles.filter((p) => playing.has(p.id)).map((profile) => {
       const level = profile.level ?? 0;
       const session = findSession(state.sessions, {
         profileId: profile.id, gymId: gym.id, date: state.ui.date,
@@ -204,50 +205,22 @@ function inputGrid(ctx, gym, grades) {
   const cells = new Map();   // `${profileId}:${gradeId}` -> { el, body, countEl, unitEl }
 
   /*
-   * 명단 편집.
+   * 오늘 참가자.
    *
-   * 이름·레벨·빼기를 한 줄에 두려면 44px 짜리 −/+ 두 개가 들어갈 폭이 있어야
-   * 하는데, 격자 머리글은 3명만 되어도 한 칸이 78px 이라 어림없다.
-   * 그래서 편집하는 동안만 격자 위에 전체 폭 명단을 편다. 여기서 사람을
-   * 붙이고, 이름을 고치고, 레벨을 올리고, 뺀다. 시트는 하나도 뜨지 않는다.
+   * 예전에는 여기서 이름도 고치고 레벨도 올리고 사람도 지웠다. 프로필 화면과
+   * 같은 일을 두 군데서 하게 되고, 대결하러 들어온 사람에게는 다 군더더기다.
+   * 여기서 하는 일은 하나다 — 오늘 온 사람을 세운다. 껐다 켜면 오늘 기록이
+   * 있는 사람이 자동으로 서므로, 보통은 이 줄을 열 일조차 없다.
    */
+  const playingSet = new Set(ctx.playingIds());
   const roster = adding ? h('section', { class: 'roster' },
-    h('ul', { class: 'roster__list' }, m.rows.map((r) => {
-      const step = (d) => () => {
-        const next = Math.min(MAX_LEVEL, Math.max(0, r.level + d));
-        if (next !== r.level) actions.setLevel(r.profile.id, next);
-      };
-      return h('li', { class: 'roster__row' },
-        editableText({
-          value: r.profile.name,
-          label: `이름 (${r.profile.name})`,
-          fkey: `roster-name:${r.profile.id}`,
-          onCommit: (v) => actions.renameProfile(r.profile.id, v),
-        }),
-        h('span', { class: 'stepper' },
-          h('button', {
-            class: 'stepper__btn', type: 'button',
-            'aria-label': `${r.profile.name} 레벨 낮추기`, onclick: step(-1),
-          }, icon('minus', { size: 16 })),
-          h('span', { class: 'roster__lv num' }, levelLabel(r.level)),
-          h('button', {
-            class: 'stepper__btn', type: 'button',
-            'aria-label': `${r.profile.name} 레벨 올리기`, onclick: step(+1),
-          }, icon('plus', { size: 16 })),
-        ),
-        h('button', {
-          class: 'iconbtn', type: 'button',
-          'aria-label': `${r.profile.name} 빼기`, title: '빼기',
-          onclick: () => confirmModal({
-            title: '참가자 빼기',
-            message: `${r.profile.name}${josa(r.profile.name, '이/가')} 빠져요.`
-              + (r.sends ? ` 오늘 기록 ${r.sends}개도 함께 사라져요.` : ''),
-            confirmLabel: '빼기',
-            onConfirm: () => actions.dropProfile(r.profile.id),
-          }),
-        }, icon('close', { size: 15 })),
-      );
-    })),
+    h('div', { class: 'chips roster__chips' },
+      state.profiles.map((p) => h('button', {
+        class: 'chip', type: 'button',
+        'aria-pressed': String(playingSet.has(p.id)),
+        onclick: () => actions.togglePlaying(p.id),
+      }, p.name)),
+    ),
     personFields(state, actions),
     h('div', { class: 'roster__foot' },
       button('완료', { onClick: () => actions.stopAddProfile(), variant: 'solid', small: true, trailing: 'check' }),
@@ -266,13 +239,11 @@ function inputGrid(ctx, gym, grades) {
       );
       const btn = h('button', {
         class: `grid__person${isTop(r) ? ' is-lead' : ''}`,
-        // 값 하나(레벨) 때문에 시트를 열지 않는다. 명단 편집을 그 자리에 편다.
+        // 값 하나(레벨) 때문에 시트를 열지 않는다. 오늘 참가자 줄을 그 자리에 편다.
         type: 'button', onclick: () => actions.startAddProfile(),
-        title: `${r.profile.name} — 눌러서 이름·레벨 고치기`,
+        title: `${r.profile.name} — 눌러서 오늘 참가자 고치기`,
       }, top, scoreEl, h('span', { class: 'hint num' }, levelLabel(r.level)));
       heads.set(r.profile.id, { btn, top, rankEl, scoreEl });
-      // 빼기는 명단 편집에서 한다. 여기 얹어 두면 기록하다가 잘못 눌러
-      // 사람이 사라지고, 작게 두면 손가락이 닿지 않는다.
       return btn;
     }),
   );
@@ -308,8 +279,9 @@ function inputGrid(ctx, gym, grades) {
    * 돌려주고, 그때는 app.js 가 평소대로 전부 다시 그린다.
    */
   const sync = () => {
-    if (state.profiles.length !== n) return false;
-    if (!state.profiles.every((p, i) => p.id === m.rows[i].profile.id)) return false;
+    const now = ctx.playingIds();
+    if (now.length !== n) return false;
+    if (!now.every((id, i) => id === m.rows[i].profile.id)) return false;
     m = compute();
 
     for (const r of m.rows) {

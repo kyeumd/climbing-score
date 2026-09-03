@@ -15,7 +15,11 @@ export function viewProfile(ctx) {
     panel(
       h('div', { class: 'section-head', style: { marginBottom: '0.75rem' } },
         eyebrow('참가자'),
-        button('추가', { onClick: actions.startAddProfile, small: true, trailing: 'plus' }),
+        /* 열어 두면 닫을 길이 있어야 한다. 같은 버튼이 그 일을 맡는다 —
+           칸만 덩그러니 남아 있고 끝내는 방법이 없으면 고장으로 보인다. */
+        state.ui.adding
+          ? button('완료', { onClick: actions.stopAddProfile, small: true, variant: 'solid', trailing: 'check' })
+          : button('추가', { onClick: actions.startAddProfile, small: true, trailing: 'plus' }),
       ),
       h('ul', { class: 'profilelist' }, state.profiles.map((p) => profileRow(p, ctx))),
       // 여기서도 팝업 없이 바로 붙인다. 격자 쪽과 같은 칸을 쓴다.
