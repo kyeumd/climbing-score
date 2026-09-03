@@ -1,7 +1,7 @@
 /** 짐 설정 — 난이도 등급 편집. 색 체계 없이는 앱이 성립하지 않으므로 핵심 화면. */
 import { h, panel, button, icon, eyebrow, modal } from './components.js';
 import { hold, holdShape } from './hold.js';
-import { allGrades } from '../domain/gym.js';
+import { activeGrades } from '../domain/gym.js';
 
 const PALETTE = [
   ['흰색', '#F5F5F5'], ['핑크', '#FF6FA5'], ['빨강', '#E23B34'], ['주황', '#F07C1E'],
@@ -26,7 +26,8 @@ export function viewGym(ctx, gymId) {
     );
   }
 
-  const grades = allGrades(gym);
+  // 은퇴한 색은 지난 기록을 세는 데만 쓰인다. 설정 목록에는 두지 않는다.
+  const grades = activeGrades(gym);
 
   return h('div', { class: 'view' },
     h('div', { class: 'viewhead' },
@@ -123,10 +124,10 @@ function gradeRow(grade, i, total, gym, actions) {
       h('button', {
         // 되돌릴 수 있는 동작이라 위험 표시를 하지 않는다. 지우기(X)와도 글리프가 다르다.
         class: 'iconbtn', type: 'button',
-        title: grade.retired ? '다시 쓰기' : '이제 안 쓰는 색',
-        'aria-label': grade.retired ? `${grade.label} 다시 쓰기` : `${grade.label} 이제 안 씀`,
-        onclick: () => actions.toggleRetire(gym.id, grade.id, !grade.retired),
-      }, icon(grade.retired ? 'plus' : 'minus', { size: 15 })),
+        title: '빼기',
+        'aria-label': `${grade.label} 빼기`,
+        onclick: () => actions.removeGrade(gym.id, grade.id),
+      }, icon('minus', { size: 15 })),
     ),
   );
 }

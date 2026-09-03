@@ -5,7 +5,7 @@ import { emptyState } from './storage/adapter.js';
 import { localDate, uid } from './domain/ids.js';
 import {
   toggleFavorite, markVerified, addGrade, updateGrade, moveGrade,
-  retireGrade, restoreGrade, sortGyms,
+  retireGrade, removeGrade as removeGradeFrom, sortGyms,
 } from './domain/gym.js';
 import { findSession, createSession, bumpCount } from './domain/session.js';
 import { createProfile, setLevel as setProfileLevel, rename as renameProfileName } from './domain/profile.js';
@@ -122,8 +122,20 @@ const actions = {
     patchGym(gymId, (gym) => updateGrade(gym, gradeId, patch));
   },
   moveGrade(gymId, gradeId, dir) { patchGym(gymId, (gym) => moveGrade(gym, gradeId, dir)); },
-  toggleRetire(gymId, gradeId, retire) {
-    patchGym(gymId, (gym) => (retire ? retireGrade(gym, gradeId) : restoreGrade(gym, gradeId)));
+  /*
+   * 색 빼기.
+   *
+   * 예전에는 무조건 은퇴 표시만 하고 목록에 남겨 뒀다. 뺐는데 그대로 있으니
+   * 안 지워진 것으로 보인다. 기록이 없으면 진짜 지운다.
+   *
+   * 기록이 있으면 지울 수 없다 — 그 색의 id 로 완등 수를 세어 두었으므로
+   * 지우면 지난 점수를 다시 셀 수 없다. 이때는 은퇴시키고 목록에서 감춘다.
+   * 과거 기록은 그대로 남고, 세션 편집에서는 여전히 보인다.
+   */
+  removeGrade(gymId, gradeId) {
+    const used = state.sessions.some(
+      (x) => x.gymId === gymId && (x.counts?.[gradeId] ?? 0) > 0);
+    patchGym(gymId, (gym) => (used ? retireGrade(gym, gradeId) : removeGradeFrom(gym, gradeId)));
   },
 
   setScoreTable(gymId, patch) {

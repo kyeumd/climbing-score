@@ -40,6 +40,21 @@ export function allGrades(gym) {
  * 등급은 삭제하지 않고 retire한다.
  * 암장이 세팅을 바꿔 색이 없어져도 과거 세션이 깨지지 않게 하는 핵심 규칙.
  */
+/**
+ * 목록에서 아주 뺀다.
+ *
+ * 과거 기록이 이 색의 id 를 참조하고 있으면 쓰면 안 된다 — 점수를 다시 셀 수
+ * 없게 된다. 부르는 쪽(app.js)이 기록 여부를 보고 이것과 retireGrade 중
+ * 하나를 고른다.
+ */
+export function removeGrade(gym, gradeId) {
+  return {
+    ...gym,
+    grades: gym.grades.filter((g) => g.id !== gradeId)
+      .map((g, i) => ({ ...g, order: i })),
+  };
+}
+
 export function retireGrade(gym, gradeId) {
   return {
     ...gym,
