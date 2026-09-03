@@ -110,6 +110,11 @@ function emptyGym({ state, actions }) {
  * 난이도 이름과 칸 사이의 빈 띠가 넓어져, 이름과 칸을 잇는 눈길이 더 멀어진다.
  * 칸을 늘려 두고 안을 채우는 편이 낫다(cell 참고).
  */
+/** 난이도 칸의 폭. 칩 줄을 열에 맞춰 들여쓰는 데도 쓴다. */
+function firstCol(n) {
+  return n >= 4 ? 34 : n === 3 ? 72 : 84;
+}
+
 function tpl(n) {
   /*
    * 사람이 늘면 난이도 칸부터 줄인다.
@@ -119,8 +124,7 @@ function tpl(n) {
    * 홀드 하나면 충분하다 — 그래서 네 명부터는 이름을 접고(아래 is-tight)
    * 칸을 홀드 크기까지 줄인다.
    */
-  const first = n >= 4 ? 34 : n === 3 ? 72 : 84;
-  return `minmax(${first}px, ${n >= 4 ? 0 : 1}fr) repeat(${n}, minmax(0, 1fr))`;
+  return `minmax(${firstCol(n)}px, ${n >= 4 ? 0 : 1}fr) repeat(${n}, minmax(0, 1fr))`;
 }
 
 /**
@@ -182,14 +186,17 @@ function inputGrid(ctx, gym, grades) {
   // 0점인 사람만 배지를 빼면 그 칸만 모양이 달라진다.
   // 아무도 기록이 없을 때만 순위를 감춘다.
   const showRank = () => n > 1 && m.lead > 0;
-  const footText = () => {
-    const [a, b] = m.ordered;
-    if (m.lead > 0 && m.lead > (b?.score ?? 0)) {
-      return `${a.profile.name}${josa(a.profile.name, '이/가')} `
-        + `${(m.lead - b.score).toLocaleString('ko-KR')}점 앞서고 있어요.`;
-    }
-    return m.lead > 0 ? '동점' : '';
-  };
+  /*
+   * 꼴찌.
+   *
+   * 점수가 가장 낮은 사람. 다만 아무도 기록이 없거나 전원 동점이면 꼴찌가
+   * 아니라 그냥 시작 전이므로 붙이지 않는다. 내기 앱에서 1등만 표시하면
+   * 재미가 반이다.
+   */
+  const isLast = (r) => n > 1 && m.lead > 0
+    && r.score === m.ordered[m.ordered.length - 1].score
+    && r.score < m.lead;
+  const rankText = (r) => (isLast(r) ? '꼴찌' : `${m.rankOf.get(r.profile.id)}위`);
 
   // 고쳐 쓸 노드를 들고 있는다. 다시 찾느라 DOM 을 훑지 않는다.
   const heads = new Map();   // profileId -> { btn, top, rankEl, scoreEl }
@@ -206,7 +213,12 @@ function inputGrid(ctx, gym, grades) {
    */
   const playingSet = new Set(ctx.playingIds());
   const roster = state.profiles.length > 1
-    ? h('div', { class: 'chips roster__chips', role: 'group', 'aria-label': '오늘 참가자' },
+    /* 칩과 열은 같은 사람의 같은 순서다. 왼쪽 끝에서 시작하면 난이도 칸
+       폭만큼 어긋나 보이므로, 열이 시작하는 자리에 맞춰 들여쓴다. */
+    ? h('div', {
+        class: 'chips roster__chips', role: 'group', 'aria-label': '오늘 참가자',
+        style: { paddingLeft: `${firstCol(n) + 4}px` },
+      },
         state.profiles.map((p) => h('button', {
           class: 'chip', type: 'button',
           'aria-pressed': String(playingSet.has(p.id)),
@@ -218,8 +230,9 @@ function inputGrid(ctx, gym, grades) {
   const head = h('div', { class: 'grid__head', style: { gridTemplateColumns: cols } },
     h('span', { class: 'grid__corner hint' }, '난이도'),
     m.rows.map((r) => {
-      const rankEl = h('span', { class: `grid__rank num${isTop(r) ? ' is-first' : ''}` },
-        `${m.rankOf.get(r.profile.id)}위`);
+      const rankEl = h('span', {
+        class: `grid__rank num${isTop(r) ? ' is-first' : ''}${isLast(r) ? ' is-last' : ''}`,
+      }, rankText(r));
       const scoreEl = h('span', { class: 'grid__score num' }, r.score.toLocaleString('ko-KR'));
       const top = h('span', { class: 'grid__top' },
         showRank() ? rankEl : null,
@@ -254,10 +267,6 @@ function inputGrid(ctx, gym, grades) {
     }),
   ));
 
-  const foot = n > 1
-    ? h('p', { class: 'hint', style: { marginTop: 'var(--sp-3)' } }, footText())
-    : null;
-  if (foot) foot.hidden = !footText();
 
   /*
    * 개수가 바뀌었을 때 부수지 않고 고쳐 쓴다.
@@ -275,8 +284,9 @@ function inputGrid(ctx, gym, grades) {
       const hd = heads.get(r.profile.id);
       if (!hd) return false;
       hd.scoreEl.textContent = r.score.toLocaleString('ko-KR');
-      hd.rankEl.textContent = `${m.rankOf.get(r.profile.id)}위`;
+      hd.rankEl.textContent = rankText(r);
       hd.rankEl.classList.toggle('is-first', isTop(r));
+      hd.rankEl.classList.toggle('is-last', isLast(r));
       hd.btn.classList.toggle('is-lead', isTop(r));
       // 첫 기록이 들어오면 순위 배지가 그제서야 생긴다
       if (showRank() && !hd.rankEl.isConnected) hd.top.prepend(hd.rankEl);
@@ -301,7 +311,6 @@ function inputGrid(ctx, gym, grades) {
         }
       }
     }
-    if (foot) foot.textContent = footText();
     return true;
   };
   ctx.setLiveSync(sync);
@@ -312,7 +321,6 @@ function inputGrid(ctx, gym, grades) {
     // 사람 수를 CSS 에 알린다. 좁을 때 무엇을 접을지는 CSS 가 정한다.
     h('div', { class: `grid${n >= 4 ? ' is-tight' : ''}`, 'data-people': String(n) },
       head, body),
-    foot,
   );
 }
 

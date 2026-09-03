@@ -977,6 +977,13 @@ ul { margin: 0; padding: 0; list-style: none; }
   background: var(--ink); color: var(--bg-elevated);
   border-radius: var(--r-tight);
 }
+/* 꼴찌. 1위와 같은 자리에 같은 크기로 앉되, 채우지 않고 점선으로 두른다.
+   내기 앱에서 1등만 표시하면 재미가 반이다. */
+.grid__rank.is-last {
+  background: none; color: var(--ink-3);
+  box-shadow: inset 0 0 0 1px var(--ink-3);
+  border-style: dashed;
+}
 .grid__score { font-size: 1.0625rem; font-weight: 800; letter-spacing: -0.03em; }
 .grid__grade {
   /* gap 대신 홀드의 margin 을 쓴다. 자리가 빠듯할 때 아래 이음선이
