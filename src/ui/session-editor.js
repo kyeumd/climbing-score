@@ -1,5 +1,5 @@
 /** 과거 세션 편집 (설계서 7.3절). 잘못 기록한 날을 고치는 유일한 경로. */
-import { h, button, icon, modal } from './components.js';
+import { h, button, icon, modal, confirmModal } from './components.js';
 import { hold } from './hold.js';
 import { allGrades } from '../domain/gym.js';
 import { scoreFor } from '../domain/scoring.js';
@@ -107,12 +107,11 @@ export function openSessionEditor(session, gym, ctx) {
       h('span', {}, '합계 ', totalEl),
       h('div', { class: 'btnrow' },
         button('삭제', {
-          onClick: () => {
-            if (confirm('이 날 기록을 지울까요? 되돌릴 수 없어요.')) {
-              actions.deleteSession(draft.id);
-              sheet.close();
-            }
-          }, small: true,
+          onClick: () => confirmModal({
+            title: '기록 지우기',
+            message: '이 날 기록이 지워져요. 되돌릴 수 없어요.',
+            onConfirm: () => { actions.deleteSession(draft.id); sheet.close(); },
+          }), small: true,
         }),
         button('저장', {
           onClick: () => { actions.saveSession(draft); sheet.close(); },

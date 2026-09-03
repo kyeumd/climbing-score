@@ -1,5 +1,5 @@
 /** 점수표 편집 (설계서 5.2절). 공식으로 채우고, 마음에 안 드는 칸만 고친다. */
-import { h, panel, button, eyebrow } from './components.js';
+import { h, panel, button, eyebrow, promptModal } from './components.js';
 import { levelLabel } from '../domain/text.js';
 import { hold } from './hold.js';
 import { activeGrades } from '../domain/gym.js';
@@ -115,9 +115,10 @@ function matrixTable(rows, grades, gymId, actions) {
 }
 
 function editCell(cell, level, gymId, actions) {
-  const input = prompt(`${levelLabel(level)} × ${cell.grade.label} 점수`, String(cell.score));
-  if (input == null) return;
-  const v = Number(input);
-  if (!Number.isFinite(v) || v < 0) return;
-  actions.setOverride(gymId, overrideKey(level, cell.grade.id), Math.round(v));
+  promptModal({
+    title: '점수 고치기',
+    label: `${levelLabel(level)} × ${cell.grade.label}`,
+    value: cell.score,
+    onCommit: (v) => actions.setOverride(gymId, overrideKey(level, cell.grade.id), v),
+  });
 }

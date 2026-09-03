@@ -256,6 +256,42 @@ export function newPersonFields({ onAdd, onCancel, isTaken }) {
 }
 
 /**
+ * 값 하나를 받는다.
+ *
+ * window.prompt 는 브라우저가 그리는 창이라 앱과 생김새가 완전히 다르고,
+ * 모바일에서는 키보드와 겹쳐 값이 안 보이기도 한다. 앱의 시트로 받는다.
+ */
+export function promptModal({ title, label, value, onCommit }) {
+  const input = h('input', {
+    class: 'field num', type: 'number', min: 0, value: String(value),
+    'aria-label': label, inputmode: 'numeric',
+  });
+  const commit = () => {
+    const v = Number(input.value);
+    sheet.close();
+    if (Number.isFinite(v) && v >= 0) onCommit(Math.round(v));
+  };
+  input.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter') return;
+    if (e.isComposing || e.keyCode === 229) return;
+    e.preventDefault();
+    commit();
+  });
+  const sheet = modal(title,
+    h('div', {},
+      h('p', { class: 'hint', style: { marginBottom: 'var(--sp-2)' } }, label),
+      input,
+      h('div', { class: 'btnrow', style: { justifyContent: 'flex-end', marginTop: 'var(--sp-5)' } },
+        button('취소', { onClick: () => sheet.close(), small: true }),
+        button('저장', { onClick: commit, variant: 'solid', small: true, trailing: 'check' }),
+      ),
+    ),
+  );
+  setTimeout(() => { input.focus(); input.select(); }, 60);
+  return sheet;
+}
+
+/**
  * 지우기 전에 한 번 묻는다.
  *
  * window.confirm 은 브라우저가 그리는 팝업이라 앱과 생김새가 다르고, 모바일에서
