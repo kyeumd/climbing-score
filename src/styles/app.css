@@ -838,6 +838,34 @@ ul { margin: 0; padding: 0; list-style: none; }
 .swatch--lg { width: 52px; height: 52px; }
 
 /* ============================================================
+   그 자리에서 고치는 글자 — 상자 대신 밑줄 + 연필
+   ============================================================ */
+.ename {
+  display: flex; align-items: center; gap: 0.3rem;
+  flex: 0 1 auto; min-width: 0; margin-right: auto;
+}
+.ename__input {
+  /* 두 글자 이름은 37px 까지 좁아져 손가락이 닿지 않는다. 글자 폭에
+     맞추되 바닥은 탭 기준으로 잡는다. */
+  flex: 0 1 auto; min-width: var(--tap-min); max-width: 100%;
+  min-height: var(--tap-min);
+  padding: 0.4rem 0 0.3rem;
+  background: none; border: 0;
+  border-bottom: 1px solid transparent;
+  font-weight: 650; font-size: 1.0625rem; color: var(--ink);
+  transition: border-color var(--dur-tap) var(--ease-spring);
+}
+.ename__input:hover { border-bottom-color: var(--shell-line); }
+/* 고치는 중임을 밑줄 색으로 알린다. 상자를 씌우면 줄이 통째로 흔들린다. */
+.ename__input:focus { border-bottom-color: var(--accent); outline: none; }
+/* 연필은 늘 보이되 물러나 있다. 호버에만 띄우면 손가락 화면에서는 안 보인다. */
+.ename > svg {
+  flex: 0 0 auto; color: var(--ink-3); opacity: 0.4;
+  transition: opacity var(--dur-tap) var(--ease-spring);
+}
+.ename:hover > svg, .ename:focus-within > svg { opacity: 1; color: var(--accent); }
+
+/* ============================================================
    프로필 한 줄 — 아바타(선택) · 이름 · 레벨 · 삭제
    ============================================================ */
 .profilerow {
@@ -853,20 +881,6 @@ ul { margin: 0; padding: 0; list-style: none; }
 .profilerow__sel[aria-pressed='true'] {
   background: var(--ink); color: var(--bg); border-color: var(--ink);
 }
-/*
- * 이름은 평소 글자처럼 보이다가 손이 닿으면 칸이 된다. 늘 상자를 두르면
- * 한 줄에 상자가 셋(이름·레벨·삭제)이라 어디가 무엇인지 읽히지 않는다.
- */
-.profilerow__name {
-  flex: 1 1 auto; min-width: 0; min-height: var(--tap-min);
-  padding: 0.4rem 0.5rem;
-  background: none; border: 1px solid transparent;
-  font-weight: 650; font-size: 1.0625rem; color: var(--ink);
-  transition: border-color var(--dur-tap) var(--ease-spring),
-              background var(--dur-tap) var(--ease-spring);
-}
-.profilerow__name:hover { border-color: var(--shell-line); }
-.profilerow__name:focus { background: var(--sunken); border-color: var(--hairline); }
 .profilerow__lv { min-width: 3.4rem; text-align: center; font-weight: 700; }
 /*
  * 좁은 화면에서는 이름이 74px 까지 눌린다. '박하늘' 세 글자가 겨우 들어가는
@@ -874,7 +888,7 @@ ul { margin: 0; padding: 0; list-style: none; }
  */
 @media (max-width: 460px) {
   .profilerow { flex-wrap: wrap; padding: var(--sp-2) 0; }
-  .profilerow__name { flex: 1 1 auto; order: 1; }
+  .profilerow .ename { flex: 1 1 auto; order: 1; }
   .profilerow__sel { order: 0; }
   .profilerow .stepper { order: 2; margin-left: calc(var(--tap-min) + var(--sp-2)); }
   .profilerow .iconbtn { order: 3; margin-left: auto; }
@@ -904,17 +918,6 @@ ul { margin: 0; padding: 0; list-style: none; }
   border-bottom: 1px solid var(--shell-line);
 }
 .roster__row:last-child { border-bottom: 0; }
-/* 이름은 평소 글자처럼, 손이 닿으면 칸이 된다 */
-.roster__name {
-  flex: 1 1 auto; min-width: 0; min-height: var(--tap-min);
-  padding: 0.4rem 0.5rem;
-  background: none; border: 1px solid transparent;
-  font-weight: 650; font-size: 1.0625rem; color: var(--ink);
-  transition: border-color var(--dur-tap) var(--ease-spring),
-              background var(--dur-tap) var(--ease-spring);
-}
-.roster__name:hover { border-color: var(--shell-line); }
-.roster__name:focus { background: var(--sunken); border-color: var(--hairline); }
 .roster__lv { min-width: 3.4rem; text-align: center; font-weight: 700; }
 .roster__new { margin-top: var(--sp-2); }
 .roster__foot { display: flex; justify-content: flex-end; margin-top: var(--sp-3); }

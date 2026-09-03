@@ -39,6 +39,7 @@ const PATHS = {
   chart: 'M4 20V10M10 20V4M16 20v-7M22 20H2',
   user: 'M4 20c0-3.3 3.6-5.5 8-5.5s8 2.2 8 5.5M12 11.5a4 4 0 1 0 0-8 4 4 0 0 0 0 8z',
   trophy: 'M7 4h10v4a5 5 0 0 1-10 0V4zM5 5H3v2a3 3 0 0 0 3 3M19 5h2v2a3 3 0 0 1-3 3M9 20h6M12 13v7',
+  pencil: 'M4.5 19.5l4-1L20 7a2.1 2.1 0 0 0-3-3L5.5 15.5l-1 4zM14.5 5.5l3 3',
 };
 
 export function icon(name, { size = 18, fill = false } = {}) {
@@ -196,6 +197,32 @@ export function onPressAndHold(el, { onTap, onHold, delay = 250 }) {
   // 브라우저가 뒤따라 보내는 click을 막는다. 안 막으면 한 번 더 세진다.
   el.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); });
   el.addEventListener('contextmenu', (e) => e.preventDefault());
+}
+
+/**
+ * 그 자리에서 고치는 글자.
+ *
+ * 입력칸을 상자로 두르면 한 줄에 상자가 셋씩 생겨 어디가 무엇인지 읽히지
+ * 않는다. 평소에는 그냥 글자로 두고, 옆에 연필을 흐리게 띄워 고칠 수 있다는
+ * 것만 알린다. 손이 닿으면 밑줄이 생기고, 고치는 중에는 밑줄이 액센트로 켜진다.
+ *
+ * (호버가 없는 손가락 화면을 생각해 연필은 늘 보이게 둔다. 호버에만 나타나게
+ * 하면 휴대폰에서는 영영 안 보인다.)
+ */
+export function editableText({ value, label, fkey, onCommit, className = '' }) {
+  /* 칸을 글자 폭에 맞춘다. 늘어난 채로 두면 연필이 이름에서 멀찍이 떨어져
+     그 이름을 고치는 버튼이라는 게 읽히지 않는다. */
+  const fit = (el) => { el.size = Math.max(3, [...el.value].length + 1); };
+  const input = h('input', {
+    class: 'ename__input', type: 'text', value,
+    'aria-label': label, autocomplete: 'off',
+    ...(fkey ? { 'data-fkey': fkey } : {}),
+    oninput: (e) => fit(e.target),
+    onchange: (e) => onCommit(e.target.value),
+  });
+  fit(input);
+  return h('span', { class: `ename${className ? ' ' + className : ''}` },
+    input, icon('pencil', { size: 13 }));
 }
 
 /**

@@ -1,5 +1,5 @@
 /** 당일 대결 화면 (설계서 7.1절). 앱을 열면 여기가 뜬다. */
-import { h, panel, button, icon, onPressAndHold, eyebrow, dangerButton } from './components.js';
+import { h, panel, button, icon, onPressAndHold, eyebrow, dangerButton, editableText } from './components.js';
 import { hold } from './hold.js';
 import { activeGrades } from '../domain/gym.js';
 import { MAX_LEVEL } from '../domain/profile.js';
@@ -250,11 +250,11 @@ function inputGrid(ctx, gym, grades) {
         if (next !== r.level) actions.setLevel(r.profile.id, next);
       };
       return h('li', { class: 'roster__row' },
-        h('input', {
-          class: 'roster__name', value: r.profile.name,
-          'aria-label': `이름 (${r.profile.name})`,
-          'data-fkey': `roster-name:${r.profile.id}`,
-          onchange: (e) => actions.renameProfile(r.profile.id, e.target.value),
+        editableText({
+          value: r.profile.name,
+          label: `이름 (${r.profile.name})`,
+          fkey: `roster-name:${r.profile.id}`,
+          onCommit: (v) => actions.renameProfile(r.profile.id, v),
         }),
         h('span', { class: 'stepper' },
           h('button', {

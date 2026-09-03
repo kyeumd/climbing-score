@@ -1,5 +1,5 @@
 /** 프로필·레벨 관리, 백업. */
-import { h, panel, button, icon, eyebrow, modal, dangerButton } from './components.js';
+import { h, panel, button, icon, eyebrow, modal, dangerButton, editableText } from './components.js';
 import { josa, levelLabel } from '../domain/text.js';
 import { MAX_LEVEL } from '../domain/profile.js';
 
@@ -73,11 +73,11 @@ function profileRow(profile, { state, actions }) {
       onclick: () => actions.setProfile(profile.id),
     }, profile.name.slice(0, 1)),
 
-    h('input', {
-      class: 'profilerow__name', value: profile.name,
-      'aria-label': `이름 (${profile.name})`,
-      'data-fkey': `profile-name:${profile.id}`,
-      onchange: (e) => actions.renameProfile(profile.id, e.target.value),
+    editableText({
+      value: profile.name,
+      label: `이름 (${profile.name})`,
+      fkey: `profile-name:${profile.id}`,
+      onCommit: (v) => actions.renameProfile(profile.id, v),
     }),
 
     h('span', { class: 'stepper' },
