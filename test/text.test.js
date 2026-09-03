@@ -38,16 +38,24 @@ test('엔터를 받는 곳은 모두 조합 중을 걸러 낸다', async () => {
     .replace(/\/\*[\s\S]*?\*\//g, '')
     .replace(/^\s*\/\/.*$/gm, '');
 
-  for (const f of ['../src/app.js', '../src/ui/view-match.js']) {
-    const lines = strip(readFileSync(new URL(f, import.meta.url), 'utf8')).split('\n');
-    let checked = 0;
+  /* 엔터를 받는 파일을 손으로 적어 두면 코드가 옮겨갈 때 테스트가 조용히
+     빈손이 된다. src/ 를 훑어 엔터를 받는 곳을 전부 찾는다. */
+  const { readdirSync, statSync } = await import('node:fs');
+  const walk = (dir) => readdirSync(dir).flatMap((n) => {
+    const path = `${dir}/${n}`;
+    return statSync(path).isDirectory() ? walk(path) : (path.endsWith('.js') ? [path] : []);
+  });
+  const files = walk(new URL('../src', import.meta.url).pathname);
+  let handlers = 0;
+  for (const f of files) {
+    const lines = strip(readFileSync(f, 'utf8')).split('\n');
     lines.forEach((line, i) => {
       if (!/\bkey\s*[!=]==\s*'Enter'/.test(line)) return;
-      checked += 1;
+      handlers += 1;
       // 같은 핸들러 안(뒤 8줄)에 조합 검사가 있어야 한다
       assert.match(lines.slice(i, i + 8).join('\n'), /isComposing/,
-        `${f}:${i + 1} 엔터를 받는데 isComposing 검사가 없습니다`);
+        `${f.split('/src/')[1]}:${i + 1} 엔터를 받는데 isComposing 검사가 없습니다`);
     });
-    assert.ok(checked > 0, `${f} 에서 엔터 처리 구문을 못 찾았습니다`);
   }
+  assert.ok(handlers >= 2, `엔터 처리 구문을 ${handlers}곳밖에 못 찾았습니다`);
 });

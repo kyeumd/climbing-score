@@ -1,7 +1,7 @@
 /** 프로필·레벨 관리, 백업. */
-import { h, panel, button, icon, eyebrow, modal, confirmModal, editableText } from './components.js';
+import { h, panel, button, icon, eyebrow, modal, confirmModal, editableText, newPersonFields } from './components.js';
 import { josa, levelLabel } from '../domain/text.js';
-import { MAX_LEVEL, shortId } from '../domain/profile.js';
+import { MAX_LEVEL, shortId, handleTaken } from '../domain/profile.js';
 
 export function viewProfile(ctx) {
   const { state, actions } = ctx;
@@ -18,21 +18,11 @@ export function viewProfile(ctx) {
         button('추가', { onClick: actions.startAddProfile, small: true, trailing: 'plus' }),
       ),
       h('ul', { class: 'profilelist' }, state.profiles.map((p) => profileRow(p, ctx))),
-      // 여기서도 팝업 없이 바로 붙인다. 이름·엔터·이름·엔터.
-      state.ui.adding ? h('input', {
-        class: 'field profilelist__new', type: 'text', placeholder: '이름',
-        'aria-label': '새 참가자 이름', autocomplete: 'off', 'data-fkey': 'new-profile',
-        onkeydown: (e) => {
-          if (e.key === 'Escape') { actions.stopAddProfile(); return; }
-          if (e.key !== 'Enter') return;
-          // 한글 조합 중 엔터는 확정 신호지 입력 완료가 아니다
-          if (e.isComposing || e.keyCode === 229) return;
-          e.preventDefault();
-          const v = e.target.value.trim();
-          if (v) actions.addProfile(v);
-          else actions.stopAddProfile();
-        },
-        onblur: (e) => { if (!e.target.value.trim()) actions.stopAddProfile(); },
+      // 여기서도 팝업 없이 바로 붙인다. 격자 쪽과 같은 칸을 쓴다.
+      state.ui.adding ? newPersonFields({
+        onAdd: (p) => actions.addProfile(p),
+        onCancel: () => actions.stopAddProfile(),
+        isTaken: (v) => handleTaken(state.profiles, v),
       }) : null,
     ),
 
@@ -92,12 +82,6 @@ function profileRow(profile, { state, actions }) {
         'aria-label': `${profile.name} 레벨 올리기`, onclick: step(+1),
       }, icon('plus', { size: 16 })),
     ),
-
-    h('button', {
-      class: `iconbtn${isCurrent ? ' is-on' : ''}`, type: 'button',
-      'aria-label': `${profile.name} 기록 보기`, title: '기록 보기',
-      onclick: () => actions.showProfileStats(profile.id),
-    }, icon('chart', { size: 15 })),
 
     h('button', {
       class: 'iconbtn', type: 'button',

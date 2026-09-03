@@ -888,7 +888,17 @@ ul { margin: 0; padding: 0; list-style: none; }
 }
 /* 지금 기록을 보고 있는 사람 */
 .iconbtn.is-on { color: var(--accent); }
-.profilelist__new { margin-top: var(--sp-3); }
+/* 새 사람 넣는 칸 — 아이디 + 닉네임 */
+.newperson { margin-top: var(--sp-3); }
+.newperson__row { display: flex; gap: var(--sp-2); }
+.newperson__id { flex: 0 1 9rem; min-width: 0; }
+.newperson__name { flex: 1 1 auto; min-width: 0; }
+/* 비어 있을 때 자리를 잡아 두면 글자가 뜰 때 줄이 흔들리지 않는다 */
+.newperson__err { min-height: 1.2em; margin-top: 0.35rem; color: var(--ink); }
+@media (max-width: 380px) {
+  .newperson__row { flex-direction: column; }
+  .newperson__id { flex: 0 0 auto; }
+}
 .profilerow__lv { min-width: 3.4rem; text-align: center; font-weight: 700; }
 /*
  * 좁은 화면에서는 이름이 74px 까지 눌린다. '박하늘' 세 글자가 겨우 들어가는
@@ -919,12 +929,8 @@ ul { margin: 0; padding: 0; list-style: none; }
 }
 .roster__row:last-child { border-bottom: 0; }
 .roster__lv { min-width: 3.4rem; text-align: center; font-weight: 700; }
-.roster__new { margin-top: var(--sp-2); }
 .roster__foot { display: flex; justify-content: flex-end; margin-top: var(--sp-3); }
 
-/* 아무도 없을 때는 격자가 없으므로 칸이 제 높이를 가져야 한다 */
-.grid__new--wide { height: auto; min-height: var(--tap-min); text-align: left; }
-.grid__new { min-height: var(--tap-min); padding: 0.4rem 0.6rem; font-weight: 650; }
 
 
 

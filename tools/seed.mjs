@@ -56,12 +56,12 @@ export const SEED = `
   const addBtn = byText('.btn', '참가자 추가');
   if (addBtn) {
     tap(addBtn);
-    const nameInput = await until(() => q('.grid__new'), '이름 칸');
+    const nameInput = await until(() => q('.newperson__id'), '이름 칸');
     nameInput.value = '동균';
     nameInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
     await until(() => q('.grid__name'), '참가자 열');
     // 이름 칸을 닫아 원래 열 너비로 돌려놓는다
-    const still = q('.grid__new');
+    const still = q('.newperson__id');
     if (still) still.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
     await wait(200);
   }

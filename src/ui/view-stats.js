@@ -50,6 +50,15 @@ export function viewStats(ctx) {
       h('h1', { class: 'title' }, '기록'),
     ),
 
+    /*
+     * 누구의 기록인지 여기서 고른다.
+     *
+     * 예전에는 프로필 화면의 행마다 '기록 보기' 버튼을 뒀는데, 다른 탭으로
+     * 건너뛰는 버튼이라 무엇을 하는지 읽히지 않았고 그 줄에 컨트롤만 하나
+     * 더 늘었다. 고르는 일은 보는 자리에서 하는 게 맞다.
+     */
+    state.profiles.length > 1 && personChips(state.profiles, profile, actions),
+
     // 고를 곳이 하나뿐이면 고르는 줄 자체가 필요 없다
     gyms.length > 1 && gymChips(gyms, gym, actions),
 
@@ -127,6 +136,16 @@ export function viewStats(ctx) {
 }
 
 /** 지금 보는 짐의 칩이 화면 밖에 있으면 어디를 보고 있는지 알 수 없다 */
+function personChips(profiles, current, actions) {
+  const row = h('div', { class: 'chips' },
+    profiles.map((p) => h('button', {
+      class: 'chip', type: 'button', 'aria-pressed': String(p.id === current.id),
+      onclick: () => actions.setProfile(p.id),
+    }, p.name)),
+  );
+  return row;
+}
+
 function gymChips(gyms, gym, actions) {
   const row = h('div', { class: 'chips' },
     gyms.map((g) => h('button', {

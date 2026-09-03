@@ -179,12 +179,12 @@ const SCREENS = [
     // 격자 머리글의 이름 칸에서 이어 붙인다. 팝업은 뜨지 않는다.
     tap(await until(() => byText('.btn', '참가자 추가'), '참가자 버튼'));
     for (const name of ['지수', '박하늘']) {
-      const i = await until(() => q('.grid__new'), '이름 칸');
+      const i = await until(() => q('.newperson__id'), '이름 칸');
       i.focus(); i.value = name;
       i.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
       await wait(400);
     }
-    const open = q('.grid__new');
+    const open = q('.newperson__id');
     if (open) open.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
     await wait(300);
     tap(q('.grid__row', 6).querySelectorAll('.cell')[2]); await wait(200);

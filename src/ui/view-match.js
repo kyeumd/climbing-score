@@ -1,8 +1,8 @@
 /** 당일 대결 화면 (설계서 7.1절). 앱을 열면 여기가 뜬다. */
-import { h, panel, button, icon, onPressAndHold, eyebrow, confirmModal, editableText } from './components.js';
+import { h, panel, button, icon, onPressAndHold, eyebrow, confirmModal, editableText, newPersonFields } from './components.js';
 import { hold } from './hold.js';
 import { activeGrades } from '../domain/gym.js';
-import { MAX_LEVEL } from '../domain/profile.js';
+import { MAX_LEVEL, handleTaken, shortId } from '../domain/profile.js';
 import { scoreFor } from '../domain/scoring.js';
 import { josa, levelLabel } from '../domain/text.js';
 import { prettyDate } from './date-picker.js';
@@ -130,38 +130,12 @@ function tpl(n) {
  *
  * 세로는 난이도, 가로는 참가자. 각 칸을 탭하면 그 사람의 그 난이도가 +1.
  */
-/*
- * 이름 받는 칸.
- *
- * 엔터를 치면 그 사람이 붙고 칸은 비워진 채 남는다. 이름·엔터·이름·엔터로
- * 몇 명이든 이어 붙일 수 있다. 비운 채 엔터나 Esc, 또는 다른 데를 누르면 닫힌다.
- *
- * data-fkey 를 달아 두면 render() 가 다시 그린 뒤 포커스를 되돌려 준다.
- * 한 명 붙일 때마다 화면 전체가 다시 그려지므로, 없으면 매번 키보드가 내려간다.
- */
-function nameField(actions, extraClass = '') {
-  return h('input', {
-    class: `field grid__new${extraClass ? ' ' + extraClass : ''}`, type: 'text',
-    placeholder: '이름', 'aria-label': '참가자 이름',
-    autocomplete: 'off', enterkeyhint: 'done', 'data-fkey': 'new-profile',
-    onkeydown: (e) => {
-      if (e.key === 'Escape') { actions.stopAddProfile(); return; }
-      if (e.key !== 'Enter') return;
-      /*
-       * 한글 IME 는 마지막 글자를 조합하는 중이다. 그 상태에서 누른 엔터는
-       * '조합 확정' 이지 '입력 완료' 가 아니고, keydown 은 isComposing: true 로
-       * 온다(옛 브라우저는 keyCode 229). 이걸 그냥 처리하면 아직 덜 만들어진
-       * 값으로 사람을 붙이고, 브라우저가 뒤이어 확정한 마지막 글자는 새로
-       * 비워진 칸에 떨어져 또 한 명이 된다 — "이름 마지막 글자가 쪼개져서
-       * 추가로 만들어지는" 게 이것이다. 확정 뒤에 오는 엔터만 받는다.
-       */
-      if (e.isComposing || e.keyCode === 229) return;
-      e.preventDefault();
-      const v = e.target.value.trim();
-      if (v) actions.addProfile(v);
-      else actions.stopAddProfile();
-    },
-    onblur: (e) => { if (!e.target.value.trim()) actions.stopAddProfile(); },
+/* 새 사람 넣는 칸. 아이디·닉네임 두 칸을 쓰며, 붙인 뒤에도 열린 채 남는다. */
+function personFields(state, actions) {
+  return newPersonFields({
+    onAdd: (p) => actions.addProfile(p),
+    onCancel: () => actions.stopAddProfile(),
+    isTaken: (v) => handleTaken(state.profiles, v),
   });
 }
 
@@ -176,7 +150,7 @@ function inputGrid(ctx, gym, grades) {
         eyebrow('참가자 없음'),
         h('h2', { class: 'title', style: { margin: '0.4rem 0 0.35rem' } }, '누가 오늘 같이 하나요'),
         state.ui.adding
-          ? nameField(actions, 'grid__new--wide')
+          ? personFields(state, actions)
           : button('참가자 추가', { onClick: actions.startAddProfile, variant: 'solid', trailing: 'plus' }),
       ),
     );
@@ -274,7 +248,7 @@ function inputGrid(ctx, gym, grades) {
         }, icon('close', { size: 15 })),
       );
     })),
-    nameField(actions, 'roster__new'),
+    personFields(state, actions),
     h('div', { class: 'roster__foot' },
       button('완료', { onClick: () => actions.stopAddProfile(), variant: 'solid', small: true, trailing: 'check' }),
     ),

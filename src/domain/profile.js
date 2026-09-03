@@ -9,9 +9,10 @@ import { uid } from './ids.js';
 
 export const MAX_LEVEL = 15;
 
-export function createProfile({ name, level = 0, primaryGymId = null }) {
+export function createProfile({ name, handle = '', level = 0, primaryGymId = null }) {
   return {
     id: uid('pf'),
+    handle: normalizeHandle(handle),
     name,
     level: clampLevel(level),
     primaryGymId,
@@ -19,15 +20,31 @@ export function createProfile({ name, level = 0, primaryGymId = null }) {
   };
 }
 
+/** 아이디로 쓸 수 있는 꼴로 다듬는다. 공백은 못 쓴다 — 눈으로 구분이 안 된다. */
+export function normalizeHandle(v) {
+  return String(v ?? '').trim().replace(/\s+/g, '').slice(0, 16);
+}
+
 /**
  * 사람에게 보여 줄 ID.
  *
- * 닉네임은 바뀌지만 이 값은 안 바뀐다. 새 필드를 두면 이미 저장된 프로필을
- * 모두 옮겨야 하므로, 만들 때 받은 uid 에서 뽑아 쓴다 — uid 는 절대 바뀌지 않는다.
+ * 만들 때 직접 적고, 그 뒤로는 못 바꾼다. 닉네임은 바뀌어도 이 값은 그대로라
+ * 같은 이름이 둘일 때 이걸로 가른다.
+ *
+ * 예전 프로필에는 이 값이 없다. 그때는 uid 에서 뽑아 쓴다 — 없다고 빈칸으로
+ * 두면 이미 만들어 둔 사람들만 식별자가 사라진다.
  */
 export function shortId(profile) {
+  if (profile?.handle) return `@${profile.handle}`;
   const raw = String(profile?.id ?? '').replace(/^pf[_-]?/, '');
   return `#${raw.slice(-4).toUpperCase().padStart(4, '0')}`;
+}
+
+/** 이미 쓰고 있는 아이디인가. 대소문자는 구분하지 않는다. */
+export function handleTaken(profiles, handle) {
+  const v = normalizeHandle(handle).toLowerCase();
+  if (!v) return false;
+  return profiles.some((p) => (p.handle ?? '').toLowerCase() === v);
 }
 
 export function clampLevel(v) {

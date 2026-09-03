@@ -200,6 +200,62 @@ export function onPressAndHold(el, { onTap, onHold, delay = 250 }) {
 }
 
 /**
+ * 새 사람 넣는 칸 — 아이디와 닉네임.
+ *
+ * 아이디는 만들 때 한 번만 적고 그 뒤로는 못 바꾼다. 닉네임은 언제든 바꾼다.
+ * 두 칸 어디서든 엔터를 치면 붙고, 칸이 비워진 채 남아 다음 사람을 받는다.
+ *
+ * 이미 쓰는 아이디면 조용히 넘기지 않는다 — 아무 일도 안 일어나면
+ * '추가가 안 된다' 로 읽힌다. 그 자리에 이유를 적는다.
+ */
+export function newPersonFields({ onAdd, onCancel, isTaken }) {
+  const err = h('p', { class: 'newperson__err hint', role: 'alert' }, '');
+  const handle = h('input', {
+    class: 'field newperson__id', type: 'text', placeholder: '아이디',
+    'aria-label': '아이디 (나중에 바꿀 수 없어요)', autocomplete: 'off',
+    enterkeyhint: 'next', 'data-fkey': 'new-handle',
+  });
+  const name = h('input', {
+    class: 'field newperson__name', type: 'text', placeholder: '닉네임',
+    'aria-label': '닉네임', autocomplete: 'off', enterkeyhint: 'done',
+  });
+
+  const submit = () => {
+    const hv = handle.value.trim().replace(/\s+/g, '');
+    const nv = name.value.trim();
+    if (!hv && !nv) { onCancel(); return; }
+    if (!hv) { err.textContent = '아이디를 적어 주세요.'; handle.focus(); return; }
+    if (isTaken(hv)) { err.textContent = `'${hv}' 는 이미 쓰고 있어요.`; handle.focus(); return; }
+    err.textContent = '';
+    // 닉네임을 안 적으면 아이디를 그대로 쓴다. 두 번 적게 할 이유가 없다.
+    onAdd({ handle: hv, name: nv || hv });
+    handle.value = ''; name.value = '';
+    handle.focus();
+  };
+
+  for (const el of [handle, name]) {
+    el.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') { onCancel(); return; }
+      if (e.key !== 'Enter') return;
+      // 한글 조합 중 엔터는 확정 신호지 입력 완료가 아니다
+      if (e.isComposing || e.keyCode === 229) return;
+      e.preventDefault();
+      submit();
+    });
+    el.addEventListener('input', () => { err.textContent = ''; });
+  }
+
+  const box = h('div', { class: 'newperson' },
+    h('div', { class: 'newperson__row' }, handle, name), err);
+  // 두 칸 모두 비운 채 밖으로 나가면 닫는다
+  box.addEventListener('focusout', (e) => {
+    if (box.contains(e.relatedTarget)) return;
+    if (!handle.value.trim() && !name.value.trim()) onCancel();
+  });
+  return box;
+}
+
+/**
  * 지우기 전에 한 번 묻는다.
  *
  * window.confirm 은 브라우저가 그리는 팝업이라 앱과 생김새가 다르고, 모바일에서

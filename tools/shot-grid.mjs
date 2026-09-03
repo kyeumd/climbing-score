@@ -48,12 +48,12 @@ const SEED = `
   // 이름 칸은 한 번만 연다. 열린 채로 이름·엔터를 이어 친다.
   tap(await until(() => byText('.btn', '참가자 추가'), '참가자 버튼'));
   for (const name of NAMES) {
-    const input = await until(() => q('.grid__new'), '이름 칸');
+    const input = await until(() => q('.newperson__id'), '이름 칸');
     input.focus(); input.value = name;
     input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
     await wait(350);
   }
-  const still = q('.grid__new');
+  const still = q('.newperson__id');
   if (still) still.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
   await wait(300);
 
