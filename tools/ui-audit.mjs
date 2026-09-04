@@ -100,7 +100,7 @@ const GEOMETRY_PROBE = function () {
         if (lines > 1) out.tightLeading.push({ el: desc(el), ratio: +(lh / fs).toFixed(2), lines });
       }
     }
-    const interactive = el.matches('button, a, input, select, [role=button], .chip, .swatch, .iconbtn, .grid__row button, .gymrow__pick, .sessionrow');
+    const interactive = el.matches('button, a, input, select, [role=button], .chip, .swatch, .iconbtn, .grid__row button, .grid__add, .gymrow__pick, .sessionrow');
     if (interactive) {
       // <label> 안의 input은 라벨 전체가 클릭 영역이다
       const wrapLabel = el.closest('label');
@@ -176,21 +176,21 @@ const SCREENS = [
   { name: '대결(데이터 있음)', code: null },
   // 1명 시드로는 순위 배지·좁아진 열·접힌 칸이 한 번도 화면에 오르지 않는다
   { name: '대결(여러 명)', code: `
-    // 사람은 프로필에서 만든다. 대결 화면은 명단에서 세우기만 한다.
-    tap(q('.tab', 2)); await wait(500);
-    tap(await until(() => byText('.section-head .btn', '추가'), '추가 버튼'));
+    // 사람은 점선 + 카드 → 참가자 시트에서 만든다. 만들면 바로 오늘 격자에 선다.
+    tap(q('.grid__add'));
     for (const name of ['지수', '박하늘']) {
-      const i2 = await until(() => q('.newperson__id'), '아이디 칸');
+      const i2 = await until(() => q('.modal .newperson__id'), '아이디 칸');
       i2.focus(); i2.value = name;
       i2.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
       await wait(400);
     }
-    const done = byText('.section-head .btn', '완료');
-    if (done) tap(done);
+    tap(byText('.modal .btn', '닫기'));
+    await until(() => !q('.modal'), '시트 닫힘');
     await wait(300);
-    tap(q('.tab', 0)); await wait(400);
     tap(q('.grid__row', 6).querySelectorAll('.cell')[2]); await wait(200);
   ` },
+  { name: '참가자 시트', code: `tap(q('.grid__add'))` },
+  { name: '사람 시트', code: `tap(q('.grid__person'))` },
   { name: '기록/통계',        code: `tap(q('.tab', 1))` },
   { name: '짐 설정',          code: `tap(q('.tab', 3))` },
   { name: '점수표',           code: `tap(q('.tab', 3)); await wait(500); tap(byText('.btn', '점수표'))` },

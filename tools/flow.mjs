@@ -42,16 +42,17 @@ const FLOWS = [
     name: '참가자 추가',
     steps: [
       ['시작', null],
-      ['참가자 추가', `tap(byText('.btn', '참가자 추가'))`],
-      ['이름 입력', `const i = $('.newperson__id'); i.focus(); i.value = '민서'`],
-      ['엔터로 추가', `const i = $('.newperson__id');
+      ['점선 + 카드', `tap($('.grid__add'))`],
+      ['이름 입력', `const i = $('.modal .newperson__id'); i.focus(); i.value = '민서'`],
+      ['엔터로 추가', `const i = $('.modal .newperson__id');
                      i.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
-                     await wait(400);
-                     const o = $('.newperson__id');
-                     if (o) o.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))`],
+                     await wait(400)`],
+      ['시트 닫기', `tap(byText('.modal .btn', '닫기'))`],
       // .grid__row button 을 전체에서 세면 열이 늘어난 만큼 어긋난다.
       // 두 번째 줄의 두 번째 칸(= 새 참가자)을 콕 집는다.
-      ['새 참가자로 기록', `tap(q('.grid__row', 1).querySelectorAll('.cell')[1])`],
+      ['새 참가자로 기록', `await wait(300); tap(q('.grid__row', 1).querySelectorAll('.cell')[1])`],
+      ['사람 카드 → 시트', `tap($('.grid__person', 1))`],
+      ['오늘 대결에서 빼기', `tap(byText('.modal .btn', '빼기'))`],
     ],
   },
   {
@@ -106,14 +107,12 @@ const FLOWS = [
       ['검색', `const i = $('.field[type=search]'); i.value = '더클라임';
                i.dispatchEvent(new Event('input', { bubbles: true }))`],
       ['짐 선택', `tap($('.gymrow__pick'))`],
-      // 색 순서 확인 배너가 먼저 뜬다. 버튼 이름은 '프로필' 이 아니라 '참가자 추가' 다.
+      // 색 순서 확인 배너가 먼저 뜬다.
       ['색 순서 확인', `const ok = byText('.btn', '맞아요'); if (ok) tap(ok)`],
-      ['참가자 추가', `tap(byText('.btn', '참가자 추가'))`],
-      ['이름 입력 후 추가', `const i = $('.newperson__id'); i.focus(); i.value = '나';
+      ['점선 + 카드', `tap($('.grid__add'))`],
+      ['이름 입력 후 추가', `const i = $('.modal .newperson__id'); i.focus(); i.value = '나';
                           i.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
-                          await wait(400);
-                          const o = $('.newperson__id');
-                          if (o) o.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))`],
+                          await wait(400); tap(byText('.modal .btn', '닫기')); await wait(300)`],
       ['첫 완등 기록', `tap($('.grid__row button', 2))`],
     ],
   },

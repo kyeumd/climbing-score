@@ -1,14 +1,17 @@
 /** 당일 대결 화면 (설계서 7.1절). 앱을 열면 여기가 뜬다. */
-import { h, panel, button, icon, onPressAndHold, eyebrow } from './components.js';
+import {
+  h, panel, button, icon, onPressAndHold, eyebrow, modal, confirmModal, newPersonFields,
+} from './components.js';
 import { hold } from './hold.js';
 import { activeGrades } from '../domain/gym.js';
+import { handleTaken } from '../domain/profile.js';
 import { scoreFor } from '../domain/scoring.js';
 import { josa, levelLabel } from '../domain/text.js';
 import { prettyDate } from './date-picker.js';
-import { findSession, createSession, bumpCount, scoreOf, sendsOf } from '../domain/session.js';
+import { findSession, createSession, scoreOf, sendsOf } from '../domain/session.js';
 
 export function viewMatch(ctx) {
-  const { state, actions } = ctx;
+  const { state } = ctx;
   const gym = state.gyms.find((g) => g.id === state.ui.gymId);
   const date = state.ui.date;
 
@@ -101,6 +104,137 @@ function emptyGym({ state, actions }) {
   );
 }
 
+/* ---------- 참가자 넣고 빼기 ---------- */
+
+/**
+ * 점선 + 카드. 격자 머리글의 모서리 칸(난이도 열 위)에 앉는다.
+ *
+ * 사람을 넣는 버튼은 사람 카드가 늘어선 줄에 있어야 '여기에 하나 더' 로
+ * 읽힌다. 모서리는 원래 '난이도' 라는 글자 하나만 있던 자리라 폭을 새로 먹지
+ * 않고, 사람이 많아 좁아져도 홀드 열 폭(44px)만큼은 늘 남는다. 오른쪽 끝에
+ * 열을 하나 더 내는 방법도 있었지만, 그러면 다섯 명일 때 기록 칸이 그만큼
+ * 줄어 '+110점' 이 안 들어간다.
+ *
+ * 점선은 이 앱에서 '아직 비어 있는 자리' 다(확인 배너·자리 표시와 같은 문법).
+ */
+function addCard(ctx, { wide = false } = {}) {
+  return h('button', {
+    class: `grid__add${wide ? ' grid__add--wide' : ''}`, type: 'button',
+    'aria-label': '참가자 추가',
+    onclick: () => openRosterSheet(ctx),
+  },
+    icon('plus', { size: 18 }),
+    h('span', { class: 'grid__add__label' }, wide ? '참가자 추가' : '참가자'),
+  );
+}
+
+/**
+ * 참가자 시트.
+ *
+ * 위에는 명단 전원이 칩으로 선다. 채워진 칩이 오늘 격자에 있는 사람이고,
+ * 누르면 넣고 뺀다. 아래는 새 사람을 만드는 칸이다 — 만들면 바로 오늘
+ * 대결에 서고 칩도 채워진 채 늘어난다. 시트는 닫지 않는다. 암장에서 친구
+ * 셋을 한 번에 넣는 일이 잦고, 매번 다시 열게 하면 그만큼 눌러야 한다.
+ *
+ * 뒤의 격자는 시트를 열어 둔 채로도 그때그때 다시 그려진다. 모달은 #app
+ * 바깥에 붙어 있어 render() 가 격자를 부수어도 살아남는다.
+ */
+function openRosterSheet(ctx) {
+  const { state, actions } = ctx;
+  const chipOf = new Map();   // profileId -> 칩
+  const chips = h('div', { class: 'chips chips--wrap', role: 'group', 'aria-label': '오늘 참가자' });
+  const note = h('p', { class: 'hint roster__note' }, '');
+
+  /* 칩을 다시 만들지 않고 상태만 고쳐 쓴다. 통째로 갈아 끼우면 누른 칩에서
+     포커스가 떨어진다. */
+  const refresh = () => {
+    const playing = new Set(ctx.playingIds());
+    for (const p of state.profiles) {
+      let chip = chipOf.get(p.id);
+      if (!chip) {
+        chip = h('button', {
+          class: 'chip', type: 'button',
+          onclick: () => { actions.togglePlaying(p.id); refresh(); },
+        }, p.name);
+        chipOf.set(p.id, chip);
+        chips.append(chip);
+      }
+      const on = playing.has(p.id);
+      chip.setAttribute('aria-pressed', String(on));
+      // 마지막 한 명을 빼면 격자가 사라진다. 그 칩은 잠근다.
+      chip.disabled = on && playing.size === 1;
+    }
+    for (const [id, chip] of chipOf) {
+      if (!state.profiles.some((p) => p.id === id)) { chip.remove(); chipOf.delete(id); }
+    }
+    const n = state.profiles.length;
+    if (!n) note.textContent = '아직 아무도 없어요. 아래에서 첫 사람을 만들어 주세요.';
+    else if (n === 1) note.textContent = '한 명일 때는 뺄 수 없어요. 아래에서 친구를 더 만들어 보세요.';
+    else note.textContent = '누르면 오늘 대결에 넣고 빼요. 뺀 사람의 기록은 남아요.';
+  };
+  refresh();
+
+  const fields = newPersonFields({
+    onAdd: (p) => { actions.addProfile(p); refresh(); },
+    // 비운 채 다른 데를 눌러도 시트는 그대로 둔다. 칩을 누르러 가는 길일 수 있다.
+    onCancel: () => {},
+    isTaken: (v) => handleTaken(state.profiles, v),
+  });
+
+  modal('참가자',
+    h('div', { class: 'roster' },
+      h('div', { class: 'roster__now' },
+        eyebrow('오늘 같이 하는 사람'),
+        chips,
+        note,
+      ),
+      h('div', { class: 'roster__new' },
+        eyebrow('새로 만들기'),
+        h('p', { class: 'hint', style: { margin: '0.15rem 0 0' } },
+          '아이디는 나중에 바꿀 수 없어요. 닉네임을 비우면 아이디를 그대로 써요.'),
+        fields,
+      ),
+    ),
+  );
+}
+
+/**
+ * 사람 카드를 누르면 뜨는 시트. 그 사람에 대한 일만 한다 — 오늘 빼기, 명단에서 지우기.
+ * 이름·레벨 고치기는 프로필 화면 몫이다.
+ */
+function openPersonSheet(ctx, r, n) {
+  const { actions } = ctx;
+  const p = r.profile;
+  const canDrop = n > 1;
+  const sheet = modal(p.name,
+    h('div', {},
+      h('p', { class: 'subtitle', style: { marginBottom: 'var(--sp-4)' } },
+        `오늘 ${r.score.toLocaleString('ko-KR')}점 · 완등 ${r.sends}개 · ${levelLabel(r.level)}`),
+      h('div', { class: 'btnrow' },
+        button('오늘 대결에서 빼기', {
+          onClick: () => { sheet.close(); actions.togglePlaying(p.id); },
+          variant: 'solid', trailing: 'minus', disabled: !canDrop,
+        }),
+        button('명단에서 지우기', {
+          onClick: () => {
+            sheet.close();
+            confirmModal({
+              title: '참가자 지우기',
+              message: `${p.name}${josa(p.name, '과/와')} 그 기록이 모두 지워져요. 되돌릴 수 없어요.`,
+              onConfirm: () => actions.deleteProfile(p.id),
+            });
+          },
+          trailing: 'close',
+        }),
+      ),
+      h('p', { class: 'hint', style: { marginTop: 'var(--sp-3)' } },
+        canDrop
+          ? '빼도 기록은 남아요. 점선 + 를 눌러 다시 넣을 수 있어요.'
+          : '혼자일 때는 뺄 수 없어요. 점선 + 를 눌러 친구를 넣어 보세요.'),
+    ),
+  );
+}
+
 /* ---------- 입력 격자: 난이도 x 참가자 ---------- */
 
 /**
@@ -110,16 +244,17 @@ function emptyGym({ state, actions }) {
  * 난이도 이름과 칸 사이의 빈 띠가 넓어져, 이름과 칸을 잇는 눈길이 더 멀어진다.
  * 칸을 늘려 두고 안을 채우는 편이 낫다(cell 참고).
  */
-/** 난이도 칸의 폭. 칩 줄을 열에 맞춰 들여쓰는 데도 쓴다. */
+/** 난이도 칸의 폭. 머리글 모서리의 + 카드도 이 폭을 쓴다. */
 function firstCol(n) {
-  return n >= 4 ? 34 : n === 3 ? 72 : 84;
+  // 넷부터는 홀드 하나 폭까지 줄인다. 다만 모서리에 + 카드가 앉으므로 손가락 기준(44px) 아래로는 안 내려간다.
+  return n >= 4 ? 44 : n === 3 ? 72 : 84;
 }
 
 function tpl(n) {
   /*
    * 사람이 늘면 난이도 칸부터 줄인다.
    *
-   * 360px 에 다섯 명이면 기록 칸이 50px 까지 눌린다. 그 폭에 개수와 '+34점'
+   * 360px 에 다섯 명이면 기록 칸이 58px 까지 눌린다. 그 폭에 개수와 '+34점'
    * 이 함께 들어가야 한다. 반면 난이도 칸은 색 이름(25px)을 안 그리면
    * 홀드 하나면 충분하다 — 그래서 네 명부터는 이름을 접고(아래 is-tight)
    * 칸을 홀드 크기까지 줄인다.
@@ -137,16 +272,14 @@ function inputGrid(ctx, gym, grades) {
   const { state, actions } = ctx;
   const people = state.profiles;
   if (!people.length) {
-    // 아무도 없을 때도 같은 칸을 쓴다. 여기서만 팝업을 띄우면 첫 사람만
-    // 다른 방식으로 넣게 되고, 무엇보다 첫 사람을 넣을 길이 아예 막힌다.
+    // 아무도 없을 때도 같은 점선 카드다. 첫 사람도 같은 시트에서 만든다.
     return h('section', { class: 'section' },
       panel(
         eyebrow('참가자 없음'),
         h('h2', { class: 'title', style: { margin: '0.4rem 0 0.35rem' } }, '누가 오늘 같이 하나요'),
-        // 사람을 만드는 일은 프로필에서만 한다. 여기서는 데려다 세우기만 한다.
-        button('프로필에서 만들기', {
-          onClick: actions.openNewProfile, variant: 'solid', trailing: 'next',
-        }),
+        h('p', { class: 'subtitle', style: { marginBottom: '1rem' } },
+          '사람을 넣으면 여기에서 바로 완등을 기록할 수 있어요.'),
+        addCard(ctx, { wide: true }),
       ),
     );
   }
@@ -180,55 +313,29 @@ function inputGrid(ctx, gym, grades) {
 
   let m = compute();
   const n = m.rows.length;
-  const adding = !!state.ui.adding;
   const cols = tpl(n);
   const isTop = (r) => n > 1 && m.rankOf.get(r.profile.id) === 1 && r.score > 0;
   // 0점인 사람만 배지를 빼면 그 칸만 모양이 달라진다.
   // 아무도 기록이 없을 때만 순위를 감춘다.
   const showRank = () => n > 1 && m.lead > 0;
   /*
-   * 꼴찌.
+   * 꼴등.
    *
-   * 점수가 가장 낮은 사람. 다만 아무도 기록이 없거나 전원 동점이면 꼴찌가
+   * 점수가 가장 낮은 사람. 다만 아무도 기록이 없거나 전원 동점이면 꼴등이
    * 아니라 그냥 시작 전이므로 붙이지 않는다. 내기 앱에서 1등만 표시하면
    * 재미가 반이다.
    */
   const isLast = (r) => n > 1 && m.lead > 0
     && r.score === m.ordered[m.ordered.length - 1].score
     && r.score < m.lead;
-  const rankText = (r) => (isLast(r) ? '꼴찌' : `${m.rankOf.get(r.profile.id)}위`);
+  const rankText = (r) => (isLast(r) ? '꼴등' : `${m.rankOf.get(r.profile.id)}위`);
 
   // 고쳐 쓸 노드를 들고 있는다. 다시 찾느라 DOM 을 훑지 않는다.
   const heads = new Map();   // profileId -> { btn, top, rankEl, scoreEl }
   const cells = new Map();   // `${profileId}:${gradeId}` -> { el, body, countEl, unitEl }
 
-  /*
-   * 오늘 참가자.
-   *
-   * 모드를 없앴다. 예전에는 '참가자' 를 눌러 상자를 열고, 칩을 만지고,
-   * '완료' 를 눌러 닫아야 했다. 세 번 누를 일을 한 번으로 줄인다 —
-   * 칩 줄 자체가 컨트롤이면서 현황이다. 채워진 칩이 오늘 격자에 선 사람이다.
-   *
-   * 사람을 만드는 일은 여기 없다. 그건 프로필이 맡는다.
-   */
-  const playingSet = new Set(ctx.playingIds());
-  const roster = state.profiles.length > 1
-    /* 칩과 열은 같은 사람의 같은 순서다. 왼쪽 끝에서 시작하면 난이도 칸
-       폭만큼 어긋나 보이므로, 열이 시작하는 자리에 맞춰 들여쓴다. */
-    ? h('div', {
-        class: 'chips roster__chips', role: 'group', 'aria-label': '오늘 참가자',
-        style: { paddingLeft: `${firstCol(n) + 4}px` },
-      },
-        state.profiles.map((p) => h('button', {
-          class: 'chip', type: 'button',
-          'aria-pressed': String(playingSet.has(p.id)),
-          onclick: () => actions.togglePlaying(p.id),
-        }, p.name)),
-      )
-    : null;
-
   const head = h('div', { class: 'grid__head', style: { gridTemplateColumns: cols } },
-    h('span', { class: 'grid__corner hint' }, '난이도'),
+    addCard(ctx),
     m.rows.map((r) => {
       const rankEl = h('span', {
         class: `grid__rank num${isTop(r) ? ' is-first' : ''}${isLast(r) ? ' is-last' : ''}`,
@@ -238,12 +345,16 @@ function inputGrid(ctx, gym, grades) {
         showRank() ? rankEl : null,
         h('span', { class: 'grid__name' }, r.profile.name),
       );
-      /* 이름·점수·레벨을 읽는 자리다. 누를 것이 없으므로 버튼이 아니다.
-         예전에는 눌러서 레벨 시트를 열었는데 레벨은 프로필로 옮겼다. */
-      const btn = h('div', {
-        class: `grid__person${isTop(r) ? ' is-lead' : ''}`,
+      /*
+       * 사람 카드는 버튼이다. 누르면 그 사람의 시트가 뜬다 — 오늘 빼기, 지우기.
+       * 기록 칸과 같은 문법(선 두른 상자 = 누를 수 있다)이라 따로 알릴 것이 없다.
+       */
+      const btn = h('button', {
+        class: `grid__person${isTop(r) ? ' is-lead' : ''}`, type: 'button',
+        title: `${r.profile.name} — 눌러서 빼기·지우기`,
+        onclick: () => openPersonSheet(ctx, heads.get(r.profile.id).row, n),
       }, top, scoreEl, h('span', { class: 'hint num' }, levelLabel(r.level)));
-      heads.set(r.profile.id, { btn, top, rankEl, scoreEl });
+      heads.set(r.profile.id, { btn, top, rankEl, scoreEl, row: r });
       return btn;
     }),
   );
@@ -283,6 +394,7 @@ function inputGrid(ctx, gym, grades) {
     for (const r of m.rows) {
       const hd = heads.get(r.profile.id);
       if (!hd) return false;
+      hd.row = r;   // 사람 시트가 최신 점수를 읽도록
       hd.scoreEl.textContent = r.score.toLocaleString('ko-KR');
       hd.rankEl.textContent = rankText(r);
       hd.rankEl.classList.toggle('is-first', isTop(r));
@@ -317,7 +429,6 @@ function inputGrid(ctx, gym, grades) {
 
   return h('section', { class: 'section' },
     eyebrow('오늘의 기록'),
-    roster,
     // 사람 수를 CSS 에 알린다. 좁을 때 무엇을 접을지는 CSS 가 정한다.
     h('div', { class: `grid${n >= 4 ? ' is-tight' : ''}`, 'data-people': String(n) },
       head, body),
@@ -347,4 +458,3 @@ function cell({ grade, profile, level, session, gym, actions }) {
   });
   return el;
 }
-

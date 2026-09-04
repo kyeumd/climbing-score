@@ -187,14 +187,8 @@ const actions = {
   deleteSession(id) { store.deleteSession(id); reload(); },
 
   /*
-   * 예전에는 참가자 목록을 띄웠다. 그런데 대결 격자는 이미 모든 참가자를
-   * 보여주므로, 목록에서 이름을 눌러도 화면이 그대로였다. 누른 사람은
-   * 아무 일도 안 일어났다고 느낀다. 세 군데 호출부의 뜻이 모두 '만들기' 라
-   * 바로 이름 입력으로 간다.
-   */
-  /*
-   * 참가자는 팝업이 아니라 격자 안에서 바로 붙였다 뗀다.
-   * adding 이 켜지면 머리글 맨 끝에 이름 칸이 한 열 생긴다.
+   * 프로필 화면의 '추가' 칸을 열고 닫는다. 대결 화면은 이 상태를 쓰지 않는다 —
+   * 거기서는 점선 + 카드가 참가자 시트를 띄운다(view-match.js).
    */
   startAddProfile() { state.ui.adding = true; render(); },
   /*
@@ -211,21 +205,22 @@ const actions = {
     // 전원을 다 빼면 격자가 사라진다. 마지막 한 명은 남긴다.
     if (!now.size) return;
     state.ui.playing = [...now];
-    try {
-      localStorage.setItem(PLAY_KEY, JSON.stringify({ date: state.ui.date, ids: state.ui.playing }));
-    } catch { /* 저장 못 해도 이번 세션 동안은 유지된다 */ }
+    savePlaying();
     render();
   },
-  /* 프로필 화면에서 부르는 자리. 액션을 지우고 호출부를 안 고쳐 버튼이 죽어 있었다. */
+  /* 기록 화면의 빈 상태에서 부른다. 프로필 화면을 '추가' 칸이 열린 채로 띄운다. */
   openNewProfile() { state.ui.route = 'profile'; state.ui.adding = true; render(); },
-  openProfilePicker() { actions.openNewProfile(); },
   stopAddProfile() { state.ui.adding = false; render(); },
   addProfile({ handle, name }) {
     const profile = createProfile({ handle, name, primaryGymId: state.ui.gymId });
     store.saveProfile(profile);
     if (!state.ui.profileId) state.ui.profileId = profile.id;
     // 방금 만든 사람은 오늘 대결에 넣는다. 만들자마자 또 골라야 할 이유가 없다.
-    if (state.ui.playing) state.ui.playing = [...state.ui.playing, profile.id];
+    // (저장까지 해 둔다. 안 그러면 새로고침 뒤 저장된 옛 명단에서 이 사람만 빠진다.)
+    if (state.ui.playing) {
+      state.ui.playing = [...state.ui.playing, profile.id];
+      savePlaying();
+    }
     // adding 을 켜 둔 채 다시 그린다. 이름 칸이 그대로 남아 다음 이름을 받는다.
     reload();
   },
@@ -279,6 +274,12 @@ const actions = {
  * 전원으로 돌아간다. 앱 데이터와 섞지 않으려고 열쇠를 따로 쓴다.
  */
 const PLAY_KEY = 'climbing-score/playing';
+
+function savePlaying() {
+  try {
+    localStorage.setItem(PLAY_KEY, JSON.stringify({ date: state.ui.date, ids: state.ui.playing }));
+  } catch { /* 저장 못 해도 이번 세션 동안은 유지된다 */ }
+}
 
 function storedPlaying() {
   try {

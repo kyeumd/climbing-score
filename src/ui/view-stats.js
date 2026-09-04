@@ -26,7 +26,7 @@ export function viewStats(ctx) {
             onClick: actions.openGymPicker, variant: 'solid', trailing: 'next',
           }),
           !profile && button('프로필 만들기', {
-            onClick: actions.openProfilePicker, variant: gym ? 'solid' : '', trailing: 'next',
+            onClick: actions.openNewProfile, variant: gym ? 'solid' : '', trailing: 'next',
           }),
         ),
       ),

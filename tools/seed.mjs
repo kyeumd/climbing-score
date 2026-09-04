@@ -48,29 +48,24 @@ export const SEED = `
   tap(await until(() => q('.gymrow__pick'), '검색 결과'));
 
   const ok = await until(
-    () => byText('.btn', '맞아요') || byText('.btn', '참가자 추가') || byText('.btn', '난이도 설정하기'),
+    () => byText('.btn', '맞아요') || q('.grid__add') || byText('.btn', '난이도 설정하기'),
     '대결 화면');
   if (OPT.confirm && ok.textContent.includes('맞아요')) { tap(ok); await wait(400); }
 
   /*
-   * 참가자는 프로필 화면에서 만든다. 대결 화면은 명단에서 오늘 온 사람을
-   * 세우기만 하므로, 사람 자체가 없으면 거기서는 만들 수 없다.
+   * 참가자는 대결 화면의 점선 + 카드로 만든다. 참가자 시트가 뜨고, 아이디를
+   * 적고 엔터를 치면 바로 오늘 격자에 선다. 색 등급이 없는 짐은 격자 자체가
+   * 안 그려지므로 + 카드도 없다 — 그때는 건너뛴다.
    */
-  if (!q('.grid__name')) {
-    tap(q('.tab', 2));
-    await wait(500);
-    tap(await until(() => byText('.section-head .btn', '추가'), '추가 버튼'));
-    const idInput = await until(() => q('.newperson__id'), '아이디 칸');
+  if (!q('.grid__name') && q('.grid__add')) {
+    tap(q('.grid__add'));
+    const idInput = await until(() => q('.modal .newperson__id'), '아이디 칸');
     idInput.focus();
     idInput.value = '동균';
     idInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
-    await until(() => q('.profilerow'), '프로필 줄');
-    const done = byText('.section-head .btn', '완료');
-    if (done) tap(done);
-    await wait(300);
-    tap(q('.tab', 0));
-    // 색 등급이 없는 짐은 격자 자체가 안 그려진다. 둘 중 먼저 오는 것을 기다린다.
-    await until(() => q('.grid__name') || byText('.btn', '난이도 설정하기'), '대결 화면');
+    await until(() => q('.grid__name'), '사람 카드');
+    tap(byText('.modal .btn', '닫기'));
+    await until(() => !q('.modal'), '시트 닫힘');
     await wait(200);
   }
 
