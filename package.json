@@ -19,7 +19,10 @@
     "audit:scroll": "node tools/scroll-audit.mjs",
     "audit:lines": "node tools/line-audit.mjs",
     "build": "node tools/build-dist.mjs",
-    "audit:mobile": "node tools/mobile-audit.mjs"
+    "audit:mobile": "node tools/mobile-audit.mjs",
+    "sync": "node tools/e2e-sync.mjs",
+    "fake-db": "node tools/fake-rtdb.mjs",
+    "check:fb": "node tools/check-firebase.mjs"
   },
   "devDependencies": {
     "axe-core": "^4.13.0",

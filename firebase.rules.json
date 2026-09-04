@@ -1,0 +1,28 @@
+{
+  "rules": {
+    "rooms": {
+      "$room": {
+        ".read": "$room.length >= 16",
+        ".write": "$room.length >= 16",
+        "profiles": {
+          "$id": {
+            ".validate": "newData.hasChildren(['id', 'name']) && newData.child('id').val() === $id"
+          }
+        },
+        "sessions": {
+          "$id": {
+            ".validate": "newData.hasChildren(['id', 'profileId', 'gymId', 'date']) && newData.child('id').val() === $id"
+          }
+        },
+        "gyms": {
+          "$id": {
+            ".validate": "newData.hasChildren(['id', 'name']) && newData.child('id').val() === $id"
+          }
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    }
+  }
+}

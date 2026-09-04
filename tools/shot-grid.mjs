@@ -72,7 +72,11 @@ for (let n = 1; n <= NAMES.length; n++) {
   const page = await (await launch({ width: W, height: H, dark: !light })).connect();
   try {
     await page.goto(APP, { wait: 600 });
-    await page.eval(() => localStorage.clear());
+    // 검사 도구는 서버에 붙지 않는다 (seed.mjs 의 open 주석 참고)
+    await page.eval(() => {
+      localStorage.clear();
+      localStorage.setItem('climbing-score/sync', 'off');
+    });
     await page.goto(APP, { wait: 1200 });
     for (let i = 0; i < 40; i++) {
       if (await page.eval(() => !!document.querySelector('.btn'))) break;

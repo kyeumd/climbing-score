@@ -110,7 +110,18 @@ export async function ensureServer() {
 export async function open(page, { seed = true, sleep, ...opts } = {}) {
   await ensureServer();
   await page.goto(APP, { wait: 600 });
-  await page.eval(() => localStorage.clear());
+  /*
+   * 검사 도구는 서버에 붙지 않는다.
+   *
+   * config.js 에 주소가 채워진 뒤로는, 앱을 띄우는 것만으로 진짜 방이 하나
+   * 생기고 시드가 통째로 올라간다. review 한 번이 25개, 감사는 그보다 많다.
+   * 남의 데이터베이스에 쓰레기를 쌓는 셈이고, 정작 우리가 보려는 화면과도
+   * 상관이 없다. 앱을 부르기 전에 꺼 둔다.
+   */
+  await page.eval(() => {
+    localStorage.clear();
+    localStorage.setItem('climbing-score/sync', 'off');
+  });
   await page.goto(APP, { wait: 1200 });
   for (let i = 0; i < 40; i++) {
     const ready = await page.eval(() =>

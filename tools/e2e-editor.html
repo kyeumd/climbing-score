@@ -6,6 +6,8 @@ const log = [];
 const ok = (n, c, e='') => log.push(`${c?'PASS':'FAIL'} ${n}${e?' — '+e:''}`);
 const wait = (ms) => new Promise(r => setTimeout(r, ms));
 localStorage.clear();
+// 검증용 페이지는 서버에 붙지 않는다. 붙으면 가짜 기록이 진짜 방으로 올라간다.
+localStorage.setItem('climbing-score/sync', 'off');
 const { createGym } = await import('../src/domain/gym.js');
 // 기대값은 domain 에서 계산한다. 상수로 박아 두면 기본 점수표가 바뀔 때 엉뚱하게 실패한다.
 const { scoreFor } = await import('../src/domain/scoring.js');

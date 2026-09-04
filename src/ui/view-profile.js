@@ -2,6 +2,7 @@
 import { h, panel, button, icon, eyebrow, modal, confirmModal, editableText, newPersonFields } from './components.js';
 import { josa, levelLabel } from '../domain/text.js';
 import { MAX_LEVEL, shortId, handleTaken } from '../domain/profile.js';
+import { formatRoomCode, isValidRoomCode, ROOM_LENGTH } from '../domain/room.js';
 
 export function viewProfile(ctx) {
   const { state, actions } = ctx;
@@ -30,16 +31,125 @@ export function viewProfile(ctx) {
       }) : null,
     ),
 
+    roomPanel(ctx),
+
     h('div', { class: 'section' },
       panel(
         eyebrow('백업'),
+        /* 방에 붙어 있으면 '이 브라우저에만' 은 거짓말이다. 상태에 맞게 말한다. */
         h('p', { class: 'hint', style: { margin: '0.35rem 0 1rem' } },
-          '이 브라우저에만 저장돼요.'),
+          actions.roomInfo().code
+            ? '기록은 방에 저장돼요. 방을 잃어버릴 때를 대비해 가끔 내려받아 두세요.'
+            : '이 브라우저에만 저장돼요.'),
         h('div', { class: 'btnrow' },
           // ↗ 는 앱 밖으로 나가는 동작에만 쓴다. 화면 이동은 › (next)
           button('JSON 내보내기', { onClick: actions.exportData, trailing: 'arrow' }),
           button('가져오기', { onClick: actions.importData }),
         ),
+      ),
+    ),
+  );
+}
+
+/**
+ * 함께 보기.
+ *
+ * 계정이 없다. 방 코드가 곧 열쇠라서, 그 방을 아는 사람은 같은 기록을 보고
+ * 같이 고칠 수 있다.
+ *
+ * 그래서 코드를 부르게 하지 않는다. 링크로 넘기면 친구는 누르기만 하면 되고,
+ * 코드는 길고 안전한 값을 그대로 쓸 수 있다. 짧고 부르기 쉬운 코드는 곧
+ * 약한 자물쇠다 — 데이터베이스 주소는 배포된 파일에 들어 있어 누구나 읽는다.
+ *
+ * 코드 자체는 접어 둔다. 링크가 막힌 상황(사진으로 찍어 보내는 경우)에만 쓴다.
+ */
+function roomPanel({ actions }) {
+  const { enabled, on, code, status, past } = actions.roomInfo();
+  if (!enabled) return null;
+
+  /* 꺼져 있으면 켜는 길만 보여 준다. 켤 수 없는 스위치나 빈 칸을 두지 않는다. */
+  if (!on) {
+    return h('div', { class: 'section' },
+      panel(
+        eyebrow('함께 보기'),
+        h('p', { class: 'hint', style: { margin: '0.35rem 0 1rem' } },
+          '지금은 꺼져 있어요. 기록이 이 브라우저 밖으로 나가지 않아요.'),
+        button('함께 보기 켜기', { onClick: () => actions.setSync(true), trailing: 'next' }),
+      ),
+    );
+  }
+
+  const said = h('p', { class: 'room__said hint', role: 'status' }, '');
+  const say = (text) => {
+    said.textContent = text;
+    setTimeout(() => { said.textContent = ''; }, 2800);
+  };
+
+  const share = button('친구 초대 링크 보내기', {
+    variant: 'solid', trailing: 'arrow',
+    onClick: async () => {
+      const how = await actions.shareRoom();
+      if (how === 'copied') say('링크를 복사했어요. 카톡에 붙여 넣으세요.');
+      else if (how === 'failed') say('링크를 복사하지 못했어요. 아래 코드를 알려 주세요.');
+      // 공유 시트가 떴거나 사용자가 닫은 경우에는 할 말이 없다
+    },
+  });
+
+  const input = h('input', {
+    class: 'field', type: 'text', placeholder: '방 코드',
+    'aria-label': '친구의 방 코드', autocomplete: 'off', spellcheck: 'false',
+    'data-fkey': 'room-join',
+  });
+  const err = h('p', { class: 'hint room__err', role: 'alert' }, '');
+  const join = () => {
+    if (!isValidRoomCode(input.value)) {
+      err.textContent = `코드는 ${ROOM_LENGTH}글자예요. 다시 확인해 주세요.`;
+      return;
+    }
+    if (!actions.joinRoom(input.value)) err.textContent = '이미 그 방에 있어요.';
+  };
+  input.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter') return;
+    if (e.isComposing || e.keyCode === 229) return;
+    e.preventDefault();
+    join();
+  });
+  input.addEventListener('input', () => { err.textContent = ''; });
+
+  /* 링크를 못 쓸 때를 위한 뒷문. 평소에는 접어 둔다. */
+  const manual = h('details', { class: 'room__manual' },
+    h('summary', { class: 'hint' }, '링크 대신 코드로 하기'),
+    h('div', { class: 'room__manualbody' },
+      h('p', { class: 'hint', style: { margin: '0 0 0.35rem' } }, '내 방 코드'),
+      h('span', { class: 'room__code num' }, formatRoomCode(code)),
+      h('p', { class: 'hint', style: { margin: '0.75rem 0 0.4rem' } }, '친구 방으로 옮기기'),
+      h('div', { class: 'fieldrow' }, input, button('들어가기', { onClick: join, small: true })),
+      err,
+      past.length ? h('div', { class: 'room__past' },
+        h('p', { class: 'hint', style: { margin: '0 0 0.4rem' } }, '지난 방'),
+        h('div', { class: 'chips chips--wrap' },
+          past.map((c) => h('button', {
+            class: 'chip', type: 'button', 'aria-label': `${formatRoomCode(c)} 방으로 돌아가기`,
+            onclick: () => actions.joinRoom(c),
+          }, formatRoomCode(c)))),
+      ) : null,
+    ),
+  );
+
+  return h('div', { class: 'section' },
+    panel(
+      h('div', { class: 'section-head', style: { marginBottom: '0.5rem' } },
+        eyebrow('함께 보기'),
+        h('span', { class: `room__dot${status === 'on' ? ' is-on' : ''}` },
+          status === 'on' ? '연결됨' : '연결 안 됨'),
+      ),
+      h('p', { class: 'hint', style: { margin: '0 0 0.75rem' } },
+        '링크를 받은 사람은 같은 기록을 보고 함께 고칠 수 있어요. 아무 데나 올리지 마세요.'),
+      share,
+      said,
+      manual,
+      h('div', { class: 'room__off' },
+        button('함께 보기 끄기', { onClick: () => actions.setSync(false), small: true, variant: 'ghost' }),
       ),
     ),
   );

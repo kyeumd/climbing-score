@@ -1,5 +1,8 @@
 /** 라우팅과 상태 조립. 저장 어댑터를 여기서 한 번만 주입한다. */
+import { DATABASE_URL } from './config.js';
 import { createLocalStorageAdapter } from './storage/local-storage.js';
+import { createSyncedAdapter } from './storage/synced.js';
+import { createRoomCode, normalizeRoomCode, isValidRoomCode } from './domain/room.js';
 import { loadSeed, mergeSeed, SEED_VERSION } from './storage/seed.js';
 import { emptyState } from './storage/adapter.js';
 import { localDate, uid } from './domain/ids.js';
@@ -18,8 +21,116 @@ import { viewScoreTable } from './ui/view-score-table.js';
 import { openGymPicker } from './ui/gym-picker.js';
 import { openDatePicker } from './ui/date-picker.js';
 
-// 서버로 옮길 때 여기 한 줄만 바꾼다.
-const store = createLocalStorageAdapter();
+/*
+ * 저장소 조립.
+ *
+ * 주소가 비어 있으면 지금까지처럼 이 브라우저에만 쌓는다. 주소가 있으면 방
+ * 코드를 아는 사람끼리 같은 값을 실시간으로 본다. 어느 쪽이든 UI 가 보는
+ * 계약은 같아서 화면 코드는 이 갈래를 모른다.
+ */
+const ROOM_KEY = 'climbing-score/room';
+const ROOM_PAST_KEY = 'climbing-score/room-past';
+/*
+ * 함께 보기를 끄는 열쇠.
+ *
+ * 기록을 이 기기 밖으로 내보내고 싶지 않은 사람이 있다. 그리고 검증용 페이지도
+ * 서버에 붙으면 안 된다 — 실제로 tools/e2e-*.html 이 가짜 기록을 진짜 방에
+ * 올리고 있었다. 켜고 끄는 스위치 하나로 둘 다 해결된다.
+ */
+const SYNC_KEY = 'climbing-score/sync';
+
+function syncEnabled() {
+  try { return localStorage.getItem(SYNC_KEY) !== 'off'; } catch { return true; }
+}
+
+function storedRoom() {
+  try { return normalizeRoomCode(localStorage.getItem(ROOM_KEY) ?? ''); } catch { return ''; }
+}
+
+/*
+ * 지난 방 코드.
+ *
+ * 이미 기록이 있는 방으로 옮기면 서버가 이기므로, 이 기기에 있던 기록은
+ * 화면에서 사라진다. 서버의 옛 방에는 그대로 있는데 코드를 잊으면 영영
+ * 못 돌아간다. 옮기기 전에 적어 둔다.
+ */
+function pastRooms() {
+  try { return JSON.parse(localStorage.getItem(ROOM_PAST_KEY) ?? '[]').filter(Boolean); }
+  catch { return []; }
+}
+
+function rememberRoom(code) {
+  if (!code) return;
+  const next = [code, ...pastRooms().filter((c) => c !== code)].slice(0, 5);
+  try { localStorage.setItem(ROOM_PAST_KEY, JSON.stringify(next)); } catch { /* 못 적어도 넘어간다 */ }
+}
+
+/*
+ * 방 코드는 이 기기에만 둔다. 앱 데이터와 같은 열쇠에 넣으면 내보내기 JSON 에
+ * 섞여 나가는데, 그건 비밀번호를 첨부해서 보내는 셈이다.
+ */
+function saveRoom(code) {
+  try {
+    if (code) localStorage.setItem(ROOM_KEY, code);
+    else localStorage.removeItem(ROOM_KEY);
+  } catch { /* 저장 못 해도 이번 실행 동안은 유지된다 */ }
+}
+
+/*
+ * 링크로 들어온 방.
+ *
+ * 코드를 # 뒤에 붙인다. # 뒤는 브라우저가 서버로 보내지 않는다 — 코드가 곧
+ * 비밀번호라, 경로에 넣으면 GitHub Pages 접속 기록에 그대로 남는다.
+ *
+ * 읽은 뒤에는 주소창에서 지운다. 남겨 두면 뒤로 가기 기록과 화면 캡처에
+ * 열쇠가 따라다닌다.
+ */
+function roomFromLink() {
+  const m = location.hash.match(/(?:^#|&)room=([^&]*)/);
+  if (!m) return '';
+  const code = normalizeRoomCode(decodeURIComponent(m[1]));
+  return isValidRoomCode(code) ? code : '';
+}
+
+function clearLinkFromAddress() {
+  if (!location.hash) return;
+  try { history.replaceState(null, '', location.pathname + location.search); } catch { /* 못 지워도 넘어간다 */ }
+}
+
+function pickRoom() {
+  if (!DATABASE_URL || !syncEnabled()) return '';
+  const linked = roomFromLink();
+  const now = storedRoom();
+  if (linked) {
+    // 옮기기 전 방은 적어 둔다. 서버에는 그대로 있으므로 돌아갈 수 있다.
+    if (now && now !== linked) rememberRoom(now);
+    saveRoom(linked);
+    return linked;
+  }
+  if (now) return now;
+  const made = createRoomCode();
+  saveRoom(made);
+  return made;
+}
+
+const local = createLocalStorageAdapter();
+const room = pickRoom();
+clearLinkFromAddress();
+
+/*
+ * 이미 열려 있는 앱에 링크가 들어오는 경우.
+ *
+ * 주소창에 붙여 넣거나, 같은 탭에서 링크를 누르면 # 만 바뀐다. 그때 브라우저는
+ * 페이지를 다시 읽지 않으므로 위의 pickRoom 이 다시 돌지 않는다. 아무 일도
+ * 일어나지 않는 것처럼 보이는데, 정작 주소창에는 방 코드가 떠 있다.
+ */
+addEventListener('hashchange', () => {
+  const linked = roomFromLink();
+  if (linked && linked !== room) actions.joinRoom(linked);
+  else clearLinkFromAddress();
+});
+const synced = room ? createSyncedAdapter({ local, databaseUrl: DATABASE_URL, room }) : null;
+const store = synced ?? local;
 
 const state = {
   ...emptyState(),
@@ -60,6 +171,27 @@ function reload() {
  * 갱신하는 함수를 여기 걸어 두고, bump 는 그걸 먼저 부른다.
  */
 let liveSync = null;
+
+/*
+ * 서버가 무언가 바꿨다.
+ *
+ * 여기서 render() 를 바로 부르면 안 된다. 격자를 통째로 다시 만들면 지금
+ * 손가락이 누르고 있는 칸이 DOM 에서 사라져 길게 눌러 빼기가 깨진다 —
+ * 예전에 그렇게 당한 적이 있어 만들어 둔 통로가 liveSync 다. 숫자만 달라진
+ * 경우에는 그쪽이 맡고, 구조가 달라졌을 때만 다시 그린다.
+ */
+function onRemoteChange(what) {
+  reloadState();
+  // 세션 개수만 달라졌을 때만 빠른 길로 간다. 사람·색·짐 설정이 바뀌었다면
+  // 격자의 구조 자체가 달라지므로 그 통로로는 화면이 안 바뀐다.
+  if (what === 'sessions' && liveSync?.()) return;
+  render();
+}
+
+function onSyncStatus() {
+  // 연결 표시는 프로필 화면에만 있다. 그 화면을 보고 있을 때만 다시 그린다.
+  if (state.ui.route === 'profile') render();
+}
 
 function patchGym(gymId, fn) {
   const gym = state.gyms.find((g) => g.id === gymId);
@@ -210,6 +342,71 @@ const actions = {
   },
   /* 기록 화면의 빈 상태에서 부른다. 프로필 화면을 '추가' 칸이 열린 채로 띄운다. */
   openNewProfile() { state.ui.route = 'profile'; state.ui.adding = true; render(); },
+
+  /* ---- 방 ---- */
+  /*
+   * 친구에게 보낼 링크.
+   *
+   * 도메인은 이 앱이 올라간 자리라 누구에게나 같다. 열쇠 노릇을 하는 것은
+   * # 뒤의 코드다. 그래서 링크 자체를 아무 데나 올리면 안 된다.
+   */
+  shareLink() {
+    return `${location.origin}${location.pathname}#room=${room}`;
+  },
+  /*
+   * 폰에서는 공유 시트가 뜬다(카톡·메시지). 없는 환경에서는 클립보드로 떨어진다.
+   * 돌려주는 값으로 화면이 무슨 일이 일어났는지 말한다 — 아무 반응이 없으면
+   * 버튼이 고장 난 것으로 읽힌다.
+   */
+  async shareRoom() {
+    const url = actions.shareLink();
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: '클라이밍 점수', text: '오늘 같이 기록해요', url });
+        return 'shared';
+      } catch (err) {
+        // 사용자가 공유 시트를 닫은 것은 실패가 아니다
+        if (err?.name === 'AbortError') return 'cancelled';
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      return 'copied';
+    } catch { return 'failed'; }
+  },
+  roomInfo() {
+    return {
+      enabled: !!DATABASE_URL,
+      on: !!room,
+      code: room,
+      status: synced?.status() ?? 'off',
+      past: pastRooms().filter((c) => c !== room),
+    };
+  },
+  /*
+   * 껐다 켜면 저장소 조립부터 달라진다. 화면만 고쳐 쓰지 않고 페이지를 새로
+   * 연다 — 방을 옮길 때와 같은 이유다.
+   */
+  setSync(on) {
+    try {
+      if (on) localStorage.removeItem(SYNC_KEY);
+      else localStorage.setItem(SYNC_KEY, 'off');
+    } catch { /* 못 적으면 이번 실행 동안만 유지된다 */ }
+    location.reload();
+  },
+  /*
+   * 친구 방으로 옮긴다. 코드를 바꾸면 보던 값이 통째로 달라지므로, 화면만
+   * 고쳐 쓰지 않고 페이지를 새로 연다. 스트림·캐시가 모두 새 방 기준으로
+   * 다시 서야 하는데 그걸 손으로 갈아 끼우는 것보다 정확하다.
+   */
+  joinRoom(codeText) {
+    const code = normalizeRoomCode(codeText);
+    if (!isValidRoomCode(code) || code === room) return false;
+    rememberRoom(room);
+    saveRoom(code);
+    location.reload();
+    return true;
+  },
   stopAddProfile() { state.ui.adding = false; render(); },
   addProfile({ handle, name }) {
     const profile = createProfile({ handle, name, primaryGymId: state.ui.gymId });
@@ -443,6 +640,21 @@ async function boot() {
       loaded = store.loadAll();
     } catch (err) {
       console.warn('시드를 불러오지 못해 기존 목록을 유지해요.', err);
+    }
+  }
+
+  /*
+   * 방에 붙는다.
+   *
+   * 첫 화면은 캐시로 이미 그릴 수 있으므로 여기서 기다리는 건 잠깐이다.
+   * 실패해도 앱은 돈다 — 서버가 없을 뿐 기록은 이 브라우저에 쌓인다.
+   */
+  if (synced) {
+    try {
+      await synced.connect({ onRemoteChange, onStatusChange: onSyncStatus });
+      loaded = store.loadAll();
+    } catch (err) {
+      console.warn('방에 붙지 못했어요. 이 브라우저에만 저장합니다.', err);
     }
   }
 
