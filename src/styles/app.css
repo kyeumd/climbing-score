@@ -1196,3 +1196,17 @@ ul { margin: 0; padding: 0; list-style: none; }
 .room__dot.is-on { color: var(--accent); }
 .room__past { margin-top: var(--sp-4); }
 .room__off { margin-top: var(--sp-3); }
+
+/* 보낼 링크. 누르면 복사된다. 주소는 길므로 줄을 접고 코드 쪽이 잘리지 않게 둔다. */
+.room__linkbtn {
+  display: block; width: 100%; text-align: left;
+  margin: 0 0 var(--sp-3);
+  padding: var(--sp-3);
+  background: var(--sunken); border: 1px solid var(--shell-line);
+  transition: border-color var(--dur-tap) var(--ease-spring);
+}
+.room__linkbtn:hover { border-color: var(--hairline); }
+.room__link {
+  display: block; font-size: var(--fs-min); color: var(--ink-2);
+  line-height: 1.5; word-break: break-all;
+}

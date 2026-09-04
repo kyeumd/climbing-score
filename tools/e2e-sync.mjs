@@ -264,6 +264,33 @@ try {
   }
   ok('그 사이 다른 기기 화면의 사람도 그대로다', aliveB >= 2, `열 ${aliveB}개`);
 
+  console.log('--- 초대 링크를 눌러 복사한다 ---');
+  const E = await (await launch({ width: 390, height: 664, dark: true })).connect();
+  await openApp(E);
+  // 클립보드 권한은 헤드리스에서 막혀 있을 수 있다. 실제로 무엇을 복사하려 했는지 가로챈다.
+  await E.eval(() => {
+    window.__copied = null;
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: { writeText: (t) => { window.__copied = t; return Promise.resolve(); } },
+    });
+  });
+  await run(E, `
+    tap(await until(() => q('.tab', 2), '프로필 탭'));
+    tap(await until(() => q('.room__linkbtn'), '링크'));
+    await wait(400);
+  `);
+  const copiedByLink = await E.eval(() => window.__copied);
+  ok('링크를 누르면 복사된다', copiedByLink?.includes(`#room=${ROOM}`), String(copiedByLink));
+  ok('복사한 링크에 사이트 주소가 들어 있다', copiedByLink?.startsWith('http'), String(copiedByLink));
+  await E.eval(() => { window.__copied = null; });
+  await run(E, `tap(byText('.btn', '초대 링크 복사')); await wait(400);`);
+  const copiedByBtn = await E.eval(() => window.__copied);
+  ok('버튼으로도 복사된다', copiedByBtn === copiedByLink, String(copiedByBtn));
+  const said = await E.text('.room__said');
+  ok('복사했다고 알려 준다', /복사/.test(said ?? ''), String(said));
+  await E.close();
+
   console.log('--- 좁은 화면에서 초대 칸이 넘치지 않는다 ---');
   /*
    * 이 칸은 서버 주소가 있을 때만 그려진다. 저장소의 주소는 비어 있으므로

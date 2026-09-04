@@ -85,15 +85,26 @@ function roomPanel({ actions }) {
     setTimeout(() => { said.textContent = ''; }, 2800);
   };
 
-  const share = button('친구 초대 링크 보내기', {
-    variant: 'solid', trailing: 'arrow',
-    onClick: async () => {
-      const how = await actions.shareRoom();
-      if (how === 'copied') say('링크를 복사했어요. 카톡에 붙여 넣으세요.');
-      else if (how === 'failed') say('링크를 복사하지 못했어요. 아래 코드를 알려 주세요.');
-      // 공유 시트가 떴거나 사용자가 닫은 경우에는 할 말이 없다
-    },
-  });
+  /* 보낼 것을 눈으로 보여 준다. 무엇이 복사되는지 모르면 붙여 넣기가 불안하다. */
+  const linkEl = h('span', { class: 'room__link' }, actions.shareLink());
+
+  const copy = async () => {
+    if (await actions.copyLink() === 'copied') {
+      say('복사했어요. 카톡에 붙여 넣으세요.');
+    } else {
+      // 클립보드를 막아 둔 브라우저가 있다. 그때는 직접 고르게 해 준다.
+      say('길게 눌러 복사해 주세요.');
+      getSelection()?.selectAllChildren(linkEl);
+    }
+  };
+
+  /* 링크 자체를 눌러도 복사된다. 버튼만 눌리게 하면 링크를 눌러 본 사람이 헛손질한다. */
+  const linkBtn = h('button', {
+    class: 'room__linkbtn', type: 'button', 'aria-label': '초대 링크 복사',
+    onclick: copy,
+  }, linkEl);
+
+  const share = button('초대 링크 복사', { variant: 'solid', trailing: 'check', onClick: copy });
 
   const input = h('input', {
     class: 'field', type: 'text', placeholder: '방 코드',
@@ -145,6 +156,7 @@ function roomPanel({ actions }) {
       ),
       h('p', { class: 'hint', style: { margin: '0 0 0.75rem' } },
         '링크를 받은 사람은 같은 기록을 보고 함께 고칠 수 있어요. 아무 데나 올리지 마세요.'),
+      linkBtn,
       share,
       said,
       manual,

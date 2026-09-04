@@ -354,23 +354,15 @@ const actions = {
     return `${location.origin}${location.pathname}#room=${room}`;
   },
   /*
-   * 폰에서는 공유 시트가 뜬다(카톡·메시지). 없는 환경에서는 클립보드로 떨어진다.
-   * 돌려주는 값으로 화면이 무슨 일이 일어났는지 말한다 — 아무 반응이 없으면
-   * 버튼이 고장 난 것으로 읽힌다.
+   * 누르면 복사한다.
+   *
+   * 공유 시트(navigator.share)를 먼저 띄워 봤는데, 기기마다 뜨는 것이 다르고
+   * 데스크톱에는 아예 없어서 같은 버튼이 다르게 움직였다. 복사는 어디서나
+   * 같게 동작한다. 복사한 뒤 카톡에 붙여 넣으면 된다.
    */
-  async shareRoom() {
-    const url = actions.shareLink();
-    if (navigator.share) {
-      try {
-        await navigator.share({ title: '클라이밍 점수', text: '오늘 같이 기록해요', url });
-        return 'shared';
-      } catch (err) {
-        // 사용자가 공유 시트를 닫은 것은 실패가 아니다
-        if (err?.name === 'AbortError') return 'cancelled';
-      }
-    }
+  async copyLink() {
     try {
-      await navigator.clipboard.writeText(url);
+      await navigator.clipboard.writeText(actions.shareLink());
       return 'copied';
     } catch { return 'failed'; }
   },
