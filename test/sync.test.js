@@ -131,28 +131,24 @@ test('오늘 참가 여부는 서버로 간다', () => {
   assert.match(fn, /store\.saveSession/, 'togglePlaying 이 저장소를 거치지 않습니다');
 });
 
-test('칸에 적는 값과 합계가 같은 점수표를 본다', () => {
+test('점수는 언제나 지금 점수표로 센다', () => {
   /*
-   * 점수를 세는 쪽(domain/session.js 의 scoreOf)은 세션에 박힌 스냅샷을 쓴다.
-   * 화면이 짐의 지금 표로 값을 적으면, 기준 점수를 고쳤을 때 '+340점' 이라
-   * 적어 놓고 34점을 준다. 적어 놓은 값과 주는 값이 다른 것은 거짓말이다.
+   * 점수표는 기록이 아니라 규칙이다. 세션에 표를 박아 두면, 규칙을 고쳤을 때
+   * 칸에는 새 값이 적히는데 합계는 옛 값 그대로다 — 앱이 '+340점' 이라 적어
+   * 놓고 34점을 준다. 스냅샷을 두지 않으면 이 어긋남 자체가 생기지 않는다.
    */
+  assert.doesNotMatch(read('src/domain/scoring.js'), /session\.scoreTable/,
+    '점수 계산이 아직 세션 스냅샷을 봅니다');
+  assert.doesNotMatch(read('src/domain/session.js'), /scoreTable:/,
+    '세션에 아직 점수표를 박고 있습니다');
+  assert.match(read('src/domain/session.js'), /sessionScore\(session, allGrades\(gym\), gym\.scoreTable\)/);
+  // 화면에 적는 개당 점수도 같은 표를 봐야 한다
   for (const f of ['src/ui/view-match.js', 'src/ui/session-editor.js']) {
-    const src = read(f);
-    assert.doesNotMatch(src, /scoreFor\(\s*gym\.scoreTable/,
-      `${f} 가 세션이 아니라 짐의 점수표로 값을 적습니다`);
+    assert.match(read(f), /scoreFor\(gym\.scoreTable/, `${f} 가 짐의 표를 쓰지 않습니다`);
   }
-  assert.match(read('src/ui/view-match.js'), /session\.scoreTable \?\? gym\.scoreTable/);
-  assert.match(read('src/ui/session-editor.js'), /draft\.scoreTable \?\? gym\.scoreTable/);
 });
 
-test('점수표를 고치면 오늘 기록이 따라간다', () => {
-  // 레벨은 이미 그렇게 하고 있었는데(setLevel) 점수표만 빠져 있었다
-  const app = read('src/app.js');
-  assert.match(app, /function applyTableToToday/);
-  const setTable = app.slice(app.indexOf('setScoreTable('), app.indexOf('setLevel('));
-  assert.match(setTable, /applyTableToToday/);
-  assert.ok(setTable.includes('setOverride'), '개별 칸 수정도 같은 자리에 있어야 합니다');
-  assert.equal((setTable.match(/applyTableToToday/g) ?? []).length, 2,
-    '배율과 개별 칸 둘 다 오늘 기록에 반영해야 합니다');
+test('오늘 것만 갱신하던 우회는 사라졌다', () => {
+  // 스냅샷을 없앴으므로 따라 옮길 것도 없다
+  assert.doesNotMatch(read('src/app.js'), /applyTableToToday/);
 });

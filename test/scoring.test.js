@@ -49,28 +49,39 @@ test('수동 수정한 칸이 공식보다 우선한다', () => {
 });
 
 test('세션 점수는 기록 시점 레벨로 계산된다', () => {
-  const session = { levelAtTime: 1, scoreTable: T, counts: { g1: 2, g3: 1 } };
+  const session = { levelAtTime: 1, counts: { g1: 2, g3: 1 } };
   // LV1 기준: 2단계=100 ×2, 4단계=230 ×1
-  assert.equal(sessionScore(session, grades), 430);
+  assert.equal(sessionScore(session, grades, T), 430);
   assert.equal(sessionSends(session), 3);
 });
 
 test('레벨을 올려도 과거 세션 점수는 변하지 않는다', () => {
-  const past = { levelAtTime: 0, scoreTable: T, counts: { g0: 3 } };
-  const before = sessionScore(past, grades);
+  const past = { levelAtTime: 0, counts: { g0: 3 } };
+  const before = sessionScore(past, grades, T);
   // 프로필 레벨을 2로 올려도 세션의 levelAtTime은 그대로다
-  assert.equal(sessionScore(past, grades), before);
+  assert.equal(sessionScore(past, grades, T), before);
   assert.equal(before, 300);
 });
 
+test('점수표를 고치면 지난 점수까지 다시 센다', () => {
+  /*
+   * 점수표는 기록이 아니라 규칙이다. 규칙을 고치면 그 규칙으로 센 값이 전부
+   * 다시 나와야 한다. 세션마다 표를 박아 두었더니, 기준 점수를 고쳤을 때
+   * 칸에는 새 값이 적히는데 합계는 옛 값이라 앱이 거짓말을 했다.
+   */
+  const s = { levelAtTime: 0, counts: { g0: 3 } };
+  assert.equal(sessionScore(s, grades, T), 300);
+  assert.equal(sessionScore(s, grades, { ...T, baseScore: T.baseScore * 2 }), 600);
+});
+
 test('사라진 등급을 참조하는 카운트는 무시한다', () => {
-  const session = { levelAtTime: 0, scoreTable: T, counts: { g0: 1, 'deleted-grade': 5 } };
-  assert.equal(sessionScore(session, grades), 100);
+  const session = { levelAtTime: 0, counts: { g0: 1, 'deleted-grade': 5 } };
+  assert.equal(sessionScore(session, grades, T), 100);
 });
 
 test('빈 세션은 0점', () => {
-  assert.equal(sessionScore({ levelAtTime: 0, counts: {} }, grades), 0);
-  assert.equal(sessionScore({ levelAtTime: 0 }, grades), 0);
+  assert.equal(sessionScore({ levelAtTime: 0, counts: {} }, grades, T), 0);
+  assert.equal(sessionScore({ levelAtTime: 0 }, grades, T), 0);
 });
 
 test('레벨 차가 커도 0점이 되지 않는다', () => {

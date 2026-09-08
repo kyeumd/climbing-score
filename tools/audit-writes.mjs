@@ -150,6 +150,110 @@ try {
   const dup = Object.entries(perPerson).filter(([, n]) => n > 1);
   ok('같은 사람·짐·날짜에 세션이 하나뿐이다', dup.length === 0, JSON.stringify(dup));
 
+  /*
+   * 점수표 검사는 색을 은퇴시키기 전에 한다.
+   *
+   * 은퇴한 색은 화면에서 줄이 빠지지만 그 색으로 센 완등은 점수에 남는다.
+   * 그게 맞는 동작인데, 그 뒤에 '칸 값 × 개수 = 합계' 를 보면 보이지 않는
+   * 줄 때문에 안 맞는다. 앱이 아니라 검사가 틀린 것이라 순서를 앞으로 뒀다.
+   */
+  console.log('--- 점수표를 고치면 대결 점수가 따라오는가 ---');
+  /*
+   * 사용자가 실제로 밟는 길: 클라이밍장 → 점수표 열기 → 값 고치기 → 대결.
+   *
+   * 서버에 값이 들어가는 것과 그 값이 실제로 쓰이는 것은 다르다. 점수표는
+   * 저장은 됐는데 대결 점수가 옛 표로 세어지고 있었다. 칸에는 새 값이 적히니
+   * 화면만 보면 멀쩡하다 — 적어 놓은 값과 주는 값이 달랐다.
+   *
+   * 판정은 배수로 하지 않는다. 점수는 100 이상에서 유효숫자 두 자리로
+   * 다듬어져 정확한 배수가 아니다. 대신 더 강한 것을 본다 —
+   * 칸에 적힌 값 × 개수를 다 더하면 합계가 나와야 한다.
+   */
+  /*
+   * 첫 사람의 열만 읽는다. 개수와 개당 점수를 같은 칸에서 꺼내야 한다 —
+   * 줄에서 아무 .cell__count 나 집으면 옆 사람 것을 읽고, 합계가 안 맞는다고
+   * 엉뚱하게 보고한다. 실제로 한 번 그랬다.
+   */
+  const readGrid = () => page.eval(() => {
+    const num = (t) => Number(String(t ?? '0').replace(/[^\d]/g, ''));
+    const rows = [...document.querySelectorAll('.grid__row')].map((r) => {
+      const cell = r.querySelector('.cell');
+      return {
+        unit: num(cell?.querySelector('.cell__unit')?.textContent),
+        count: num(cell?.querySelector('.cell__count')?.textContent ?? '0'),
+      };
+    });
+    return {
+      total: num(document.querySelector('.grid__score')?.textContent),
+      level: num(document.querySelector('.grid__person .hint')?.textContent),
+      rows,
+    };
+  });
+  const consistent = (g) => g.rows.reduce((a, r) => a + r.unit * r.count, 0) === g.total;
+
+  await run(`tap(q('.tab',0)); await wait(800);`);
+  const beforeTable = await readGrid();
+  ok('고치기 전: 칸 값 × 개수 = 합계', consistent(beforeTable),
+     `합계 ${beforeTable.total}, 줄 ${JSON.stringify(beforeTable.rows.filter((r) => r.count))}`);
+
+  await run(`
+    tap(q('.tab',3)); await wait(700);
+    tap(await until(()=>byText('.btn','점수표'),'점수표 열기')); await wait(800);
+    const d = await until(()=>q('.dial .field'),'기준 점수');
+    d.value='40'; d.dispatchEvent(new Event('change',{bubbles:true})); await wait(700);
+    tap(q('.tab',0)); await wait(900);
+  `);
+  const afterTable = await readGrid();
+  ok('칸에 적힌 값이 새 표를 따른다', afterTable.rows[0].unit > beforeTable.rows[0].unit,
+     `${beforeTable.rows[0].unit} → ${afterTable.rows[0].unit}`);
+  ok('대결 합계도 바로 따라온다', afterTable.total > beforeTable.total,
+     `${beforeTable.total} → ${afterTable.total}`);
+  ok('고친 뒤: 칸 값 × 개수 = 합계', consistent(afterTable),
+     `합계 ${afterTable.total}, 줄 ${JSON.stringify(afterTable.rows.filter((r) => r.count))}`);
+
+  const tapped = await run(`
+    const num=(t)=>Number(String(t??'0').replace(/[^\d]/g,''));
+    const before = num(q('.grid__score').textContent);
+    const unit = num(q('.cell__unit').textContent);
+    tap(q('.grid__row .cell')); await wait(700);
+    return { before, after: num(q('.grid__score').textContent), unit };
+  `);
+  ok('한 번 누르면 칸에 적힌 만큼 오른다', tapped.after - tapped.before === tapped.unit,
+     `${tapped.before} → ${tapped.after} (칸에는 +${tapped.unit})`);
+
+  /*
+   * 개별 칸 수정도 같은 길을 타야 한다.
+   *
+   * 표에서 고칠 칸은 그 사람의 레벨 줄이어야 한다. Lv.0 칸을 고쳐 놓고
+   * Lv.1 인 사람 화면을 보면 당연히 안 바뀌는데, 그걸 버그로 읽기 쉽다.
+   */
+  await run(`
+    tap(q('.tab',3)); await wait(700);
+    tap(await until(()=>byText('.btn','점수표'),'점수표 열기')); await wait(800);
+    const lv = ${afterTable.level};
+    const row = document.querySelectorAll('.matrix tbody tr')[lv];
+    if (!row) throw new Error('레벨 ' + lv + ' 줄이 없습니다');
+    tap(row.querySelectorAll('td')[0]); await wait(600);
+    const f = await until(()=>q('.modal input'),'값 칸');
+    f.value='7777'; f.dispatchEvent(new Event('input',{bubbles:true}));
+    tap(byText('.modal .btn','저장')); await wait(700);
+    tap(q('.tab',0)); await wait(900);
+  `);
+  const afterOverride = await readGrid();
+  ok('개별 칸 수정도 대결에 반영된다', afterOverride.rows.some((r) => r.unit === 7777),
+     JSON.stringify(afterOverride.rows.map((r) => r.unit)));
+  ok('개별 칸 수정 뒤에도 칸 값 × 개수 = 합계', consistent(afterOverride),
+     `합계 ${afterOverride.total}`);
+
+  const savedGym = await settle('/gyms', (v) => Object.values(v ?? {})[0]?.scoreTable?.baseScore === 40);
+  ok('바뀐 표가 서버에 저장된다',
+     Object.values(savedGym ?? {})[0]?.scoreTable?.baseScore === 40,
+     `baseScore ${Object.values(savedGym ?? {})[0]?.scoreTable?.baseScore}`);
+  const anySnapshot = await server('/sessions');
+  ok('세션에는 점수표를 박지 않는다',
+     Object.values(anySnapshot ?? {}).every((x) => x.scoreTable === undefined),
+     '스냅샷이 남아 있으면 규칙을 고쳐도 옛 값으로 셀 수 있다');
+
   console.log('--- 오늘 대결 참가자 ---');
   await run(`
     tap(q('.grid__person', 1)); await wait(400);
@@ -242,47 +346,6 @@ try {
   ok('점수표 배율 변경이 서버에 들어간다',
      Object.values(gyms ?? {})[0]?.scoreTable?.baseScore === 20,
      `baseScore ${Object.values(gyms ?? {})[0]?.scoreTable?.baseScore}`);
-
-  console.log('--- 점수표를 고치면 점수가 따라오는가 ---');
-  /*
-   * 서버에 값이 들어가는 것과 그 값이 실제로 쓰이는 것은 다르다. 점수표는
-   * 저장은 잘 됐는데 오늘 점수가 옛 표로 세어지고 있었다. 칸에는 새 값이
-   * 적히니 화면만 보면 멀쩡하다 — 적어 놓은 값과 주는 값이 달랐다.
-   */
-  await run(`tap(q('.tab',0)); await wait(700);`);
-  const readGrid = () => page.eval(() => ({
-    total: Number((document.querySelector('.grid__score')?.textContent ?? '0').replace(/[^\d]/g, '')),
-    unit: Number((document.querySelector('.cell__unit')?.textContent ?? '0').replace(/[^\d]/g, '')),
-  }));
-  const beforeTable = await readGrid();
-  await run(`
-    tap(q('.tab',3)); await wait(700);
-    tap(await until(()=>byText('.btn','점수표'),'점수표')); await wait(800);
-    const d = await until(()=>q('.dial .field'),'기준 점수');
-    d.value='40'; d.dispatchEvent(new Event('change',{bubbles:true})); await wait(700);
-    tap(q('.tab',0)); await wait(800);
-  `);
-  const afterTable = await readGrid();
-  ok('칸에 적힌 값이 새 표를 따른다', afterTable.unit === beforeTable.unit * 2,
-     `${beforeTable.unit} → ${afterTable.unit}`);
-  ok('합계도 같이 따라온다', afterTable.total === beforeTable.total * 2,
-     `${beforeTable.total} → ${afterTable.total} (기대 ${beforeTable.total * 2})`);
-
-  const tapped = await run(`
-    const before = Number((q('.grid__score').textContent||'0').replace(/[^\d]/g,''));
-    const unit = Number((q('.cell__unit').textContent||'0').replace(/[^\d]/g,''));
-    tap(q('.grid__row .cell')); await wait(600);
-    const after = Number((q('.grid__score').textContent||'0').replace(/[^\d]/g,''));
-    return { before, after, unit };
-  `);
-  ok('한 번 누르면 칸에 적힌 만큼 오른다', tapped.after - tapped.before === tapped.unit,
-     `${tapped.before} → ${tapped.after} (칸에는 +${tapped.unit})`);
-
-  const savedTables = await settle('/sessions',
-    (v) => Object.values(v ?? {}).every((x) => x.scoreTable?.baseScore === 40));
-  ok('바뀐 표가 오늘 세션에도 저장된다',
-     Object.values(savedTables ?? {}).every((x) => x.scoreTable?.baseScore === 40),
-     JSON.stringify(Object.values(savedTables ?? {}).map((x) => x.scoreTable?.baseScore)));
 
   console.log('--- 세션 편집 ---');
   await run(`

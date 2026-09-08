@@ -198,33 +198,6 @@ function patchGym(gymId, fn) {
   if (gym) persistGym(fn(gym));
 }
 
-/*
- * 점수표를 고치면 오늘 기록이 따라간다.
- *
- * 세션은 그때의 점수표를 스냅샷으로 박아 둔다. 지난 점수를 보존하려는 것이고
- * 그건 맞다. 그런데 오늘 기록까지 옛 표로 세고 있었다.
- *
- * 그래서 기준 점수를 10에서 100으로 올리면, 칸에는 '+340점' 이 뜨는데(칸은 지금
- * 표를 본다) 합계는 그대로였고, 한 번 더 누르면 34점만 올랐다. 적어 놓은 값과
- * 주는 값이 달랐다. 레벨은 이미 같은 규칙으로 오늘 것만 따라가게 해 두었는데
- * (setLevel), 점수표만 빠져 있었다.
- *
- * 지난 날짜는 건드리지 않는다. 그날의 실력과 그날의 규칙으로 남는다.
- */
-function applyTableToToday(gymId) {
-  const gym = state.gyms.find((g) => g.id === gymId);
-  if (!gym) return;
-  const today = localDate();
-  let changed = false;
-  for (const s of state.sessions) {
-    if (s.gymId !== gymId || s.date !== today) continue;
-    if (JSON.stringify(s.scoreTable ?? null) === JSON.stringify(gym.scoreTable ?? null)) continue;
-    store.saveSession({ ...s, scoreTable: { ...gym.scoreTable } });
-    changed = true;
-  }
-  if (changed) reload();
-}
-
 /* ============================================================
    액션 — UI는 이것만 호출한다
    ============================================================ */
@@ -298,8 +271,8 @@ const actions = {
   },
 
   setScoreTable(gymId, patch) {
+    // 점수는 지금 표로 센다(scoring.js). 저장하면 화면이 다시 그려지며 전부 따라온다.
     patchGym(gymId, (gym) => ({ ...gym, scoreTable: { ...gym.scoreTable, ...patch } }));
-    applyTableToToday(gymId);
   },
   setOverride(gymId, key, value) {
     patchGym(gymId, (gym) => ({
@@ -309,7 +282,6 @@ const actions = {
         overrides: { ...(gym.scoreTable.overrides ?? {}), [key]: value },
       },
     }));
-    applyTableToToday(gymId);
   },
 
   setLevel(profileId, level) {
@@ -381,7 +353,7 @@ const actions = {
 
     const gym = state.gyms.find((g) => g.id === gymId);
     const base = existing ?? createSession({
-      profileId: id, gymId, date, level: profile.level ?? 0, scoreTable: gym?.scoreTable,
+      profileId: id, gymId, date, level: profile.level ?? 0,
     });
     store.saveSession({ ...base, playing: willPlay });
     reload();

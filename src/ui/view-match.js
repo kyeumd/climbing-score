@@ -296,8 +296,7 @@ function inputGrid(ctx, gym, grades) {
       const session = findSession(state.sessions, {
         profileId: profile.id, gymId: gym.id, date: state.ui.date,
       }) ?? createSession({
-        profileId: profile.id, gymId: gym.id, date: state.ui.date,
-        level, scoreTable: gym.scoreTable,
+        profileId: profile.id, gymId: gym.id, date: state.ui.date, level,
       });
       return { profile, level, session, score: scoreOf(session, gym), sends: sendsOf(session) };
     });
@@ -409,7 +408,7 @@ function inputGrid(ctx, gym, grades) {
         if (!c) return false;
         const count = r.session.counts?.[grade.id] ?? 0;
         const shownLevel = levelOf(r.session, r.level);
-        const unit = scoreFor(tableOf(r.session, gym), shownLevel, grade);
+        const unit = scoreFor(gym.scoreTable, shownLevel, grade);
         // className 을 통째로 덮으면 지금 누르고 있는 is-pressing/is-held 가 날아간다
         c.el.classList.toggle('has-count', count > 0);
         c.el.classList.toggle('is-mylevel', grade.order === shownLevel);
@@ -438,20 +437,17 @@ function inputGrid(ctx, gym, grades) {
 
 /*
  * 칸에 적는 개당 점수는 합계를 세는 것과 같은 표·같은 레벨을 봐야 한다.
+ * 다르면 '+340점' 이라 적어 놓고 34점을 주게 된다.
  *
- * 예전에는 칸이 지금 짐의 점수표를 보고, 합계는 세션에 박힌 스냅샷을 봤다.
- * 그래서 점수표를 고치면 칸에는 '+340점' 이 뜨는데 한 번 누르면 34점만 올랐다.
- * 적어 놓은 값과 주는 값이 다른 것은 그냥 거짓말이다.
- *
- * 세션이 진실이다 — 점수를 세는 쪽이 그걸 쓰기 때문이다(domain/session.js).
+ * 표는 지금 짐의 것이다 — 점수표는 규칙이라 고치면 전부 다시 센다.
+ * 레벨은 그날의 사실이라 세션에 남은 값을 쓴다.
  */
-const tableOf = (session, gym) => session.scoreTable ?? gym.scoreTable;
 const levelOf = (session, level) => session.levelAtTime ?? level;
 
 function cell({ grade, profile, level, session, gym, actions }) {
   const count = session.counts?.[grade.id] ?? 0;
   const shownLevel = levelOf(session, level);
-  const unit = scoreFor(tableOf(session, gym), shownLevel, grade);
+  const unit = scoreFor(gym.scoreTable, shownLevel, grade);
   const el = h('button', {
     class: `cell${count ? ' has-count' : ''}${grade.order === shownLevel ? ' is-mylevel' : ''}`,
     type: 'button',

@@ -16,7 +16,7 @@ export function ranking({ sessions, gym, date, profiles }) {
     .map((s) => ({
       session: s,
       profile: byId.get(s.profileId),
-      score: sessionScore(s, grades),
+      score: sessionScore(s, grades, gym.scoreTable),
       sends: sessionSends(s),
       level: s.levelAtTime,
     }))

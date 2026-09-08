@@ -108,13 +108,26 @@ export function buildMatrix(table, grades) {
 }
 
 /** 세션 하나의 총점. 기록 시점 레벨(levelAtTime)로 계산해 과거 점수를 보존한다. */
-export function sessionScore(session, grades) {
+/**
+ * 세션 하나의 총점.
+ *
+ * 점수표는 스냅샷이 아니라 **지금 짐의 표**로 센다. 점수표는 기록이 아니라
+ * 규칙이기 때문이다. 규칙을 고치면 그 규칙으로 센 값이 전부 다시 나와야 한다.
+ *
+ * 예전에는 세션마다 표를 박아 뒀다. 그래서 기준 점수를 고치면 칸에는 새 값이
+ * 적히는데 합계는 옛 값 그대로였고, 한 번 누르면 적힌 것과 다른 만큼 올랐다.
+ * 오늘 것만 갱신해 봤지만 그것도 반쪽이다 — 어제 기록을 열면 또 어긋난다.
+ *
+ * 레벨은 다르다. 그날의 실력은 규칙이 아니라 사실이라 세션에 남긴다
+ * (levelAtTime, 세션 편집에서 직접 고칠 수 있다).
+ */
+export function sessionScore(session, grades, table) {
   const byId = new Map(grades.map((g) => [g.id, g]));
   let total = 0;
   for (const [gradeId, count] of Object.entries(session.counts || {})) {
     const grade = byId.get(gradeId);
     if (!grade || !count) continue;
-    total += count * scoreFor(session.scoreTable, session.levelAtTime, grade);
+    total += count * scoreFor(table, session.levelAtTime, grade);
   }
   return total;
 }

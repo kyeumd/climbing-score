@@ -5,16 +5,16 @@ import { allGrades } from './gym.js';
 
 /**
  * 프로필 + 짐 + 날짜 조합당 세션 1개 (설계서 7.1절).
- * levelAtTime과 scoreTable을 스냅샷으로 박아 과거 점수를 보존한다.
+ * levelAtTime 을 남겨 그날의 실력을 보존한다. 점수표는 남기지 않는다 —
+ * 그건 기록이 아니라 규칙이라, 언제나 지금 짐의 표로 센다(scoring.js).
  */
-export function createSession({ profileId, gymId, date = localDate(), level = 0, scoreTable }) {
+export function createSession({ profileId, gymId, date = localDate(), level = 0 }) {
   return {
     id: uid('ses'),
     profileId,
     gymId,
     date,
     levelAtTime: level,
-    scoreTable: scoreTable ? { ...scoreTable } : undefined,
     counts: {},
     memo: '',
   };
@@ -36,7 +36,7 @@ export function bumpCount(session, gradeId, delta) {
 }
 
 export function scoreOf(session, gym) {
-  return sessionScore(session, allGrades(gym));
+  return sessionScore(session, allGrades(gym), gym.scoreTable);
 }
 
 export function sendsOf(session) {
@@ -56,7 +56,7 @@ export function gymStats(sessions, gym, profileId) {
   let topOrder = -1;
 
   for (const s of mine) {
-    totalScore += sessionScore(s, grades);
+    totalScore += sessionScore(s, grades, gym.scoreTable);
     totalSends += sessionSends(s);
     for (const [gradeId, count] of Object.entries(s.counts ?? {})) {
       if (!count) continue;
@@ -73,6 +73,6 @@ export function gymStats(sessions, gym, profileId) {
     totalSends,
     topGrade: topOrder >= 0 ? grades.find((g) => g.order === topOrder) : null,
     gradeTotals: grades.map((g) => ({ grade: g, count: byGrade.get(g.id) ?? 0 })),
-    trend: mine.map((s) => ({ date: s.date, score: sessionScore(s, grades) })),
+    trend: mine.map((s) => ({ date: s.date, score: sessionScore(s, grades, gym.scoreTable) })),
   };
 }

@@ -70,11 +70,9 @@ export function openSessionEditor(session, gym, ctx) {
       const count = draft.counts[grade.id] ?? 0;
       // 은퇴한 색은 그날 기록이 남아 있을 때만 보인다
       li.hidden = grade.retired && count === 0;
-      /* 합계는 이 세션에 박힌 점수표로 센다(scoreOf). 줄마다 적는 값도 같은
-         표를 봐야 한다 — 다르면 줄 값을 다 더해도 합계가 안 나온다. */
-      const table = draft.scoreTable ?? gym.scoreTable;
+      /* 합계와 같은 표를 본다. 점수표는 규칙이라 언제나 지금 짐의 것이다. */
       unitEl.textContent =
-        `${scoreFor(table, draft.levelAtTime, grade).toLocaleString('ko-KR')}점`;
+        `${scoreFor(gym.scoreTable, draft.levelAtTime, grade).toLocaleString('ko-KR')}점`;
       // 사람이 직접 치는 중이면 건드리지 않는다. 커서가 튄다.
       if (document.activeElement !== input) input.value = String(count);
     }
