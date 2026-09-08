@@ -134,7 +134,7 @@ const store = synced ?? local;
 
 const state = {
   ...emptyState(),
-  ui: { route: 'match', gymId: null, profileId: null, date: localDate(), gymSettingsId: null, adding: false, playing: null },
+  ui: { route: 'match', gymId: null, profileId: null, date: localDate(), gymSettingsId: null, adding: false },
 };
 
 let root;
@@ -326,19 +326,35 @@ const actions = {
   /*
    * 오늘 대결에 낄 사람.
    *
-   * 프로필은 계속 남는 명단이고, 대결은 그중 오늘 온 사람만 세운다.
-   * playing 이 null 이면 아직 고른 적이 없다는 뜻이라, 오늘 기록이 있는
-   * 사람을 자동으로 세운다. 그래야 앱을 껐다 켜도 하던 대결이 그대로다.
-   * 아무도 기록이 없으면(하루의 시작) 명단 전원을 세운다.
+   * 예전에는 이 목록을 localStorage 에만 적었다. 그래서 한 사람이 누군가를
+   * 빼도 친구 화면에는 그대로 서 있었다 — 화면만 바뀌고 데이터는 안 가는
+   * 전형적인 자리였다(tools/audit-writes.mjs 가 잡았다).
+   *
+   * 이제 세션에 싣는다. 세션은 이미 방으로 동기화되고, 사람·짐·날짜로
+   * 묶이는 단위라 '오늘 이 짐에 왔는가' 와 정확히 같은 축이다. 서버 규칙을
+   * 새로 게시하지 않아도 되는 것도 이 방식의 덕이다.
    */
   togglePlaying(id) {
+    const gymId = state.ui.gymId;
+    const date = state.ui.date;
+    const profile = state.profiles.find((p) => p.id === id);
+    if (!profile || !gymId) return;
+
     const now = new Set(playingIds());
-    if (now.has(id)) now.delete(id); else now.add(id);
+    const willPlay = !now.has(id);
     // 전원을 다 빼면 격자가 사라진다. 마지막 한 명은 남긴다.
-    if (!now.size) return;
-    state.ui.playing = [...now];
-    savePlaying();
-    render();
+    if (!willPlay && now.size <= 1) return;
+
+    const existing = findSession(state.sessions, { profileId: id, gymId, date });
+    // 세션이 없으면 기본이 '참가' 다. 다시 넣는 것은 아무것도 안 바꾼다.
+    if (willPlay && !existing) { render(); return; }
+
+    const gym = state.gyms.find((g) => g.id === gymId);
+    const base = existing ?? createSession({
+      profileId: id, gymId, date, level: profile.level ?? 0, scoreTable: gym?.scoreTable,
+    });
+    store.saveSession({ ...base, playing: willPlay });
+    reload();
   },
   /* 기록 화면의 빈 상태에서 부른다. 프로필 화면을 '추가' 칸이 열린 채로 띄운다. */
   openNewProfile() { state.ui.route = 'profile'; state.ui.adding = true; render(); },
@@ -404,12 +420,7 @@ const actions = {
     const profile = createProfile({ handle, name, primaryGymId: state.ui.gymId });
     store.saveProfile(profile);
     if (!state.ui.profileId) state.ui.profileId = profile.id;
-    // 방금 만든 사람은 오늘 대결에 넣는다. 만들자마자 또 골라야 할 이유가 없다.
-    // (저장까지 해 둔다. 안 그러면 새로고침 뒤 저장된 옛 명단에서 이 사람만 빠진다.)
-    if (state.ui.playing) {
-      state.ui.playing = [...state.ui.playing, profile.id];
-      savePlaying();
-    }
+    // 새로 만든 사람은 오늘 세션이 없으므로 기본으로 대결에 선다. 따로 할 일이 없다.
     // adding 을 켜 둔 채 다시 그린다. 이름 칸이 그대로 남아 다음 이름을 받는다.
     reload();
   },
@@ -455,37 +466,24 @@ const actions = {
 /*
  * 오늘 대결에 세울 사람.
  *
- * 고른 적이 없으면 명단 전원이다. '오늘 기록이 있는 사람' 을 기본으로 삼아
- * 봤더니, 셋이 왔는데 한 명만 기록한 뒤 새로고침하면 나머지 둘이 사라졌다.
- * 기본은 전원이고, 안 온 사람만 빼면 된다.
+ * 기본은 명단 전원이다. '오늘 기록이 있는 사람' 을 기본으로 삼아 봤더니,
+ * 셋이 왔는데 한 명만 기록한 뒤 새로고침하면 나머지 둘이 사라졌다.
+ * 전원을 세우고, 안 온 사람만 뺀다.
  *
- * 고른 결과는 날짜와 함께 저장한다. 껐다 켜도 그대로고, 날이 바뀌면 저절로
- * 전원으로 돌아간다. 앱 데이터와 섞지 않으려고 열쇠를 따로 쓴다.
+ * 뺀 사실은 그 사람의 오늘 세션에 적는다. 세션은 방으로 동기화되므로 친구
+ * 화면에서도 같이 빠지고, 날이 바뀌면 새 날의 세션이 없어 저절로 전원으로
+ * 돌아간다. 짐마다 따로 기억되는 것도 맞다 — 어제 다른 짐에서 뺀 사람이
+ * 오늘 여기서도 빠져 있을 이유가 없다.
  */
-const PLAY_KEY = 'climbing-score/playing';
-
-function savePlaying() {
-  try {
-    localStorage.setItem(PLAY_KEY, JSON.stringify({ date: state.ui.date, ids: state.ui.playing }));
-  } catch { /* 저장 못 해도 이번 세션 동안은 유지된다 */ }
-}
-
-function storedPlaying() {
-  try {
-    const raw = JSON.parse(localStorage.getItem(PLAY_KEY) || 'null');
-    return raw && raw.date === state.ui.date ? raw.ids : null;
-  } catch { return null; }
-}
-
 function playingIds() {
-  const picked = state.ui.playing ?? storedPlaying();
-  if (picked?.length) {
-    const keep = new Set(picked);
-    // 그 사이 지워진 사람은 빠지고, 열 순서는 명단 순서를 따른다
-    const kept = state.profiles.filter((p) => keep.has(p.id)).map((p) => p.id);
-    if (kept.length) return kept;
-  }
-  return state.profiles.map((p) => p.id);
+  const gymId = state.ui.gymId;
+  const date = state.ui.date;
+  const here = state.profiles.filter((p) => {
+    const s = findSession(state.sessions, { profileId: p.id, gymId, date });
+    return s?.playing !== false;
+  }).map((p) => p.id);
+  // 어쩌다 전원이 빠진 상태가 남았으면 격자가 통째로 사라진다. 그때는 전원을 세운다.
+  return here.length ? here : state.profiles.map((p) => p.id);
 }
 
 const ctx = {

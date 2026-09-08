@@ -99,6 +99,7 @@ export function createRemote({ databaseUrl, room }) {
 
       const open = () => {
         if (closed) return;
+        es?.close();
         es = new EventSource(url());
         es.addEventListener('open', () => { retry = 0; onStatus?.('on'); });
         for (const kind of ['put', 'patch']) {
@@ -120,7 +121,22 @@ export function createRemote({ databaseUrl, room }) {
         });
       };
       open();
-      return () => { closed = true; onStatus?.('off'); es?.close(); };
+      return {
+        stop() { closed = true; onStatus?.('off'); es?.close(); es = null; },
+        /*
+         * 다시 붙는다.
+         *
+         * 폰이 잠들거나 화면을 다른 앱으로 넘기면 브라우저가 이 연결을 끊는다.
+         * 그때 error 이벤트가 오면 위에서 다시 붙지만, 조용히 죽는 경우가 있다.
+         * 그러면 readyState 는 OPEN 인 채로 아무것도 오지 않는다 — 화면은
+         * 멀쩡해 보이는데 친구가 누른 점수가 영영 안 온다.
+         *
+         * 살아 있는지 판정하려 들지 않고 그냥 다시 연다. 붙자마자 방 전체가
+         * 한 번 오므로 자는 동안 놓친 것도 그때 따라잡는다. 화면으로 돌아올
+         * 때만 일어나는 일이라 자주 하지도 않는다.
+         */
+        resume() { if (!closed) { retry = 0; open(); } },
+      };
     },
   };
 }

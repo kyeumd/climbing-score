@@ -239,6 +239,76 @@ try {
   ok('열려 있는 앱에 링크를 넣어도 옮겨진다', moved === OTHER, String(moved));
   await D.close();
 
+  console.log('--- 폰이 잠들어 스트림이 끊겨도 돌아오면 따라잡는다 ---');
+  /*
+   * 실시간이 안 된다는 신고의 가장 흔한 원인이다. 폰을 주머니에 넣으면
+   * 브라우저가 연결을 끊는데, 조용히 끊기면 error 이벤트가 안 와서 다시
+   * 붙지도 못한다. 화면은 아는 값을 계속 그리므로 멀쩡해 보인다.
+   *
+   * 여기서는 페이지 안의 EventSource 를 강제로 닫아 그 상태를 만든다.
+   */
+  const F = await (await launch({ width: 414, height: 896, dark: true })).connect();
+  await F.send('Page.addScriptToEvaluateOnNewDocument', {
+    source: `window.__streams = [];
+      const Real = EventSource;
+      window.EventSource = function (...a) { const es = new Real(...a); window.__streams.push(es); return es; };
+      window.EventSource.prototype = Real.prototype;`,
+  });
+  await openApp(F);
+  await run(F, `await until(() => q('.grid__name'), '사람 카드')`);
+  const liveScore = Number(await F.text('.grid__score'));
+  ok('잠들기 전에는 값이 보인다', liveScore > 0, `점수 ${liveScore}`);
+
+  // 연결을 조용히 끊는다
+  await F.eval(() => { (window.__streams ?? []).forEach((es) => es.close()); });
+  await sleep(400);
+
+  // 그 사이 다른 곳에서 기록이 바뀐다
+  const someone = await fetch(`${DB_URL}/rooms/${ROOM}/sessions.json`).then((r) => r.json());
+  // 화면에 보이는 사람의 세션을 고른다. 첫 열의 사람이어야 점수가 눈에 띈다.
+  const shownId = await F.eval(() => document.querySelector('.cell')?.getAttribute('aria-label'));
+  const [sid, sval] = Object.entries(someone)
+    .find(([, v]) => shownId?.startsWith(v.profileId)) ?? Object.entries(someone)[0];
+  /* 실제로 있는 난이도 id 를 올려야 점수가 바뀐다. 없는 id 로 넣으면 서버에는
+     값이 들어가도 점수는 그대로라, 동기화가 된 건지 안 된 건지 알 수 없다. */
+  const bumpKey = Object.keys(sval.counts ?? {})[0];
+  if (!bumpKey) throw new Error('올릴 난이도를 찾지 못했습니다');
+  await fetch(`${DB_URL}/rooms/${ROOM}/sessions/${sid}.json`, {
+    method: 'PUT', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ...sval, counts: { ...sval.counts, [bumpKey]: (sval.counts[bumpKey] ?? 0) + 9 } }),
+  });
+  await sleep(1500);
+  const whileAsleep = Number(await F.text('.grid__score'));
+  ok('끊긴 동안에는 안 온다 (재현 확인)', whileAsleep === liveScore, `${liveScore} → ${whileAsleep}`);
+
+  // 화면으로 돌아온다
+  await F.eval(() => document.dispatchEvent(new Event('visibilitychange', { bubbles: true })));
+  let woke = whileAsleep;
+  for (let i = 0; i < 60; i++) {
+    woke = Number(await F.text('.grid__score'));
+    if (woke !== whileAsleep) break;
+    await sleep(200);
+  }
+  ok('돌아오면 다시 붙어 따라잡는다', woke !== whileAsleep, `${whileAsleep} → ${woke}`);
+
+  /* 다시 붙은 뒤에는 새로 오는 것도 받아야 한다. 스냅샷만 한 번 받고 다시
+     죽어 있으면 다음 탭부터 또 안 온다. */
+  const [sid2, sval2] = Object.entries(
+    await fetch(`${DB_URL}/rooms/${ROOM}/sessions.json`).then((r) => r.json())
+  ).find(([k]) => k === sid);
+  await fetch(`${DB_URL}/rooms/${ROOM}/sessions/${sid2}.json`, {
+    method: 'PUT', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ...sval2, counts: { ...sval2.counts, [bumpKey]: (sval2.counts[bumpKey] ?? 0) + 3 } }),
+  });
+  let again = woke;
+  for (let i = 0; i < 50; i++) {
+    again = Number(await F.text('.grid__score'));
+    if (again !== woke) break;
+    await sleep(200);
+  }
+  ok('그 뒤로도 실시간이 이어진다', again !== woke, `${woke} → ${again}`);
+  await F.close();
+
   console.log('--- 누가 방을 통째로 비워도 기록이 살아난다 ---');
   /*
    * 계정이 없으니 코드를 아는 사람은 방을 지울 수 있다. 그 빈 상태를 진실로

@@ -28,7 +28,7 @@ const same = (a, b) => JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
  */
 export function createSyncedAdapter({ local, databaseUrl, room }) {
   const remote = createRemote({ databaseUrl, room });
-  let stop = null;
+  let sub = null;
   let status = 'off';        // off | on
   let onChange = null;       // 서버가 무언가 바꿨다고 앱에 알리는 통로
   let onStatus = null;
@@ -143,6 +143,18 @@ export function createSyncedAdapter({ local, databaseUrl, room }) {
 
   const toMap = (list) => Object.fromEntries(list.map((x) => [x.id, x]));
 
+  /*
+   * 화면으로 돌아왔다. 자는 동안 스트림이 끊겼을 수 있으므로 다시 붙는다.
+   *
+   * 이게 없으면 폰을 주머니에 넣었다 꺼낸 뒤로 친구가 누른 점수가 안 온다.
+   * 화면은 자기가 아는 값을 계속 그리므로 멀쩡해 보이고, 그래서 알아채기도
+   * 어렵다. 실시간이 안 된다는 신고의 가장 흔한 원인이다.
+   */
+  function wake() {
+    if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return;
+    sub?.resume();
+  }
+
   /* ---------- 캐시 → 서버 ---------- */
 
   /**
@@ -213,12 +225,19 @@ export function createSyncedAdapter({ local, databaseUrl, room }) {
       const existing = await remote.getAll();
       if (existing && Object.keys(existing).length) applySnapshot(existing);
       else await adopt();
-      stop = remote.stream({
+      sub = remote.stream({
         onEvent,
         onStatus: (s) => { status = s; onStatus?.(s); },
       });
+      /* visibilitychange 는 document 에서 난다. window 에 걸면 못 받는다. */
+      document.addEventListener('visibilitychange', wake);
+      window.addEventListener('online', wake);
     },
-    disconnect() { stop?.(); stop = null; status = 'off'; },
+    disconnect() {
+      document.removeEventListener('visibilitychange', wake);
+      window.removeEventListener('online', wake);
+      sub?.stop(); sub = null; status = 'off';
+    },
     status() { return status; },
     async drain() { await remote.drain(); },
   };

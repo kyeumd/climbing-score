@@ -105,3 +105,28 @@ test('검증용 페이지는 서버에 붙지 않는다', () => {
       `${page} 에서 앱을 부르기 전에 꺼야 합니다`);
   }
 });
+
+test('화면으로 돌아오면 스트림에 다시 붙는다', () => {
+  /*
+   * 폰을 주머니에 넣으면 브라우저가 연결을 끊는다. 조용히 끊기면 error 가
+   * 안 와서 다시 붙지도 못하고, 화면은 아는 값을 계속 그리므로 멀쩡해 보인다.
+   * 실시간이 안 된다는 신고의 가장 흔한 원인이다.
+   *
+   * visibilitychange 는 document 에서 난다. window 에 걸면 못 받는다.
+   */
+  const src = read('src/storage/synced.js');
+  assert.match(src, /document\.addEventListener\('visibilitychange'/);
+  assert.match(src, /window\.addEventListener\('online'/);
+  assert.match(read('src/storage/remote.js'), /resume\(\)/);
+});
+
+test('오늘 참가 여부는 서버로 간다', () => {
+  /*
+   * 예전에는 localStorage 에만 적어서, 한 사람이 누군가를 빼도 친구 화면에는
+   * 그대로 서 있었다. 화면만 바뀌고 데이터는 안 가는 자리였다.
+   */
+  const app = read('src/app.js');
+  assert.doesNotMatch(app, /climbing-score\/playing/, '아직 localStorage 에만 적고 있습니다');
+  const fn = app.slice(app.indexOf('togglePlaying('), app.indexOf('openNewProfile()'));
+  assert.match(fn, /store\.saveSession/, 'togglePlaying 이 저장소를 거치지 않습니다');
+});
