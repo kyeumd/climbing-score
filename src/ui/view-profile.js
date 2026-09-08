@@ -155,7 +155,7 @@ function roomPanel({ actions }) {
           status === 'on' ? '연결됨' : '연결 안 됨'),
       ),
       h('p', { class: 'hint', style: { margin: '0 0 0.75rem' } },
-        '링크를 받은 사람은 같은 기록을 보고 함께 고칠 수 있어요. 아무 데나 올리지 마세요.'),
+        '링크를 받은 사람은 같은 기록을 보고 함께 고칠 수 있어요. 같이 하는 사람에게만 보내세요.'),
       linkBtn,
       share,
       said,

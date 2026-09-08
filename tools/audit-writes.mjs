@@ -200,9 +200,12 @@ try {
     tap(q('.tab',3)); await wait(700);
     tap(await until(()=>byText('.btn','점수표'),'점수표 열기')); await wait(800);
     const d = await until(()=>q('.dial .field'),'기준 점수');
-    d.value='40'; d.dispatchEvent(new Event('change',{bubbles:true})); await wait(700);
+    d.value='40'; d.dispatchEvent(new Event('change',{bubbles:true})); await wait(500);
+    // 이제 즉시 반영이 아니다. 저장을 눌러야 한다.
+    tap(byText('.scorehead .btn','저장')); await wait(700);
     tap(q('.tab',0)); await wait(900);
-  `);
+  `)
+  ;
   const afterTable = await readGrid();
   ok('칸에 적힌 값이 새 표를 따른다', afterTable.rows[0].unit > beforeTable.rows[0].unit,
      `${beforeTable.rows[0].unit} → ${afterTable.rows[0].unit}`);
@@ -236,7 +239,8 @@ try {
     tap(row.querySelectorAll('td')[0]); await wait(600);
     const f = await until(()=>q('.modal input'),'값 칸');
     f.value='7777'; f.dispatchEvent(new Event('input',{bubbles:true}));
-    tap(byText('.modal .btn','저장')); await wait(700);
+    tap(byText('.modal .btn','저장')); await wait(600);
+    tap(byText('.scorehead .btn','저장')); await wait(700);
     tap(q('.tab',0)); await wait(900);
   `);
   const afterOverride = await readGrid();
@@ -341,6 +345,7 @@ try {
     tap(await until(()=>byText('.btn','점수표'),'점수표 버튼')); await wait(700);
     const d = await until(()=>q('.dial .field'),'기준 점수 칸');
     d.value='20'; d.dispatchEvent(new Event('change',{bubbles:true})); await wait(500);
+    tap(byText('.scorehead .btn','저장')); await wait(700);
   `);
   gyms = await settle('/gyms', (v) => Object.values(v ?? {})[0]?.scoreTable?.baseScore === 20);
   ok('점수표 배율 변경이 서버에 들어간다',

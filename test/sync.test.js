@@ -152,3 +152,31 @@ test('오늘 것만 갱신하던 우회는 사라졌다', () => {
   // 스냅샷을 없앴으므로 따라 옮길 것도 없다
   assert.doesNotMatch(read('src/app.js'), /applyTableToToday/);
 });
+
+test('점수표는 저장을 눌러야 반영된다', () => {
+  /*
+   * 이 값은 그 짐의 모든 점수를 다시 세게 한다(점수표는 스냅샷이 아니라 규칙).
+   * 만지는 즉시 반영하면 슬라이더를 스치기만 해도 지난 기록의 점수가 통째로
+   * 달라지고, 되돌릴 길이 없으면 만지기가 무섭다.
+   */
+  const view = read('src/ui/view-score-table.js');
+  assert.match(view, /let draft/, '초안 없이 바로 고치고 있습니다');
+  assert.match(view, /actions\.saveScoreTable/);
+  assert.doesNotMatch(view, /actions\.setScoreTable|actions\.setOverride/,
+    '아직 즉시 반영하는 길이 남아 있습니다');
+  assert.match(view, /취소/);
+  const app = read('src/app.js');
+  assert.doesNotMatch(app, /setOverride\(/, '쓰이지 않는 즉시 반영 액션이 남아 있습니다');
+});
+
+test('쉬운 문제를 한꺼번에 눕히는 규칙이 있다', () => {
+  /*
+   * 레벨 16줄 × 난이도 11칸을 하나씩 누르게 하면 아무도 안 쓴다.
+   * 내 레벨 기준 상대 규칙이라 줄마다 손댈 필요가 없다.
+   */
+  const sc = read('src/domain/scoring.js');
+  assert.match(sc, /floorFrom/);
+  assert.match(sc, /if \(t\.floorFrom != null && below >= t\.floorFrom\) return t\.floorScore;/);
+  // 눕힌 점수는 0 을 받아야 한다. 1점씩이라도 주면 쉬운 것만 잔뜩 깨서 따라잡는다.
+  assert.match(sc, /floorScore: \{ min: 0/);
+});

@@ -16,6 +16,27 @@ export const DEFAULT_SCORE_TABLE = Object.freeze({
   baseScore: 10,
   upFactor: 1.5,
   downFactor: 0.5,
+  /*
+   * 쉬운 문제 한꺼번에 눕히기.
+   *
+   * 내 레벨보다 floorFrom 단계 아래부터는 전부 floorScore 점이다. 공식만으로는
+   * 3, 2, 1 처럼 조금씩 줄어들 뿐이라, "이 정도는 이제 세지 말자" 를 만들려면
+   * 칸을 수십 번 눌러야 했다. 레벨 16줄 × 난이도 11칸이다.
+   *
+   * 레벨을 기준으로 한 상대 규칙이라 줄마다 손댈 필요가 없다. 이 앱의 점수가
+   * 처음부터 내 레벨과의 차이로 정해지는 것과 같은 축이다.
+   *
+   * 눕힌 점수는 0 을 기본으로 한다.
+   *
+   * 1점씩이라도 주면 쉬운 문제를 잔뜩 깨서 어려운 완등 하나를 따라잡을 수 있다.
+   * 기준 10점이면 쉬운 것 10개가 기준 난이도 하나와 같아진다. 그러면 '쉬운 건
+   * 안 센다' 는 뜻이 무너지고, 앵벌이가 이기는 판이 된다.
+   * 개수는 그대로 남으니 몇 개 깼는지는 여전히 보인다.
+   *
+   * null 이면 끈 것이다.
+   */
+  floorFrom: null,
+  floorScore: 0,
   overrides: {},
 });
 
@@ -30,6 +51,10 @@ export const LIMITS = Object.freeze({
   baseScore: { min: 1, max: 10000 },
   upFactor: { min: 1, max: 5 },
   downFactor: { min: 0.05, max: 1 },
+  // 0 단계 아래면 내 레벨까지 눕는다. 1 단계부터 받는다.
+  floorFrom: { min: 1, max: 15 },
+  // 여기서는 0 을 받는다. 공식 쪽은 여전히 최소 1점이다(tidy).
+  floorScore: { min: 0, max: 10000 },
 });
 
 export function clampTable(table) {
@@ -41,6 +66,10 @@ export function clampTable(table) {
     baseScore: fit(t.baseScore, LIMITS.baseScore, DEFAULT_SCORE_TABLE.baseScore),
     upFactor: fit(t.upFactor, LIMITS.upFactor, DEFAULT_SCORE_TABLE.upFactor),
     downFactor: fit(t.downFactor, LIMITS.downFactor, DEFAULT_SCORE_TABLE.downFactor),
+    // null 은 '끔' 이라 숫자로 가두면 안 된다
+    floorFrom: Number.isFinite(t.floorFrom)
+      ? fit(t.floorFrom, LIMITS.floorFrom, LIMITS.floorFrom.min) : null,
+    floorScore: fit(t.floorScore, LIMITS.floorScore, DEFAULT_SCORE_TABLE.floorScore),
   };
 }
 
@@ -59,6 +88,14 @@ export function scoreFor(table, level, grade) {
   if (t.overrides && Object.prototype.hasOwnProperty.call(t.overrides, key)) {
     return t.overrides[key];
   }
+  /*
+   * 쉬운 쪽을 한꺼번에 눕힌다. 칸을 직접 고친 것(overrides)보다는 뒤,
+   * 공식보다는 앞이다 — 규칙이지만 손으로 짚은 값이 더 구체적이다.
+   */
+  const below = level - grade.order;
+  // 눕힌 칸은 tidy 를 태우지 않는다. 0 은 0 이어야 한다.
+  if (t.floorFrom != null && below >= t.floorFrom) return t.floorScore;
+
   const diff = grade.order - level;
   const factor = diff >= 0
     ? Math.pow(t.upFactor, diff)

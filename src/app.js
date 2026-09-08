@@ -11,6 +11,7 @@ import {
   retireGrade, removeGrade as removeGradeFrom, sortGyms,
 } from './domain/gym.js';
 import { findSession, createSession, bumpCount } from './domain/session.js';
+import { clampTable } from './domain/scoring.js';
 import { createProfile, setLevel as setProfileLevel, rename as renameProfileName } from './domain/profile.js';
 import { h, clear, button, icon, modal } from './ui/components.js';
 import { viewMatch } from './ui/view-match.js';
@@ -270,18 +271,15 @@ const actions = {
     patchGym(gymId, (gym) => (used ? retireGrade(gym, gradeId) : removeGradeFrom(gym, gradeId)));
   },
 
-  setScoreTable(gymId, patch) {
-    // 점수는 지금 표로 센다(scoring.js). 저장하면 화면이 다시 그려지며 전부 따라온다.
-    patchGym(gymId, (gym) => ({ ...gym, scoreTable: { ...gym.scoreTable, ...patch } }));
-  },
-  setOverride(gymId, key, value) {
-    patchGym(gymId, (gym) => ({
-      ...gym,
-      scoreTable: {
-        ...gym.scoreTable,
-        overrides: { ...(gym.scoreTable.overrides ?? {}), [key]: value },
-      },
-    }));
+  /*
+   * 점수표 저장.
+   *
+   * 편집 화면은 초안으로 고치고 여기서 한 번에 반영한다. 이 값은 그 짐의 모든
+   * 점수를 다시 세게 하므로(점수표는 스냅샷이 아니라 규칙이다), 만지는 즉시
+   * 반영하면 슬라이더를 스치기만 해도 지난 기록의 점수가 통째로 달라진다.
+   */
+  saveScoreTable(gymId, table) {
+    patchGym(gymId, (gym) => ({ ...gym, scoreTable: clampTable(table) }));
   },
 
   setLevel(profileId, level) {

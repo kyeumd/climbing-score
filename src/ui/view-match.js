@@ -352,7 +352,9 @@ function inputGrid(ctx, gym, grades) {
         class: `grid__person${isTop(r) ? ' is-lead' : ''}`, type: 'button',
         title: `${r.profile.name} — 눌러서 빼기·지우기`,
         onclick: () => openPersonSheet(ctx, heads.get(r.profile.id).row, n),
-      }, top, scoreEl, h('span', { class: 'hint num' }, levelLabel(r.level)));
+        /* 카드에 적는 레벨도 점수를 세는 데 쓰인 값이어야 한다. 지난 날짜를
+           열어 보면 프로필의 지금 레벨과 그날의 레벨이 다르다. */
+      }, top, scoreEl, h('span', { class: 'hint num' }, levelLabel(levelOf(r.session, r.level))));
       heads.set(r.profile.id, { btn, top, rankEl, scoreEl, row: r });
       return btn;
     }),

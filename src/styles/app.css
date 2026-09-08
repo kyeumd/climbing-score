@@ -29,6 +29,9 @@ body {
   font-feature-settings: 'tnum' 1;
 }
 
+/* hidden 은 브라우저 기본이 display:none 인데, inline-flex 를 준 요소는 그걸
+   이긴다. 실제로 '공식으로 초기화' 버튼이 숨기라고 해도 계속 보였다. */
+[hidden] { display: none !important; }
 button { font: inherit; color: inherit; cursor: pointer; }
 input, select { font: inherit; color: inherit; }
 h1, h2, h3, p { margin: 0; }
@@ -707,8 +710,6 @@ ul { margin: 0; padding: 0; list-style: none; }
   display: flex; align-items: center; gap: var(--sp-2);
   padding: 0.2rem 0; border-bottom: 1px solid var(--shell-line);
 }
-/* display: flex 가 브라우저 기본 [hidden] 규칙을 이긴다. 명시해 줘야 숨는다. */
-.editrow[hidden] { display: none; }
 .editrow__label { flex: 1; font-size: 0.9375rem; }
 .editrow .field { width: 4.5rem; }
 .field--xs { width: 4rem; min-width: 0; min-height: 44px; text-align: center; padding: 0.3rem 0.5rem; }
@@ -1210,3 +1211,19 @@ ul { margin: 0; padding: 0; list-style: none; }
   display: block; font-size: var(--fs-min); color: var(--ink-2);
   line-height: 1.5; word-break: break-all;
 }
+
+/* ============================================================
+   점수표 머리 — 취소와 저장
+   표가 길어 스크롤하므로 위에 붙여 둔다. 저장을 못 찾으면 없는 기능이다.
+   ============================================================ */
+.scorehead {
+  position: sticky; top: 0; z-index: 5;
+  background: var(--bg);
+  padding: var(--sp-2) 0;
+  margin-bottom: var(--sp-4);
+}
+.scorehead .title { flex: 1; min-width: 0; }
+.scorehead__right { display: flex; align-items: center; gap: var(--sp-2); flex: 0 0 auto; }
+/* 아직 안 눌렀다는 것을 글자로 알린다. 색만으로는 안 읽힌다. */
+.scorehead__mark { white-space: nowrap; color: var(--accent); font-weight: 700; }
+.floornote { margin-top: var(--sp-3); }
