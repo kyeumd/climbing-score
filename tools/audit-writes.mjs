@@ -236,12 +236,53 @@ try {
   await run(`
     tap(await until(()=>byText('.btn','점수표'),'점수표 버튼')); await wait(700);
     const d = await until(()=>q('.dial .field'),'기준 점수 칸');
-    d.value='20'; d.dispatchEvent(new Event('change',{bubbles:true})); await wait(400);
+    d.value='20'; d.dispatchEvent(new Event('change',{bubbles:true})); await wait(500);
   `);
   gyms = await settle('/gyms', (v) => Object.values(v ?? {})[0]?.scoreTable?.baseScore === 20);
   ok('점수표 배율 변경이 서버에 들어간다',
      Object.values(gyms ?? {})[0]?.scoreTable?.baseScore === 20,
      `baseScore ${Object.values(gyms ?? {})[0]?.scoreTable?.baseScore}`);
+
+  console.log('--- 점수표를 고치면 점수가 따라오는가 ---');
+  /*
+   * 서버에 값이 들어가는 것과 그 값이 실제로 쓰이는 것은 다르다. 점수표는
+   * 저장은 잘 됐는데 오늘 점수가 옛 표로 세어지고 있었다. 칸에는 새 값이
+   * 적히니 화면만 보면 멀쩡하다 — 적어 놓은 값과 주는 값이 달랐다.
+   */
+  await run(`tap(q('.tab',0)); await wait(700);`);
+  const readGrid = () => page.eval(() => ({
+    total: Number((document.querySelector('.grid__score')?.textContent ?? '0').replace(/[^\d]/g, '')),
+    unit: Number((document.querySelector('.cell__unit')?.textContent ?? '0').replace(/[^\d]/g, '')),
+  }));
+  const beforeTable = await readGrid();
+  await run(`
+    tap(q('.tab',3)); await wait(700);
+    tap(await until(()=>byText('.btn','점수표'),'점수표')); await wait(800);
+    const d = await until(()=>q('.dial .field'),'기준 점수');
+    d.value='40'; d.dispatchEvent(new Event('change',{bubbles:true})); await wait(700);
+    tap(q('.tab',0)); await wait(800);
+  `);
+  const afterTable = await readGrid();
+  ok('칸에 적힌 값이 새 표를 따른다', afterTable.unit === beforeTable.unit * 2,
+     `${beforeTable.unit} → ${afterTable.unit}`);
+  ok('합계도 같이 따라온다', afterTable.total === beforeTable.total * 2,
+     `${beforeTable.total} → ${afterTable.total} (기대 ${beforeTable.total * 2})`);
+
+  const tapped = await run(`
+    const before = Number((q('.grid__score').textContent||'0').replace(/[^\d]/g,''));
+    const unit = Number((q('.cell__unit').textContent||'0').replace(/[^\d]/g,''));
+    tap(q('.grid__row .cell')); await wait(600);
+    const after = Number((q('.grid__score').textContent||'0').replace(/[^\d]/g,''));
+    return { before, after, unit };
+  `);
+  ok('한 번 누르면 칸에 적힌 만큼 오른다', tapped.after - tapped.before === tapped.unit,
+     `${tapped.before} → ${tapped.after} (칸에는 +${tapped.unit})`);
+
+  const savedTables = await settle('/sessions',
+    (v) => Object.values(v ?? {}).every((x) => x.scoreTable?.baseScore === 40));
+  ok('바뀐 표가 오늘 세션에도 저장된다',
+     Object.values(savedTables ?? {}).every((x) => x.scoreTable?.baseScore === 40),
+     JSON.stringify(Object.values(savedTables ?? {}).map((x) => x.scoreTable?.baseScore)));
 
   console.log('--- 세션 편집 ---');
   await run(`

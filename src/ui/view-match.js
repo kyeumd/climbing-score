@@ -408,10 +408,11 @@ function inputGrid(ctx, gym, grades) {
         const c = cells.get(`${r.profile.id}:${grade.id}`);
         if (!c) return false;
         const count = r.session.counts?.[grade.id] ?? 0;
-        const unit = scoreFor(gym.scoreTable, r.level, grade);
+        const shownLevel = levelOf(r.session, r.level);
+        const unit = scoreFor(tableOf(r.session, gym), shownLevel, grade);
         // className 을 통째로 덮으면 지금 누르고 있는 is-pressing/is-held 가 날아간다
         c.el.classList.toggle('has-count', count > 0);
-        c.el.classList.toggle('is-mylevel', grade.order === r.level);
+        c.el.classList.toggle('is-mylevel', grade.order === shownLevel);
         c.el.setAttribute('aria-label',
           `${r.profile.name} ${grade.label} ${count}개, 한 개당 ${unit}점`);
         c.unitEl.textContent = `+${unit.toLocaleString('ko-KR')}점`;
@@ -435,11 +436,24 @@ function inputGrid(ctx, gym, grades) {
   );
 }
 
+/*
+ * 칸에 적는 개당 점수는 합계를 세는 것과 같은 표·같은 레벨을 봐야 한다.
+ *
+ * 예전에는 칸이 지금 짐의 점수표를 보고, 합계는 세션에 박힌 스냅샷을 봤다.
+ * 그래서 점수표를 고치면 칸에는 '+340점' 이 뜨는데 한 번 누르면 34점만 올랐다.
+ * 적어 놓은 값과 주는 값이 다른 것은 그냥 거짓말이다.
+ *
+ * 세션이 진실이다 — 점수를 세는 쪽이 그걸 쓰기 때문이다(domain/session.js).
+ */
+const tableOf = (session, gym) => session.scoreTable ?? gym.scoreTable;
+const levelOf = (session, level) => session.levelAtTime ?? level;
+
 function cell({ grade, profile, level, session, gym, actions }) {
   const count = session.counts?.[grade.id] ?? 0;
-  const unit = scoreFor(gym.scoreTable, level, grade);
+  const shownLevel = levelOf(session, level);
+  const unit = scoreFor(tableOf(session, gym), shownLevel, grade);
   const el = h('button', {
-    class: `cell${count ? ' has-count' : ''}${grade.order === level ? ' is-mylevel' : ''}`,
+    class: `cell${count ? ' has-count' : ''}${grade.order === shownLevel ? ' is-mylevel' : ''}`,
     type: 'button',
     'aria-label': `${profile.name} ${grade.label} ${count}개, 한 개당 ${unit}점`,
   },
